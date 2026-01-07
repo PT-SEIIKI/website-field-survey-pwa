@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline - Survey PWA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(to bottom right, #f3f4f6, #e0e7ff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .icon {
+        width: 64px;
+        height: 64px;
+        background: #fee2e2;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 32px;
+      }
+
+      h1 {
+        font-size: 24px;
+        color: #1f2937;
+        margin-bottom: 10px;
+      }
+
+      p {
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .status {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 12px;
+        margin-top: 20px;
+        text-align: left;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #92400e;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">⚠️</div>
+      <h1>Anda Sedang Offline</h1>
+      <p>Koneksi internet tidak tersedia. Namun Anda masih dapat menggunakan beberapa fitur aplikasi.</p>
+
+      <div class="status">
+        <strong>Apa yang bisa Anda lakukan:</strong>
+        <ul style="margin-top: 8px; margin-left: 16px">
+          <li>Melihat foto yang sudah diunduh</li>
+          <li>Mengambil foto dengan kamera</li>
+          <li>Upload akan dilakukan otomatis saat online</li>
+        </ul>
+      </div>
+
+      <button onclick="window.location.reload()">Coba Lagi</button>
+    </div>
+  </body>
+</html>
