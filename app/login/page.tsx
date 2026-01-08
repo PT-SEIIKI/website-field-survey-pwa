@@ -53,6 +53,19 @@ export default function LoginPage() {
           <CardDescription>Masuk dengan akun Anda untuk memulai survei lapangan</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 space-y-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-[10px]">?</span>
+              Cara Menggunakan Website:
+            </h3>
+            <ul className="text-xs text-muted-foreground space-y-2 list-decimal list-inside pl-1">
+              <li><strong>Login:</strong> Gunakan akun Surveyor untuk lapangan atau Admin untuk rekap data.</li>
+              <li><strong>Ambil Foto:</strong> Klik "Buka Kamera" di dashboard untuk memotret bukti fisik.</li>
+              <li><strong>Offline:</strong> Jangan khawatir jika tidak ada sinyal, data akan tersimpan otomatis di perangkat.</li>
+              <li><strong>Sinkron:</strong> Data akan terkirim ke server secara otomatis saat Anda kembali online.</li>
+            </ul>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Username</label>

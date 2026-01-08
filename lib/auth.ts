@@ -66,13 +66,15 @@ export function login(credentials: LoginCredentials): { success: boolean; user?:
     return { success: false, error: "Username atau password salah" }
   }
 
-  // Create session
+  // Create session with expiry (e.g., 24 hours)
+  const expiry = Date.now() + 24 * 60 * 60 * 1000
   const sessionUser = {
     id: user.id,
     username: user.username,
     email: user.email,
     role: user.role,
     createdAt: user.createdAt,
+    expiresAt: expiry,
   }
 
   localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
@@ -91,7 +93,15 @@ export function getCurrentUser(): User | null {
   if (!sessionJson) return null
 
   try {
-    return JSON.parse(sessionJson)
+    const session = JSON.parse(sessionJson)
+    
+    // Check expiry
+    if (session.expiresAt && Date.now() > session.expiresAt) {
+      logout()
+      return null
+    }
+    
+    return session
   } catch {
     return null
   }
