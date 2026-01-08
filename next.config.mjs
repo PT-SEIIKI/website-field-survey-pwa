@@ -6,6 +6,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  allowedDevOrigins: [
+    'localhost',
+    '127.0.0.1',
+    '*.replit.dev',
+    '*.replit.app',
+    '*.sisko.replit.dev',
+  ],
+  turbopack: {},
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.optimization = {
