@@ -21,6 +21,7 @@ const nextConfig = {
     '127.0.0.1',
     '*.replit.dev',
     '*.replit.app',
+    '*.riker.replit.dev',
   ],
   turbopack: {
     root: process.cwd(),
