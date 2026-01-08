@@ -7,7 +7,7 @@ import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/auth"
-import { Upload, BarChart3, Wifi, WifiOff } from "lucide-react"
+import { Upload, BarChart3, Wifi, WifiOff, Camera } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export default function DashboardPage() {
@@ -112,18 +112,37 @@ export default function DashboardPage() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                Upload Survei
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="border-blue-200 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-blue-700">
+                <Camera className="w-5 h-5" />
+                Kamera Langsung
               </CardTitle>
-              <CardDescription>Upload foto-foto dari survei lapangan</CardDescription>
+              <CardDescription>Ambil foto survei sekarang</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => router.push("/survey/upload")} className="w-full bg-blue-600 hover:bg-blue-700">
-                Mulai Upload
+              <Button 
+                onClick={() => router.push("/survey/upload?action=camera")} 
+                className="w-full bg-blue-600 hover:bg-blue-700 font-bold py-6 gap-2 shadow-lg"
+              >
+                <Camera className="w-6 h-6" />
+                BUKA KAMERA
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Upload File
+              </CardTitle>
+              <CardDescription>Upload foto dari galeri HP</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => router.push("/survey/upload")} variant="outline" className="w-full py-6">
+                Pilih File
               </Button>
             </CardContent>
           </Card>

@@ -16,9 +16,11 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
 export default function UploadPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { photos, isLoading, refreshPhotos } = useLocalPhotos()
   const isOnline = useOnlineStatus()
   const syncStatus = useSyncStatus()
@@ -40,6 +42,17 @@ export default function UploadPage() {
       startSync()
     }
   }, [isOnline])
+
+  useEffect(() => {
+    // Check if camera should be opened immediately
+    if (searchParams.get("action") === "camera") {
+      setShowCamera(true)
+      // Scroll to camera section
+      setTimeout(() => {
+        document.getElementById("camera-section")?.scrollIntoView({ behavior: "smooth" })
+      }, 500)
+    }
+  }, [searchParams])
 
   const handleFilesSelected = async (files: File[]) => {
     setIsUploading(true)
@@ -169,38 +182,39 @@ export default function UploadPage() {
             </Card>
 
             {/* Camera Capture Section */}
-            <Card>
+            <Card id="camera-section">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-blue-700">
+                  <Camera className="w-6 h-6" />
                   Ambil Foto Langsung
                 </CardTitle>
-                <CardDescription>Ambil foto menggunakan kamera perangkat Anda</CardDescription>
+                <CardDescription>Gunakan kamera HP Anda untuk mengambil foto bukti lapangan</CardDescription>
               </CardHeader>
               <CardContent>
                 {showCamera ? (
                   <>
                     {/* Metadata Form */}
-                    <div className="space-y-4 mb-4">
+                    <div className="space-y-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
                       <div>
-                        <label className="text-sm font-medium">Lokasi Survei (opsional)</label>
+                        <label className="text-sm font-semibold text-gray-700">Lokasi Survei</label>
                         <Input
                           type="text"
-                          placeholder="Contoh: Jakarta Selatan, Blok C"
+                          placeholder="Masukkan lokasi (misal: Lantai 2, Area Parkir)"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
                           disabled={isUploading}
+                          className="mt-1"
                         />
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium">Deskripsi (opsional)</label>
+                        <label className="text-sm font-semibold text-gray-700">Keterangan Foto</label>
                         <Textarea
-                          placeholder="Catatan tentang foto ini"
+                          placeholder="Tambahkan catatan penting tentang foto ini..."
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           disabled={isUploading}
-                          className="resize-none"
+                          className="resize-none mt-1"
                           rows={3}
                         />
                       </div>
@@ -217,9 +231,12 @@ export default function UploadPage() {
                     />
                   </>
                 ) : (
-                  <Button onClick={() => setShowCamera(true)} className="w-full gap-2 bg-blue-600 hover:bg-blue-700">
-                    <Camera className="w-4 h-4" />
-                    Buka Kamera
+                  <Button 
+                    onClick={() => setShowCamera(true)} 
+                    className="w-full py-8 text-lg font-bold gap-3 bg-blue-600 hover:bg-blue-700 shadow-lg animate-pulse hover:animate-none"
+                  >
+                    <Camera className="w-8 h-8" />
+                    BUKA KAMERA SEKARANG
                   </Button>
                 )}
               </CardContent>
