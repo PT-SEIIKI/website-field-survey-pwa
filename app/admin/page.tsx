@@ -261,94 +261,108 @@ function AdminPageContent() {
         </Card>
 
         {/* Photos Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+        <Card className="overflow-hidden">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <span>Daftar Foto Survei</span>
-              <Badge variant="secondary">{photos.length} foto</Badge>
+              <Badge variant="secondary" className="w-fit">{photos.length} foto</Badge>
             </CardTitle>
             <CardDescription>Kelola foto yang telah diupload oleh tim survei</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 sm:p-6">
             {isLoading ? (
-              <div className="text-center py-8">
-                <RefreshCw className="w-6 h-6 mx-auto text-gray-400 animate-spin mb-2" />
-                <p className="text-muted-foreground">Memuat foto...</p>
+              <div className="text-center py-12">
+                <RefreshCw className="w-8 h-8 mx-auto text-primary/40 animate-spin mb-4" />
+                <p className="text-muted-foreground font-medium">Memuat data survei...</p>
               </div>
             ) : photos.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-2">No photos found</div>
-                <p className="text-sm text-muted-foreground">Coba sesuaikan filter pencarian Anda</p>
+              <div className="text-center py-16 px-4">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-muted-foreground/40" />
+                </div>
+                <h3 className="text-lg font-bold mb-1">Tidak ada foto ditemukan</h3>
+                <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">Coba sesuaikan filter pencarian untuk melihat data lain</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID Foto</TableHead>
-                      <TableHead>Lokasi</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Deskripsi</TableHead>
-                      <TableHead>Ukuran</TableHead>
-                      <TableHead className="text-right">Aksi</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {photos.map((photo) => (
-                      <TableRow key={photo.photoId} className="hover:bg-gray-50">
-                        <TableCell className="font-mono text-xs">{photo.photoId.substring(0, 8)}...</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            {photo.location || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            {new Date(photo.timestamp).toLocaleDateString("id-ID")}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate text-sm">{photo.description || "-"}</TableCell>
-                        <TableCell className="text-sm">{Math.round(photo.size / 1024)}KB</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              onClick={() => {
-                                setSelectedPhoto(photo)
-                                setShowPreview(true)
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="bg-transparent gap-1"
-                              title="Preview"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={() => handleDownload(photo.filename)}
-                              size="sm"
-                              variant="outline"
-                              className="bg-transparent gap-1"
-                              title="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={() => handleDelete(photo.photoId)}
-                              size="sm"
-                              variant="destructive"
-                              className="gap-1"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="min-w-full inline-block align-middle">
+                  <Table>
+                    <TableHeader className="bg-muted/30">
+                      <TableRow>
+                        <TableHead className="w-[100px]">ID</TableHead>
+                        <TableHead>Lokasi</TableHead>
+                        <TableHead className="hidden md:table-cell">Tanggal</TableHead>
+                        <TableHead className="hidden lg:table-cell">Deskripsi</TableHead>
+                        <TableHead className="hidden sm:table-cell">Ukuran</TableHead>
+                        <TableHead className="text-right">Aksi</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {photos.map((photo) => (
+                        <TableRow key={photo.photoId} className="group hover:bg-muted/20 transition-colors">
+                          <TableCell className="font-mono text-[10px] sm:text-xs text-muted-foreground">
+                            {photo.photoId.substring(0, 6)}...
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-1.5 font-semibold text-sm">
+                                <MapPin className="w-3.5 h-3.5 text-primary/60" />
+                                <span className="truncate max-w-[120px] sm:max-w-[200px]">{photo.location || "N/A"}</span>
+                              </div>
+                              <div className="md:hidden text-[10px] text-muted-foreground flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(photo.timestamp).toLocaleDateString("id-ID")}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              {new Date(photo.timestamp).toLocaleDateString("id-ID")}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell max-w-xs truncate text-sm text-muted-foreground">
+                            {photo.description || "-"}
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell text-sm font-medium">
+                            {Math.round(photo.size / 1024)} KB
+                          </TableCell>
+                          <TableCell className="text-right p-2 sm:p-4">
+                            <div className="flex items-center justify-end gap-1 sm:gap-2">
+                              <Button
+                                onClick={() => {
+                                  setSelectedPhoto(photo)
+                                  setShowPreview(true)
+                                }}
+                                size="icon-sm"
+                                variant="ghost"
+                                className="rounded-lg h-8 w-8 sm:h-9 sm:w-9"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDownload(photo.filename)}
+                                size="icon-sm"
+                                variant="ghost"
+                                className="rounded-lg h-8 w-8 sm:h-9 sm:w-9"
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDelete(photo.photoId)}
+                                size="icon-sm"
+                                variant="ghost"
+                                className="rounded-lg h-8 w-8 sm:h-9 sm:w-9 text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
           </CardContent>

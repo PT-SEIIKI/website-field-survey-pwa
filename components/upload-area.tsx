@@ -53,8 +53,10 @@ export function UploadArea({ onFilesSelected, isLoading = false }: UploadAreaPro
 
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-        isDragActive ? "border-blue-500 bg-blue-50" : "border-border bg-muted/20"
+      className={`border-2 border-dashed rounded-2xl p-6 sm:p-12 text-center transition-all duration-300 ${
+        isDragActive 
+          ? "border-primary bg-primary/5 scale-[0.99] shadow-inner" 
+          : "border-primary/10 bg-muted/20 hover:border-primary/20 hover:bg-muted/30"
       }`}
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
@@ -71,39 +73,44 @@ export function UploadArea({ onFilesSelected, isLoading = false }: UploadAreaPro
         disabled={isLoading}
       />
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex justify-center">
-          <div className="p-4 bg-blue-100 rounded-full">
-            <ImageIcon className="w-8 h-8 text-blue-600" />
+          <div className="p-5 bg-primary/10 rounded-3xl text-primary animate-in zoom-in duration-500">
+            <ImageIcon className="w-10 h-10" />
           </div>
         </div>
 
-        <div>
-          <p className="text-lg font-medium mb-1">Pilih atau Drag Foto</p>
-          <p className="text-sm text-muted-foreground">
-            Pilih satu atau lebih foto untuk di-upload ({isDragActive ? "Lepaskan di sini" : "atau drag ke sini"})
+        <div className="max-w-xs mx-auto">
+          <p className="text-xl font-black tracking-tight mb-2">Pilih atau Drag Foto</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {isDragActive 
+              ? "Lepaskan untuk mulai upload" 
+              : "Ambil satu atau beberapa foto bukti survei Anda"}
           </p>
         </div>
 
         <Button
           onClick={() => fileInputRef.current?.click()}
           disabled={isLoading}
-          className="gap-2 bg-blue-600 hover:bg-blue-700"
+          size="lg"
+          className="gap-3 px-8 shadow-xl active:scale-95"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
               Memproses...
             </>
           ) : (
             <>
-              <Upload className="w-4 h-4" />
-              Pilih Foto
+              <Upload className="w-5 h-5" />
+              PILIH DARI GALERI
             </>
           )}
         </Button>
 
-        <p className="text-xs text-muted-foreground">Format: JPG, PNG, WebP | Max size: 50MB per file</p>
+        <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60">
+          JPG • PNG • WEBP | MAX 10MB
+        </p>
       </div>
     </div>
   )
