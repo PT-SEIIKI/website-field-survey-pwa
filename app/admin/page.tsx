@@ -153,15 +153,20 @@ function AdminPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.push("/survey/dashboard")} className="p-2 hover:bg-gray-100 rounded-lg">
-              <Home className="w-5 h-5" />
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-primary/5 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => router.push("/survey/dashboard")} 
+              className="p-2.5 hover:bg-primary/5 rounded-xl transition-colors text-primary"
+            >
+              <Home className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Admin Panel Survei</h1>
+              <BarChart3 className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+              <h1 className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-400 dark:to-indigo-300">
+                Admin Portal
+              </h1>
             </div>
           </div>
 
