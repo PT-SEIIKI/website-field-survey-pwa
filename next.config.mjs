@@ -6,12 +6,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'localhost:5000',
+        '*.replit.dev',
+        '*.replit.app',
+      ],
+    },
+  },
   allowedDevOrigins: [
     'localhost',
     '127.0.0.1',
     '*.replit.dev',
     '*.replit.app',
-    '*.sisko.replit.dev',
   ],
   turbopack: {},
   webpack: (config, { isServer }) => {

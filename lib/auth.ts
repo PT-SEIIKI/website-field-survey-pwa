@@ -55,7 +55,12 @@ export function login(credentials: LoginCredentials): { success: boolean; user?:
   }
 
   const users = JSON.parse(usersJson)
-  const user = users.find((u: any) => u.username === credentials.username && u.password === credentials.password)
+  // Security: Use constant time comparison if possible, but for demo simple find is okay
+  // Adding basic trim for better UX
+  const username = credentials.username.trim()
+  const password = credentials.password
+  
+  const user = users.find((u: any) => u.username === username && u.password === password)
 
   if (!user) {
     return { success: false, error: "Username atau password salah" }

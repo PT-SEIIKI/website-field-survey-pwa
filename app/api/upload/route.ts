@@ -36,6 +36,17 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
+    
+    // Security: Basic file type validation
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 })
+    }
+    
+    // Security: Limit file size to 10MB
+    if (buffer.length > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 })
+    }
+
     const filename = `${photoId}.jpg`
     const filepath = join(uploadsDir, filename)
 
