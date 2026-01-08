@@ -39,24 +39,8 @@ export function initializeDefaultUsers() {
     },
   ]
 
-  if (!existingUsers) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers))
-  } else {
-    // Pastikan user demo selalu ada jika tidak sengaja terhapus/berubah
-    const users = JSON.parse(existingUsers)
-    let updated = false
-    
-    defaultUsers.forEach(defaultUser => {
-      if (!users.find((u: any) => u.username === defaultUser.username)) {
-        users.push(defaultUser)
-        updated = true
-      }
-    })
-    
-    if (updated) {
-      localStorage.setItem(USERS_KEY, JSON.stringify(users))
-    }
-  }
+  // Selalu setel ulang user demo setiap kali aplikasi dimuat untuk memastikan data bersih
+  localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers))
 }
 
 export function login(credentials: LoginCredentials): { success: boolean; user?: User; error?: string } {
