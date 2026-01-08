@@ -20,26 +20,42 @@ export function initializeDefaultUsers() {
   if (typeof window === "undefined") return
 
   const existingUsers = localStorage.getItem(USERS_KEY)
+  const defaultUsers = [
+    {
+      id: "user-1",
+      username: "surveyor1",
+      password: "password123", // Hanya untuk demo - production harus hash!
+      email: "surveyor1@example.com",
+      role: "surveyor" as const,
+      createdAt: 1704643200000,
+    },
+    {
+      id: "admin-1",
+      username: "admin",
+      password: "admin123",
+      email: "admin@example.com",
+      role: "admin" as const,
+      createdAt: 1704643200000,
+    },
+  ]
+
   if (!existingUsers) {
-    const defaultUsers = [
-      {
-        id: "user-1",
-        username: "surveyor1",
-        password: "password123", // Hanya untuk demo - production harus hash!
-        email: "surveyor1@example.com",
-        role: "surveyor" as const,
-        createdAt: Date.now(),
-      },
-      {
-        id: "admin-1",
-        username: "admin",
-        password: "admin123",
-        email: "admin@example.com",
-        role: "admin" as const,
-        createdAt: Date.now(),
-      },
-    ]
     localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers))
+  } else {
+    // Pastikan user demo selalu ada jika tidak sengaja terhapus/berubah
+    const users = JSON.parse(existingUsers)
+    let updated = false
+    
+    defaultUsers.forEach(defaultUser => {
+      if (!users.find((u: any) => u.username === defaultUser.username)) {
+        users.push(defaultUser)
+        updated = true
+      }
+    })
+    
+    if (updated) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users))
+    }
   }
 }
 
