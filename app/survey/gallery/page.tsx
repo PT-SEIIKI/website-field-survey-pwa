@@ -89,7 +89,7 @@ export default function GalleryPage() {
                     src={URL.createObjectURL(photo.blob) || "/placeholder.svg"}
                     alt="Local photo"
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform"
+                    className="object-contain group-hover:scale-105 transition-transform"
                   />
 
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">

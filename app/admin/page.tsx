@@ -392,7 +392,7 @@ function AdminPageContent() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="relative bg-gray-100 flex items-center justify-center p-2 sm:p-4" style={{ height: "300px sm:400px lg:500px" }}>
+            <CardContent className="relative bg-gray-100 flex items-center justify-center p-2 sm:p-4 h-[300px] sm:h-[400px] lg:h-[500px]">
               <div className="relative w-full h-full">
                 <img
                   src={`/uploads/${selectedPhoto.filename}`}
