@@ -3,13 +3,8 @@ import { join } from "path"
 import { existsSync } from "fs"
 import { type NextRequest, NextResponse } from "next/server"
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "50mb",
-    },
-  },
-}
+export const runtime = "nodejs"
+export const maxDuration = 30
 
 // Ensure uploads directory exists
 const uploadsDir = join(process.cwd(), "public", "uploads")

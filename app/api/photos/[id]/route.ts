@@ -2,9 +2,12 @@ import { readFile } from "fs/promises"
 import { join } from "path"
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export const runtime = "nodejs"
+export const maxDuration = 30
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const uploadsDir = join(process.cwd(), "public", "uploads")
 
     // Get metadata
@@ -24,9 +27,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const uploadsDir = join(process.cwd(), "public", "uploads")
     const fs = await import("fs/promises")
 

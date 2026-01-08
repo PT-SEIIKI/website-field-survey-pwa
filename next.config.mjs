@@ -9,6 +9,7 @@ const nextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
+        'localhost:3000',
         'localhost:5000',
         '*.replit.dev',
         '*.replit.app',
@@ -21,7 +22,9 @@ const nextConfig = {
     '*.replit.dev',
     '*.replit.app',
   ],
-  turbopack: {},
+  turbopack: {
+    root: process.cwd(),
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.optimization = {

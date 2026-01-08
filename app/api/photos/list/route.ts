@@ -2,6 +2,9 @@ import { readFile } from "fs/promises"
 import { join } from "path"
 import { type NextRequest, NextResponse } from "next/server"
 
+export const runtime = "nodejs"
+export const maxDuration = 30
+
 export async function GET(request: NextRequest) {
   try {
     const uploadsDir = join(process.cwd(), "public", "uploads")
