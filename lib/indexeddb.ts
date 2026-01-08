@@ -256,19 +256,51 @@ export async function deletePhoto(id: string): Promise<void> {
   })
 }
 
-export async function clearAllPhotos(): Promise<void> {
-  const database = await initDB()
+export async function checkStorageQuota(): Promise<{
+  usage: number;
+  quota: number;
+  isLow: boolean;
+}> {
+  if (navigator.storage && navigator.storage.estimate) {
+    const estimate = await navigator.storage.estimate();
+    const usage = estimate.usage || 0;
+    const quota = estimate.quota || 0;
+    // Anggap penyimpanan rendah jika sisa kurang dari 50MB atau penggunaan > 90%
+    const isLow = (quota - usage < 50 * 1024 * 1024) || (usage > quota * 0.9);
+    return { usage, quota, isLow };
+  }
+  return { usage: 0, quota: 0, isLow: false };
+}
+
+export async function cleanupSyncedPhotos(): Promise<number> {
+  const database = await initDB();
   return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.PHOTOS, STORES.METADATA, STORES.SYNC_QUEUE], "readwrite")
+    const tx = database.transaction([STORES.PHOTOS, STORES.METADATA, STORES.SYNC_QUEUE], "readwrite");
+    const photoStore = tx.objectStore(STORES.PHOTOS);
+    const metaStore = tx.objectStore(STORES.METADATA);
+    const queueStore = tx.objectStore(STORES.SYNC_QUEUE);
+    const index = photoStore.index("syncStatus");
+    const request = index.getAll("synced");
 
-    tx.objectStore(STORES.PHOTOS).clear()
-    tx.objectStore(STORES.METADATA).clear()
-    tx.objectStore(STORES.SYNC_QUEUE).clear()
+    let count = 0;
+    request.onsuccess = () => {
+      const syncedPhotos = request.result;
+      syncedPhotos.forEach(photo => {
+        photoStore.delete(photo.id);
+        metaStore.delete(photo.id);
+        // Hapus juga dari queue jika ada
+        const queueRequest = queueStore.index("photoId").getAllKeys(photo.id);
+        queueRequest.onsuccess = () => {
+          queueRequest.result.forEach(key => queueStore.delete(key));
+        };
+        count++;
+      });
+    };
 
-    tx.onerror = () => reject(tx.error)
     tx.oncomplete = () => {
-      console.log("[v0] All data cleared")
-      resolve()
-    }
-  })
+      console.log(`[v0] Storage cleanup: Deleted ${count} synced photos`);
+      resolve(count);
+    };
+    tx.onerror = () => reject(tx.error);
+  });
 }
