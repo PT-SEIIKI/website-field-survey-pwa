@@ -13,5 +13,7 @@
 [x] 13. Implemented Next.js API routes for survey entries and photos
 [x] 14. Connected Admin Portal to PostgreSQL database for data checking and download
 [x] 15. Verified end-to-end offline-to-online synchronization flow
+[x] 16. Fixed build error by wrapping useSearchParams in Suspense in /survey/upload
+[x] 17. Verified offline-to-online PWA logic and PostgreSQL integration
 [x] 16. Final npm install and workflow restart for environment migration
 [x] 17. Fixed cross-origin dev warnings and NODE_ENV configuration

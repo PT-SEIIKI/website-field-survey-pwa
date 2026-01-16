@@ -308,11 +308,11 @@ function AdminPageContent() {
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-1 font-semibold text-xs sm:text-sm">
-                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary/60" />
+                                <MapPin className="w-3.5 h-3.5 text-primary/60" />
                                 <span className="truncate max-w-[100px] sm:max-w-[150px] lg:max-w-[200px]">{photo.location || "N/A"}</span>
                               </div>
-                              <div className="sm:hidden text-[8px] text-muted-foreground flex items-center gap-1">
-                                <Calendar className="w-2.5 h-2.5" />
+                              <div className="sm:hidden text-[10px] text-muted-foreground flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
                                 {new Date(photo.timestamp).toLocaleDateString("id-ID")}
                               </div>
                             </div>
@@ -385,9 +385,9 @@ function AdminPageContent() {
                   onClick={() => setShowPreview(false)}
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 sm:h-8 sm:w-8"
+                  className="h-8 w-8 sm:h-10 sm:w-10 text-xl font-bold"
                 >
-                  ×
+                  &times;
                 </Button>
               </div>
             </CardHeader>

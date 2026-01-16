@@ -17,8 +17,17 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
 export default function UploadPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <UploadPageContent />
+    </Suspense>
+  )
+}
+
+function UploadPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { photos, isLoading, refreshPhotos } = useLocalPhotos()
