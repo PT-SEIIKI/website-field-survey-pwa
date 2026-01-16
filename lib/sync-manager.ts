@@ -97,23 +97,44 @@ async function syncPhoto(photo: any) {
 
     const metadata = await getMetadata(photo.id)
 
-    const formData = new FormData()
-    formData.append("file", photo.blob, `${photo.id}.jpg`)
-    formData.append("photoId", photo.id)
-    formData.append("timestamp", photo.timestamp.toString())
-
-    if (metadata) {
-      formData.append("location", metadata.location || "")
-      formData.append("description", metadata.description || "")
-    }
-
-    const response = await fetch("/api/upload", {
+    const response = await fetch("/api/entries", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        surveyId: metadata?.surveyId || 1, // Default or from metadata
+        data: JSON.stringify({
+          description: metadata?.description,
+          location: metadata?.location,
+          timestamp: photo.timestamp
+        }),
+        offlineId: photo.id,
+        isSynced: true
+      }),
     })
 
     if (!response.ok) {
       throw new Error(`Upload failed: ${response.statusText}`)
+    }
+
+    const entryData = await response.json();
+
+    // Now upload photo linked to this entry
+    const photoResponse = await fetch("/api/photos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        entryId: entryData.id,
+        url: `https://fake-storage.com/${photo.id}.jpg`, // In real app, this would be the actual storage URL
+        offlineId: photo.id
+      }),
+    });
+
+    if (!photoResponse.ok) {
+      throw new Error(`Photo upload failed: ${photoResponse.statusText}`)
     }
 
     await updatePhotoStatus(photo.id, "synced")
