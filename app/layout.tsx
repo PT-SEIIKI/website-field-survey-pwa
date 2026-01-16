@@ -31,6 +31,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Survey" />
+        <link rel="icon" href="/icon-light-32x32.png" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
