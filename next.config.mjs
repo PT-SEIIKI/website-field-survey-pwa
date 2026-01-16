@@ -22,6 +22,7 @@ const nextConfig = {
     '*.replit.dev',
     '*.replit.app',
     '*.riker.replit.dev',
+    '*.kirk.replit.dev',
   ],
   turbopack: {
     root: process.cwd(),
