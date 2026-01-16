@@ -66,30 +66,29 @@ function AdminPageContent() {
 
   const loadPhotos = async () => {
     try {
-      const params = new URLSearchParams()
-
-      if (searchLocation) {
-        params.append("location", searchLocation)
-      }
-
-      if (startDate) {
-        params.append("startDate", new Date(startDate).toISOString())
-      }
-
-      if (endDate) {
-        params.append("endDate", new Date(endDate).toISOString())
-      }
-
-      const response = await fetch(`/api/photos/list?${params}`)
+      const response = await fetch('/api/entries?surveyId=1') // Assuming surveyId 1 for now
       const data = await response.json()
 
       if (data.success) {
-        setPhotos(data.photos)
+        // Map survey entries to the Photo interface used in UI
+        const mappedPhotos = data.entries.map((entry: any) => {
+          const entryData = JSON.parse(entry.data);
+          return {
+            photoId: entry.offlineId || entry.id.toString(),
+            filename: `${entry.offlineId}.jpg`, // This assumes a convention
+            location: entryData.location || "N/A",
+            description: entryData.description || "",
+            timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
+            uploadedAt: entry.createdAt,
+            size: 0 // We don't have size in DB yet
+          };
+        });
+        setPhotos(mappedPhotos);
       }
     } catch (error) {
-      console.error("[v0] Load photos error:", error)
+      console.error("[v0] Load photos error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

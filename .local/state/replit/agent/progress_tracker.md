@@ -10,3 +10,6 @@
 [x] 10. Created server-side API routes for data synchronization
 [x] 11. Connected frontend sync manager to PostgreSQL API endpoints
 [x] 12. Verified database schema consistency and pushed changes
+[x] 13. Implemented Next.js API routes for survey entries and photos
+[x] 14. Connected Admin Portal to PostgreSQL database for data checking and download
+[x] 15. Verified end-to-end offline-to-online synchronization flow
