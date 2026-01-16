@@ -126,7 +126,7 @@ function AdminPageContent() {
 
   const handleDownload = (filename: string) => {
     const link = document.createElement("a")
-    link.href = `/uploads/${filename}`
+    link.href = `${process.env.NEXT_PUBLIC_API_URL || ''}/uploads/${filename}`
     link.download = filename
     link.click()
   }

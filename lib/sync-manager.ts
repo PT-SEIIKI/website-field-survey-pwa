@@ -128,7 +128,7 @@ async function syncPhoto(photo: any) {
       },
       body: JSON.stringify({
         entryId: entryData.id,
-        url: `https://fake-storage.com/${photo.id}.jpg`, // In real app, this would be the actual storage URL
+        url: `/uploads/${photo.id}.jpg`, // Corrected to use the configured upload directory
         offlineId: photo.id
       }),
     });
