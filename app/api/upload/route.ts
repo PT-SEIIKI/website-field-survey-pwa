@@ -7,7 +7,9 @@ export const runtime = "nodejs"
 export const maxDuration = 30
 
 // Ensure uploads directory exists
-const uploadsDir = join("/var/www/survei.seyiki.com", "uploads")
+const uploadsDir = process.env.NODE_ENV === "production" 
+  ? join("/var/www/survei.seyiki.com", "uploads")
+  : join(process.cwd(), "public", "uploads")
 
 async function ensureUploadsDir() {
   if (!existsSync(uploadsDir)) {

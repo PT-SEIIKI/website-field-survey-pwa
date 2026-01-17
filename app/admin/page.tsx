@@ -400,16 +400,21 @@ function AdminPageContent() {
             <CardContent className="relative bg-gray-100 flex items-center justify-center p-2 sm:p-4 h-[300px] sm:h-[400px] lg:h-[500px]">
               <div className="relative w-full h-full">
                 <img
-                  src={`/uploads/${selectedPhoto.filename}`}
+                  src={selectedPhoto.filename.startsWith('http') ? selectedPhoto.filename : `/uploads/${selectedPhoto.filename}`}
                   alt={selectedPhoto.description || `Photo ${selectedPhoto.photoId}`}
                   className="w-full h-full object-contain rounded-lg"
                   onClick={(e) => e.stopPropagation()}
                   onError={(e) => {
-                    console.error('Image failed to load:', e);
-                    console.log('Image path:', `/uploads/${selectedPhoto.filename}`);
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.includes('/uploads/linked_uploads/')) {
+                      console.log('Falling back to symlinked path');
+                      target.src = `/uploads/linked_uploads/${selectedPhoto.filename}`;
+                    } else {
+                      console.error('Image failed to load even with fallback:', e);
+                    }
                   }}
                   onLoad={() => {
-                    console.log('Image loaded successfully:', `/uploads/${selectedPhoto.filename}`);
+                    console.log('Image loaded successfully:', selectedPhoto.filename);
                   }}
                 />
               </div>
