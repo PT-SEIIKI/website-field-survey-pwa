@@ -1,0 +1,46 @@
+1️⃣ ID Survey Tidak Dipastikan Valid
+
+Permasalahan utama adalah permintaan POST masuk tanpa jaminan bahwa survey yang dirujuk benar-benar ada di database.
+Ketika server mencoba menyimpan data ke tabel entry, database menolak karena relasi ke survey tidak terpenuhi, dan hal ini langsung memicu error internal.
+
+2️⃣ Ketergantungan pada Nilai Default
+
+Sistem sebelumnya mengandalkan nilai asumsi (misalnya survey tertentu dianggap selalu ada).
+Saat asumsi itu tidak terpenuhi di lingkungan server, proses penyimpanan data gagal tanpa peringatan di sisi pengguna.
+
+3️⃣ Format Data Tidak Konsisten
+
+Data yang dikirim dari website kadang berbentuk objek, kadang sudah berupa teks JSON.
+Ketidakkonsistenan ini menyebabkan server harus menebak format data, dan ketika tebakan salah, proses penyimpanan bisa gagal.
+
+4️⃣ Error Terjadi di Level Database, Bukan di Aplikasi
+
+Kesalahan sebenarnya terjadi di PostgreSQL, bukan di Next.js.
+Namun karena aplikasi berjalan dalam mode produksi, pesan error database tidak diteruskan ke log, sehingga terlihat seperti “error misterius”.
+
+5️⃣ Tidak Ada Pesan Error yang Jelas di Log Server
+
+Walaupun error terjadi, log aplikasi tidak menampilkan informasi detail, sehingga sulit diketahui penyebabnya tanpa mengecek database secara langsung.
+
+6️⃣ Proses Server Berjalan dengan Kondisi Lama
+
+Aplikasi sempat berjalan menggunakan kondisi lama (state lama) meskipun database sudah berubah.
+Hal ini membuat server dan database tidak sinkron, sehingga error terus terjadi walaupun data sebenarnya sudah diperbaiki.
+
+7️⃣ Data Offline Memiliki Identitas Unik
+
+Setiap data yang dikirim dari mode offline memiliki ID unik.
+Jika data dengan ID yang sama dikirim ulang, database menolak penyimpanan dan memicu error internal.
+
+8️⃣ Tidak Ada Validasi Awal dari Website
+
+Website mengirim data ke server tanpa memastikan semua informasi wajib sudah lengkap dan benar, sehingga server menerima permintaan yang sebenarnya tidak layak diproses.
+
+9️⃣ Error 500 Menyembunyikan Kesalahan Asli
+
+Status 500 Internal Server Error hanya menunjukkan bahwa server gagal, tanpa memberi tahu apa yang salah.
+Ini membuat kesalahan terlihat seperti masalah server umum, padahal sebenarnya masalah logika dan data.
+
+10️⃣ Lingkungan Produksi Membatasi Informasi Debug
+
+Karena aplikasi berjalan di lingkungan produksi, banyak informasi debug disembunyikan secara otomatis, sehingga error sulit dilacak tanpa audit manual.

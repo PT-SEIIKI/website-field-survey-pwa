@@ -1,0 +1,58 @@
+root@server:/var/www/survei.seyiki.com# pm2 logs survei-seyiki | grep -i "error\|critical\|fail"
+/var/www/survei.seyiki.com/logs/error-14.log last 15 lines:
+^C
+root@server:/var/www/survei.seyiki.com# root@server:/var/www/survei.seyiki.com# pm2 logs survei-seyiki | grep -i "error\|critical\|fail"
+/var/www/survei.seyiki.com/logs/error-14.log last 15 lines:
+
+-bash: root@server:/var/www/survei.seyiki.com#: No such file or directory
+-bash: /var/www/survei.seyiki.com/logs/error-14.log: Permission denied
+root@server:/var/www/survei.seyiki.com# pm2 logs survei-seyiki --raw --timestamp
+[TAILING] Tailing last 15 lines for [survei-seyiki] process (change the value with --lines option)
+/var/www/survei.seyiki.com/logs/error-14.log last 15 lines:
+/var/www/survei.seyiki.com/logs/out-14.log last 15 lines:
+> website-survey-pwa@0.1.0 start
+> next start
+
+2026-01-17T07:28:17:
+> website-survey-pwa@0.1.0 start
+> next start
+
+2026-01-17T07:37:49:
+> website-survey-pwa@0.1.0 start
+> next start
+
+2026-01-17T07:42:32:
+> website-survey-pwa@0.1.0 start
+> next start
+
+
+^C
+root@server:/var/www/survei.seyiki.com# pm2 delete survei-seyiki
+pm2 start ecosystem.config.cjs
+[PM2] Applying action deleteProcessId on app [survei-seyiki](ids: [ 14 ])
+[PM2] [survei-seyiki](14) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ iot-backend        │ fork     │ 72   │ online    │ 0%       │ 48.5mb   │
+│ 12 │ seyiki-docs        │ fork     │ 11   │ online    │ 0%       │ 64.1mb   │
+│ 2  │ seyiki-main        │ fork     │ 12   │ online    │ 0%       │ 55.3mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2][WARN] Applications survei-seyiki not running, starting...
+[PM2] App [survei-seyiki] launched (1 instances)
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ iot-backend        │ fork     │ 72   │ online    │ 0%       │ 48.5mb   │
+│ 12 │ seyiki-docs        │ fork     │ 11   │ online    │ 0%       │ 64.6mb   │
+│ 2  │ seyiki-main        │ fork     │ 12   │ online    │ 0%       │ 55.8mb   │
+│ 15 │ survei-seyiki      │ cluster  │ 0    │ online    │ 0%       │ 38.1mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@server:/var/www/survei.seyiki.com# curl -X POST https://survei.seyiki.com/api/entries \
+  -H "Content-Type: application/json" \
+  -d '{
+    "surveyId": 1,
+    "data": {"timestamp": 123},
+    "isSynced": true
+  }'
+{"id":39,"surveyId":1,"data":"{\"timestamp\":123}","offlineId":null,"createdAt":"2026-01-17T08:00:09.364Z","isSynced":true}root@server:/var/www/survei.seyiki.com#
