@@ -13,6 +13,7 @@ import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Se
 
 interface Photo {
   photoId: string
+  dbId?: string
   filename: string
   location: string
   description: string
