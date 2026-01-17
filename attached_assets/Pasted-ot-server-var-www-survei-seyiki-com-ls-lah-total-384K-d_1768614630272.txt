@@ -1,0 +1,56 @@
+ot@server:/var/www/survei.seyiki.com# ls -lah
+total 384K
+drwxr-xr-x  17 root root 4.0K Jan 17 08:45 .
+drwxr-xr-x   7 root root 4.0K Jan 17 05:47 ..
+-rw-r--r--   1 root root  621 Jan 17 06:37 .env
+drwxr-xr-x   8 root root 4.0K Jan 17 08:45 .git
+-rw-r--r--   1 root root  294 Jan 17 06:37 .gitignore
+drwxr-xr-x   3 root root 4.0K Jan 16 06:39 .local
+drwxr-xr-x   8 root root 4.0K Jan 17 08:45 .next
+-rw-r--r--   1 root root 1.3K Jan 17 07:17 .replit
+-rw-r--r--   1 root root 8.4K Jan 17 06:37 DEPLOYMENT_GUIDE.md
+-rw-r--r--   1 root root 3.4K Jan 17 06:37 README.md
+-rw-r--r--   1 root root 8.6K Jan 17 06:37 TESTING_CHECKLIST.md
+-rw-r--r--   1 root root 8.5K Jan 17 06:37 TESTING_REPORT.md
+drwxr-xr-x   6 root root 4.0K Jan 17 07:07 app
+drwxr-xr-x   3 root root 4.0K Jan 17 08:40 attached_assets
+drwxr-xr-x   3 root root 4.0K Jan 17 06:37 components
+-rw-r--r--   1 root root  427 Jan 17 06:37 components.json
+-rw-r--r--   1 root root  297 Jan 17 06:37 drizzle.config.ts
+-rw-r--r--   1 root root 1.1K Jan 17 05:55 ecosystem.config.cjs
+drwxr-xr-x   2 root root 4.0K Jan 17 06:37 hooks
+drwxr-xr-x   2 root root 4.0K Jan 17 06:37 lib
+drwxr-xr-x   2 root root 4.0K Jan 17 08:00 logs
+-rw-r--r--   1 root root  247 Jan 16 06:40 next-env.d.ts
+-rw-r--r--   1 root root 1.1K Jan 17 06:37 next.config.mjs
+drwxr-xr-x 204 root root  12K Jan 17 08:45 node_modules
+-rw-r--r--   1 root root 212K Jan 17 08:45 package-lock.json
+-rw-r--r--   1 root root 2.5K Jan 17 06:37 package.json
+-rw-r--r--   1 root root  144 Jan 17 06:37 postcss.config.mjs
+drwxr-xr-x   4 root root 4.0K Jan 17 07:07 public
+-rw-r--r--   1 root root 2.2K Jan 17 06:37 replit.env.example
+-rw-r--r--   1 root root 1.1K Jan 17 06:37 replit.md
+drwxr-xr-x   2 root root 4.0K Jan 17 08:45 server
+drwxr-xr-x   2 root root 4.0K Jan 17 06:37 shared
+drwxr-xr-x   2 root root 4.0K Jan 17 06:37 styles
+-rw-r--r--   1 root root 3.0K Jan 17 06:37 tailwind.config.ts
+-rw-r--r--   1 root root  781 Jan 17 06:37 tsconfig.json
+drwxr-xr-x   2 root root 4.0K Jan 17 06:06 uploads
+root@server:/var/www/survei.seyiki.com# cd uploads
+ls -lah
+total 8.0K
+drwxr-xr-x  2 root root 4.0K Jan 17 06:06 .
+drwxr-xr-x 17 root root 4.0K Jan 17 08:45 ..
+root@server:/var/www/survei.seyiki.com/uploads# ls -lah
+total 8.0K
+drwxr-xr-x  2 root root 4.0K Jan 17 06:06 .
+drwxr-xr-x 17 root root 4.0K Jan 17 08:45 ..
+root@server:/var/www/survei.seyiki.com/uploads# chown -R www-data:www-data /var/www/survei.seyiki.com/uploads
+chmod -R 755 /var/www/survei.seyiki.com/uploads
+root@server:/var/www/survei.seyiki.com/uploads# ls -ld /var/www/survei.seyiki.com/uploads
+drwxr-xr-x 2 www-data www-data 4096 Jan 17 06:06 /var/www/survei.seyiki.com/uploads
+root@server:/var/www/survei.seyiki.com/uploads# ls -lah /var/www/survei.seyiki.com/uploads
+total 8.0K
+drwxr-xr-x  2 www-data www-data 4.0K Jan 17 06:06 .
+drwxr-xr-x 17 root     root     4.0K Jan 17 08:45 ..
+root@server:/var/www/survei.seyiki.com/uploads#

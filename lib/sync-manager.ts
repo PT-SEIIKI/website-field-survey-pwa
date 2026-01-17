@@ -1,5 +1,5 @@
 // Sync manager untuk handle upload queue dan auto-sync
-import { getPendingPhotos, updatePhotoStatus, getMetadata } from "./indexeddb"
+import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto } from "./indexeddb"
 import { checkConnectivity, subscribeToConnectivity } from "./connectivity"
 
 export interface SyncStatus {
@@ -91,11 +91,34 @@ export async function startSync() {
 }
 
 async function syncPhoto(photo: any) {
+  const photoId = photo.id;
   try {
-    await updatePhotoStatus(photo.id, "syncing")
+    await updatePhotoStatus(photoId, "syncing")
     notifySyncListeners()
 
-    const metadata = await getMetadata(photo.id)
+    const metadata = await getMetadata(photoId)
+    const photoData = await getPhoto(photoId);
+    if (!photoData) {
+      throw new Error("Photo not found in IndexedDB");
+    }
+
+    // First upload the photo file to /api/upload
+    const photoFormData = new FormData();
+    photoFormData.append("file", photoData.blob, `${photoId}.jpg`);
+    photoFormData.append("photoId", photoId);
+    photoFormData.append("location", metadata?.location || "");
+    photoFormData.append("description", metadata?.description || "");
+    photoFormData.append("timestamp", photoData.timestamp.toString());
+
+    const uploadResponse = await fetch("/api/upload", {
+      method: "POST",
+      body: photoFormData,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      throw new Error(`File upload failed: ${errorText}`);
+    }
 
     const response = await fetch("/api/entries", {
       method: "POST",
@@ -107,9 +130,9 @@ async function syncPhoto(photo: any) {
         data: JSON.stringify({
           description: metadata?.description,
           location: metadata?.location,
-          timestamp: photo.timestamp
+          timestamp: photoData.timestamp
         }),
-        offlineId: photo.id,
+        offlineId: photoId,
         isSynced: true
       }),
     })
@@ -128,8 +151,8 @@ async function syncPhoto(photo: any) {
       },
       body: JSON.stringify({
         entryId: entryData.id,
-        url: `/uploads/${photo.id}.jpg`, // Corrected to use the configured upload directory
-        offlineId: photo.id
+        url: `/uploads/${photoId}.jpg`, // Corrected to use the configured upload directory
+        offlineId: photoId
       }),
     });
 
@@ -137,11 +160,11 @@ async function syncPhoto(photo: any) {
       throw new Error(`Photo upload failed: ${photoResponse.statusText}`)
     }
 
-    await updatePhotoStatus(photo.id, "synced")
-    console.log("[v0] Photo synced:", photo.id)
+    await updatePhotoStatus(photoId, "synced")
+    console.log("[v0] Photo synced:", photoId)
   } catch (error) {
-    console.error("[v0] Failed to sync photo:", photo.id, error)
-    await updatePhotoStatus(photo.id, "failed")
+    console.error("[v0] Failed to sync photo:", photoId, error)
+    await updatePhotoStatus(photoId, "failed")
     throw error
   }
 }

@@ -1,0 +1,141 @@
+
+Anda bilang:
+78d36db1b9ebbd49.js
+9d60504257dadf06.js
+multi-tabs.css
+wrs_env.js
+style.css
+dom.build.min.js
+script.js
+⚙ script.js
+css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap
+⚙ css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap
+entries?surveyId=1
+stats
+Imagedata:image/svg+xml;…
+QGYsz_wNahGAdqQ43Rh_fKDptfpA4Q.woff2
+manifest.webmanifest
+Othericon-192x192.png
+js.js
+dom.js
+js.js
+dom.js
+4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+
+⚙ 4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+js.js
+38 requests
+153 kB transferred
+962 kB resources
+Finish: 8.06 s
+DOMContentLoaded: 194 ms
+Request URL
+https://survei.seyiki.com/uploads/4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+Request Method
+GET
+Status Code
+404 Not Found
+Remote Address
+154.19.37.61:443
+Referrer Policy
+strict-origin-when-cross-origin
+content-encoding
+gzip
+content-type
+text/html
+date
+Sat, 17 Jan 2026 01:46:34 GMT
+server
+nginx/1.18.0 (Ubuntu)
+:authority
+survei.seyiki.com
+:method
+GET
+:path
+/uploads/4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+:scheme
+https
+accept
+image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7
+cache-control
+no-cache
+pragma
+no-cache
+priority
+i
+referer
+https://survei.seyiki.com/admin
+sec-ch-ua
+"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+sec-ch-ua-mobile
+?1
+sec-ch-ua-platform
+"Android"
+sec-fetch-dest
+empty
+sec-fetch-mode
+no-cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36
+
+78d36db1b9ebbd49.js
+9d60504257dadf06.js
+multi-tabs.css
+wrs_env.js
+style.css
+dom.build.min.js
+script.js
+⚙ script.js
+css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap
+⚙ css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap
+entries?surveyId=1
+stats
+Imagedata:image/svg+xml;…
+QGYsz_wNahGAdqQ43Rh_fKDptfpA4Q.woff2
+manifest.webmanifest
+Othericon-192x192.png
+js.js
+dom.js
+js.js
+dom.js
+4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+
+⚙ 4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+js.js
+38 requests
+153 kB transferred
+962 kB resources
+Finish: 8.06 s
+DOMContentLoaded: 194 ms
+Request URL
+https://survei.seyiki.com/uploads/4567b410-d71b-414f-8830-2b3d5e961e3f.jpg
+Request Method
+GET
+Status Code
+404 Not Found (from service worker)
+Referrer Policy
+strict-origin-when-cross-origin
+content-encoding
+gzip
+content-type
+text/html
+date
+Sat, 17 Jan 2026 01:46:34 GMT
+server
+nginx/1.18.0 (Ubuntu)
+referer
+https://survei.seyiki.com/admin
+sec-ch-ua
+"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+sec-ch-ua-mobile
+?1
+sec-ch-ua-platform
+"Android"
+user-agent
+Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36
