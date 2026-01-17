@@ -16,8 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "lucide-react"
-import { useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function UploadPage() {
   return (
@@ -265,9 +264,9 @@ function UploadPageContent() {
                 <span>Galeri Lokal</span>
                 <Badge variant="secondary" className="text-xs sm:text-sm">{photos.length}</Badge>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Foto yang belum tersinkronisasi</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Status sinkronisasi foto di perangkat ini</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 px-4 sm:px-6 pb-4 sm:pb-6">
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               {isLoading ? (
                 <div className="text-center py-6 sm:py-8">
                   <div className="animate-spin mb-2">
@@ -275,38 +274,57 @@ function UploadPageContent() {
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground">Memuat foto...</p>
                 </div>
-              ) : photos.length === 0 ? (
-                <div className="text-center py-6 sm:py-8">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Belum ada foto</p>
-                </div>
               ) : (
-                <div className="space-y-2 max-h-80 sm:max-h-96 overflow-y-auto">
-                  {photos.map((photo) => (
-                    <div
-                      key={photo.id}
-                      className={`p-2 rounded border text-xs ${
-                        photo.syncStatus === "synced"
-                          ? "bg-green-50 border-green-200"
-                          : photo.syncStatus === "failed"
-                            ? "bg-red-50 border-red-200"
-                            : photo.syncStatus === "syncing"
-                              ? "bg-yellow-50 border-yellow-200"
-                              : "bg-gray-50 border-gray-200"
-                      }`}
-                    >
-                      <p className="font-medium truncate">{photo.id.substring(0, 8)}...</p>
-                      <Badge variant="outline" className="mt-1 text-[10px]">
-                        {photo.syncStatus === "synced"
-                          ? "✓ Tersinkronisasi"
-                          : photo.syncStatus === "syncing"
-                            ? "⟳ Sedang sinkronisasi"
-                            : photo.syncStatus === "failed"
-                              ? "✗ Gagal"
-                              : "⧖ Pending"}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                <Tabs defaultValue="pending" className="w-full">
+                  <TabsList className="grid grid-cols-4 w-full h-9 mb-4">
+                    <TabsTrigger value="failed" className="text-[10px] px-0">Gagal</TabsTrigger>
+                    <TabsTrigger value="pending" className="text-[10px] px-0">Pending</TabsTrigger>
+                    <TabsTrigger value="syncing" className="text-[10px] px-0">Sync</TabsTrigger>
+                    <TabsTrigger value="synced" className="text-[10px] px-0">Berhasil</TabsTrigger>
+                  </TabsList>
+
+                  <div className="max-h-80 sm:max-h-96 overflow-y-auto space-y-2">
+                    <TabsContent value="failed" className="mt-0 space-y-2">
+                      {photos.filter(p => p.syncStatus === "failed").length === 0 ? (
+                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
+                      ) : (
+                        photos.filter(p => p.syncStatus === "failed").map((photo) => (
+                          <PhotoItem key={photo.id} photo={photo} />
+                        ))
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="pending" className="mt-0 space-y-2">
+                      {photos.filter(p => !p.syncStatus || p.syncStatus === "pending").length === 0 ? (
+                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
+                      ) : (
+                        photos.filter(p => !p.syncStatus || p.syncStatus === "pending").map((photo) => (
+                          <PhotoItem key={photo.id} photo={photo} />
+                        ))
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="syncing" className="mt-0 space-y-2">
+                      {photos.filter(p => p.syncStatus === "syncing").length === 0 ? (
+                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
+                      ) : (
+                        photos.filter(p => p.syncStatus === "syncing").map((photo) => (
+                          <PhotoItem key={photo.id} photo={photo} />
+                        ))
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="synced" className="mt-0 space-y-2">
+                      {photos.filter(p => p.syncStatus === "synced").length === 0 ? (
+                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
+                      ) : (
+                        photos.filter(p => p.syncStatus === "synced").map((photo) => (
+                          <PhotoItem key={photo.id} photo={photo} />
+                        ))
+                      )}
+                    </TabsContent>
+                  </div>
+                </Tabs>
               )}
 
               <Button
@@ -322,6 +340,35 @@ function UploadPageContent() {
           </Card>
         </div>
       </main>
+    </div>
+  )
+}
+
+function PhotoItem({ photo }: { photo: any }) {
+  return (
+    <div
+      className={`p-2 rounded border text-[10px] ${
+        photo.syncStatus === "synced"
+          ? "bg-green-50 border-green-200"
+          : photo.syncStatus === "failed"
+            ? "bg-red-50 border-red-200"
+            : photo.syncStatus === "syncing"
+              ? "bg-yellow-50 border-yellow-200"
+              : "bg-gray-50 border-gray-200"
+      }`}
+    >
+      <p className="font-medium truncate">{photo.id.substring(0, 8)}...</p>
+      <div className="mt-1 flex items-center justify-between">
+        <span className="text-muted-foreground">
+          {photo.syncStatus === "synced"
+            ? "Berhasil"
+            : photo.syncStatus === "syncing"
+              ? "Sinkronisasi..."
+              : photo.syncStatus === "failed"
+                ? "Gagal"
+                : "Menunggu"}
+        </span>
+      </div>
     </div>
   )
 }
