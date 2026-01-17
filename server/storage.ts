@@ -20,6 +20,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEntry(id: number): Promise<void> {
+    // Delete associated photos first to avoid foreign key constraints
+    await db.delete(photos).where(eq(photos.entryId, id));
     await db.delete(surveyEntries).where(eq(surveyEntries.id, id));
   }
 
