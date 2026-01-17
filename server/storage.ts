@@ -20,13 +20,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEntry(insertEntry: InsertEntry): Promise<Entry> {
-    const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
-    return entry;
+    try {
+      console.log("[Storage] Inserting entry:", JSON.stringify(insertEntry));
+      const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
+      return entry;
+    } catch (error) {
+      console.error("[Storage] createEntry error:", error);
+      throw error;
+    }
   }
 
   async createPhoto(insertPhoto: InsertPhoto): Promise<Photo> {
-    const [photo] = await db.insert(photos).values(insertPhoto).returning();
-    return photo;
+    try {
+      console.log("[Storage] Inserting photo:", JSON.stringify(insertPhoto));
+      const [photo] = await db.insert(photos).values(insertPhoto).returning();
+      return photo;
+    } catch (error) {
+      console.error("[Storage] createPhoto error:", error);
+      throw error;
+    }
   }
 
   async getEntryByOfflineId(offlineId: string): Promise<Entry | undefined> {

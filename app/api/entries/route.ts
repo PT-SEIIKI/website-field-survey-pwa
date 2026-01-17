@@ -24,8 +24,16 @@ export async function POST(req: NextRequest) {
     console.log("[API] Creating entry with body:", JSON.stringify(body));
     
     // Ensure surveyId is a number
-    if (typeof body.surveyId === 'string') {
+    if (body.surveyId && typeof body.surveyId === 'string') {
       body.surveyId = parseInt(body.surveyId, 10);
+    } else if (body.surveyId === undefined || body.surveyId === null) {
+      // Default to 1 if missing, as seen in user report
+      body.surveyId = 1;
+    }
+    
+    // Ensure data is a string if it's an object
+    if (body.data && typeof body.data === 'object') {
+      body.data = JSON.stringify(body.data);
     }
     
     const entry = await storage.createEntry(body);
