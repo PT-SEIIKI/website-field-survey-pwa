@@ -151,7 +151,7 @@ async function syncPhoto(photo: any) {
       },
       body: JSON.stringify({
         entryId: entryData.id,
-        url: `/uploads/${photoId}.jpg`, // Corrected to use the configured upload directory
+        url: `/uploads/${photoId}.jpg`,
         offlineId: photoId
       }),
     });

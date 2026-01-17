@@ -9,7 +9,7 @@ export const maxDuration = 30
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const uploadsDir = join(process.cwd(), "uploads")
+    const uploadsDir = "/var/www/survei.seyiki.com/uploads"
 
     // Get metadata
     const metadataPath = join(uploadsDir, `${id}.json`)
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const uploadsDir = join(process.cwd(), "uploads")
+    const uploadsDir = "/var/www/survei.seyiki.com/uploads"
     const fs = await import("fs/promises")
 
     // If ID is numeric, it might be a direct entry ID deletion
