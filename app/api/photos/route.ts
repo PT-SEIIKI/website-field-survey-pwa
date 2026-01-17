@@ -6,12 +6,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("[API] Creating photo with body:", JSON.stringify(body));
 
-    // Ensure entryId is a number if it exists
-    if (body.entryId && typeof body.entryId === 'string') {
-      body.entryId = parseInt(body.entryId, 10);
+    const entryId = body.entryId ? parseInt(body.entryId.toString(), 10) : null;
+    const url = body.url || "";
+    const offlineId = body.offlineId || null;
+
+    if (!url) {
+      return NextResponse.json({ success: false, message: "URL is required" }, { status: 400 });
     }
 
-    const photo = await storage.createPhoto(body);
+    const photo = await storage.createPhoto({
+      entryId,
+      url,
+      offlineId
+    });
+
     return NextResponse.json(photo, { status: 201 });
   } catch (error) {
     console.error("[API] Create photo error:", error);

@@ -1,0 +1,149 @@
+Auto Clicker Script Loaded.
+c1037488a14ddffd.js:1 [v0] Service Worker registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://survei.seyiki.com/', …}
+a89e41ca029f54c4.js:1 [v0] Online - starting sync
+c1037488a14ddffd.js:1  GET https://survei.seyiki.com/_vercel/insights/script.js net::ERR_ABORTED 404 (Not Found)
+(anonymous) @ c1037488a14ddffd.js:1
+(anonymous) @ c1037488a14ddffd.js:1
+op @ 32d99f15292dc322.js:1
+e @ 32d99f15292dc322.js:1
+e @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+is @ 32d99f15292dc322.js:1
+ic @ 32d99f15292dc322.js:1
+s_ @ 32d99f15292dc322.js:1
+(anonymous) @ 32d99f15292dc322.js:1
+C @ 32d99f15292dc322.js:1Understand this error
+c1037488a14ddffd.js:1 [Vercel Web Analytics] Failed to load script from /_vercel/insights/script.js. Be sure to enable Web Analytics for your project and deploy again. See https://vercel.com/docs/analytics/quickstart for more information.
+upload?action=camera:5 ServiceWorker registration successful with scope:  https://survei.seyiki.com/
+2a89e41ca029f54c4.js:1 [v0] Starting sync for 0 photos
+content_script.js:22 isLinkNode: false
+a89e41ca029f54c4.js:1 [v0] Photo saved: 10cfdc3c-fa49-4848-a5db-f50063c13620
+a89e41ca029f54c4.js:1 [v0] Metadata saved for photo: 10cfdc3c-fa49-4848-a5db-f50063c13620
+a89e41ca029f54c4.js:1 [v0] Added to sync queue: 10cfdc3c-fa49-4848-a5db-f50063c13620
+a89e41ca029f54c4.js:1 [v0] Photo with metadata added: 10cfdc3c-fa49-4848-a5db-f50063c13620
+a89e41ca029f54c4.js:1 [v0] Starting sync for 1 photos
+a89e41ca029f54c4.js:1 [v0] Photo status updated: 10cfdc3c-fa49-4848-a5db-f50063c13620 syncing
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+b @ a89e41ca029f54c4.js:1
+await in b
+y @ a89e41ca029f54c4.js:1
+await in y
+W @ a89e41ca029f54c4.js:2
+await in W
+(anonymous) @ a89e41ca029f54c4.js:2Understand this error
+installHook.js:1 [v0] Failed to sync photo: 10cfdc3c-fa49-4848-a5db-f50063c13620 Error: Upload failed: 
+    at b (a89e41ca029f54c4.js:1:9100)
+    at async y (a89e41ca029f54c4.js:1:8509)
+overrideMethod @ installHook.js:1
+b @ a89e41ca029f54c4.js:1
+await in b
+y @ a89e41ca029f54c4.js:1
+await in y
+W @ a89e41ca029f54c4.js:2
+await in W
+(anonymous) @ a89e41ca029f54c4.js:2Understand this error
+a89e41ca029f54c4.js:1 [v0] Photo status updated: 10cfdc3c-fa49-4848-a5db-f50063c13620 failed
+installHook.js:1 [v0] Sync error: Upload failed: 
+overrideMethod @ installHook.js:1
+y @ a89e41ca029f54c4.js:1
+await in y
+W @ a89e41ca029f54c4.js:2
+await in W
+(anonymous) @ a89e41ca029f54c4.js:2Understand this error
+content_script.js:22 isLinkNode: false
+a89e41ca029f54c4.js:1 [v0] Photo saved: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef
+a89e41ca029f54c4.js:1 [v0] Added to sync queue: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef
+a89e41ca029f54c4.js:1 [v0] Photo added: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef
+a89e41ca029f54c4.js:1 [v0] Starting sync for 1 photos
+a89e41ca029f54c4.js:1 [v0] Photo status updated: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef syncing
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+b @ a89e41ca029f54c4.js:1
+await in b
+y @ a89e41ca029f54c4.js:1
+await in y
+F @ a89e41ca029f54c4.js:2
+await in F
+onChange @ a89e41ca029f54c4.js:2
+sY @ 32d99f15292dc322.js:1
+(anonymous) @ 32d99f15292dc322.js:1
+tF @ 32d99f15292dc322.js:1
+s3 @ 32d99f15292dc322.js:1
+fx @ 32d99f15292dc322.js:1
+fR @ 32d99f15292dc322.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef Error: Upload failed: 
+    at b (a89e41ca029f54c4.js:1:9100)
+    at async y (a89e41ca029f54c4.js:1:8509)
+overrideMethod @ installHook.js:1
+b @ a89e41ca029f54c4.js:1
+await in b
+y @ a89e41ca029f54c4.js:1
+await in y
+F @ a89e41ca029f54c4.js:2
+await in F
+onChange @ a89e41ca029f54c4.js:2
+sY @ 32d99f15292dc322.js:1
+(anonymous) @ 32d99f15292dc322.js:1
+tF @ 32d99f15292dc322.js:1
+s3 @ 32d99f15292dc322.js:1
+fx @ 32d99f15292dc322.js:1
+fR @ 32d99f15292dc322.js:1Understand this error
+a89e41ca029f54c4.js:1 [v0] Photo status updated: 6c7cdaed-d3a2-4079-a8e3-c92f5cc306ef failed
+installHook.js:1 [v0] Sync error: Upload failed: 
