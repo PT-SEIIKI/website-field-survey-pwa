@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const isOnline = useOnlineStatus()
   const syncStatus = useSyncStatus()
   const [user, setUser] = useState<any>(null)
+  const [stats, setStats] = useState<any>(null)
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -23,7 +24,16 @@ export default function DashboardPage() {
       return
     }
     setUser(currentUser)
-  }, [router])
+    
+    if (isOnline) {
+      fetch("/api/stats")
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setStats(data.stats)
+        })
+        .catch(err => console.error("Error fetching stats:", err))
+    }
+  }, [router, isOnline])
 
   if (!user) {
     return null
@@ -115,12 +125,10 @@ export default function DashboardPage() {
                 <div className="p-1.5 sm:p-2 lg:p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl text-purple-600 mb-1.5 sm:mb-2 lg:mb-4">
                   <BarChart3 size={12} className="sm:size-16 lg:size-24" />
                 </div>
-                <div className="text-xs sm:text-sm lg:text-xl font-mono font-bold text-purple-600 mb-0.5 sm:mb-1">
-                  {syncStatus.lastSyncTime
-                    ? new Date(syncStatus.lastSyncTime).toLocaleTimeString("id-ID", { hour12: false })
-                    : "--:--"}
+                <div className="text-sm sm:text-base lg:text-2xl font-black text-purple-600 mb-0.5 sm:mb-1">
+                  {stats ? stats.totalPhotos : "--"}
                 </div>
-                <p className="text-[8px] sm:text-[9px] lg:text-xs font-bold uppercase tracking-wider text-muted-foreground text-center leading-tight">Last Sync</p>
+                <p className="text-[8px] sm:text-[9px] lg:text-xs font-bold uppercase tracking-wider text-muted-foreground text-center leading-tight">Total Sync</p>
               </div>
             </CardContent>
           </Card>
