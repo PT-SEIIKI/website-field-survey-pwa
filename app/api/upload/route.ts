@@ -7,11 +7,15 @@ export const runtime = "nodejs"
 export const maxDuration = 30
 
 // Ensure uploads directory exists
-const uploadsDir = join(process.cwd(), "public", "uploads")
+const uploadsDir = join(process.cwd(), "uploads")
 
 async function ensureUploadsDir() {
   if (!existsSync(uploadsDir)) {
-    await mkdir(uploadsDir, { recursive: true })
+    try {
+      await mkdir(uploadsDir, { recursive: true })
+    } catch (error) {
+      console.error("[API] Error creating uploads directory:", error)
+    }
   }
 }
 
