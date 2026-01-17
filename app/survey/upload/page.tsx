@@ -17,8 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-export default function UploadPage() {
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <UploadPageContent />
