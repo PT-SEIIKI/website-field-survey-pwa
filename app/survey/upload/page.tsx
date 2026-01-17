@@ -19,6 +19,7 @@ import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "luc
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
+export default function UploadPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <UploadPageContent />

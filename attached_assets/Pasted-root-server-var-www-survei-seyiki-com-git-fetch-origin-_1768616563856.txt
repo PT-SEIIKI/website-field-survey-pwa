@@ -1,0 +1,85 @@
+root@server:/var/www/survei.seyiki.com# git fetch origin
+git reset --hard origin/main
+npm install
+npm run db:push
+npm run build
+pm2 restart all
+remote: Enumerating objects: 97, done.
+remote: Counting objects: 100% (97/97), done.
+remote: Compressing objects: 100% (27/27), done.
+remote: Total 76 (delta 31), reused 72 (delta 27), pack-reused 0 (from 0)
+Unpacking objects: 100% (76/76), 681.76 KiB | 4.43 MiB/s, done.
+From https://github.com/PT-SEIIKI/website-field-survey-pwa
+ + f0b5320...b06e128 main       -> origin/main  (forced update)
+HEAD is now at b06e128 Initial commit from VSCode
+
+up to date, audited 297 packages in 4s
+
+50 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> website-survey-pwa@0.1.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/var/www/survei.seyiki.com/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[i] No changes detected
+
+> website-survey-pwa@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./app/survey/upload/page.tsx:22:3
+Parsing ecmascript source code failed
+  20 | import { useSearchParams } from "next/navigation"
+  21 | import { Suspense } from "react"
+> 22 |   return (
+     |   ^^^^^^^^
+> 23 |     <Suspense fallback={<div>Loading...</div>}>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |       <UploadPageContent />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |     </Suspense>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |   )
+     | ^^^^
+  27 | }
+  28 |
+  29 | function UploadPageContent() {
+
+Return statement is not allowed here
+
+
+    at <unknown> (./app/survey/upload/page.tsx:22:3)
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0, 2, 12, 15 ])
+[PM2] [iot-backend](0) ✓
+[PM2] [seyiki-main](2) ✓
+[PM2] [seyiki-docs](12) ✓
+[PM2] [survei-seyiki](15) ✓
+┌────┬──────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name             │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ iot-backend      │ default     │ 0.0.0   │ fork    │ 328988   │ 0s     │ 83   │ online    │ 0%       │ 50.3mb   │ root     │ disabled │
+│ 12 │ seyiki-docs      │ default     │ N/A     │ fork    │ 329012   │ 0s     │ 22   │ online    │ 0%       │ 39.2mb   │ root     │ disabled │
+│ 2  │ seyiki-main      │ default     │ N/A     │ fork    │ 328990   │ 0s     │ 23   │ online    │ 0%       │ 47.7mb   │ root     │ disabled │
+│ 15 │ survei-seyiki    │ default     │ N/A     │ cluster │ 329013   │ 0s     │ 11   │ online    │ 0%       │ 38.0mb   │ root     │ disabled │
+└────┴──────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+root@server:/var/www/survei.seyiki.com#
