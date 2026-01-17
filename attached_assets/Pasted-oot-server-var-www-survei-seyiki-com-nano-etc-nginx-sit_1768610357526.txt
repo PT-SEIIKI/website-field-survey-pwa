@@ -1,0 +1,135 @@
+oot@server:/var/www/survei.seyiki.com# nano /etc/nginx/sites-available/survei.seyiki.com
+root@server:/var/www/survei.seyiki.com# cat /etc/nginx/sites-available/survei.seyiki.com
+# HTTPS
+server {
+    listen 443 ssl http2;
+    server_name survei.seyiki.com;
+
+    # TAMBAHKAN INI (untuk allow upload sampai 10MB)
+    client_max_body_size 10M;
+
+    ssl_certificate /etc/letsencrypt/live/survei.seyiki.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/survei.seyiki.com/privkey.pem;
+
+    # Next.js Application
+    location / {
+        proxy_pass http://127.0.0.1:3003;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # TAMBAHKAN INI JUGA (untuk timeout yang lebih lama)
+        proxy_connect_timeout 600;
+        proxy_send_timeout 600;
+        proxy_read_timeout 600;
+        send_timeout 600;
+    }
+
+    # Uploads folder
+    location /uploads/ {
+        alias /var/www/survei.seyiki.com/uploads/;
+        autoindex off;
+    }
+}
+root@server:/var/www/survei.seyiki.com# # Test konfigurasi Nginx
+sudo nginx -t
+
+# Reload Nginx
+sudo systemctl reload nginx
+sudo: unable to resolve host server.seyiki.com: Name or service not known
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+sudo: unable to resolve host server.seyiki.com: Name or service not known
+root@server:/var/www/survei.seyiki.com# ls -la /var/www/survei.seyiki.com/ | grep uploads
+drwxr-xr-x   2 root root   4096 Jan 17 06:06 uploads
+root@server:/var/www/survei.seyiki.com# cat /var/www/survei.seyiki.com/.env | grep -E "UPLOAD|MAX_FILE"
+UPLOAD_DIR="./uploads"
+MAX_FILE_SIZE="10485760"
+root@server:/var/www/survei.seyiki.com# git fetch origin
+git reset --hard origin/main
+npm install
+npm run build
+pm2 restart all
+remote: Enumerating objects: 49, done.
+remote: Counting objects: 100% (49/49), done.
+remote: Compressing objects: 100% (20/20), done.
+remote: Total 38 (delta 9), reused 37 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (38/38), 468.39 KiB | 5.20 MiB/s, done.
+From https://github.com/PT-SEIIKI/website-field-survey-pwa
+ + 9dd66d7...e151ea5 main       -> origin/main  (forced update)
+HEAD is now at e151ea5 Initial commit from VSCode
+
+up to date, audited 297 packages in 4s
+
+50 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> website-survey-pwa@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.8s
+   Skipping validation of types
+ ✓ Collecting page data using 1 worker in 976.3ms
+ ✓ Generating static pages using 1 worker (15/15) in 1235.9ms
+ ✓ Finalizing page optimization in 12.2ms
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /admin
+├ ƒ /api/entries
+├ ƒ /api/health
+├ ƒ /api/photos
+├ ƒ /api/photos/[id]
+├ ƒ /api/photos/list
+├ ƒ /api/stats
+├ ƒ /api/upload
+├ ○ /login
+├ ○ /manifest.webmanifest
+├ ○ /survey/dashboard
+├ ○ /survey/gallery
+└ ○ /survey/upload
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0, 2, 12, 14 ])
+[PM2] [seyiki-main](2) ✓
+[PM2] [iot-backend](0) ✓
+[PM2] [seyiki-docs](12) ✓
+[PM2] [survei-seyiki](14) ✓
+┌────┬──────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name             │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ iot-backend      │ default     │ 0.0.0   │ fork    │ 321560   │ 0s     │ 71   │ online    │ 0%       │ 50.2mb   │ root     │ disabled │
+│ 12 │ seyiki-docs      │ default     │ N/A     │ fork    │ 321593   │ 0s     │ 10   │ online    │ 0%       │ 29.3mb   │ root     │ disabled │
+│ 2  │ seyiki-main      │ default     │ N/A     │ fork    │ 321559   │ 0s     │ 11   │ online    │ 0%       │ 51.1mb   │ root     │ disabled │
+│ 14 │ survei-seyiki    │ default     │ N/A     │ cluster │ 321583   │ 0s     │ 13   │ online    │ 0%       │ 38.0mb   │ root     │ disabled │
+└────┴──────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+root@server:/var/www/survei.seyiki.com#
+
+
+
+
+
+
