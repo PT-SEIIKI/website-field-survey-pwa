@@ -8,7 +8,7 @@ export const maxDuration = 30
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const uploadsDir = join(process.cwd(), "public", "uploads")
+    const uploadsDir = join(process.cwd(), "uploads")
 
     // Get metadata
     const metadataPath = join(uploadsDir, `${id}.json`)
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const uploadsDir = join(process.cwd(), "public", "uploads")
+    const uploadsDir = join(process.cwd(), "uploads")
     const fs = await import("fs/promises")
 
     // Delete photo file

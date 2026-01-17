@@ -73,16 +73,17 @@ function AdminPageContent() {
         // Map survey entries to the Photo interface used in UI
         const mappedPhotos = data.entries.map((entry: any) => {
           const entryData = JSON.parse(entry.data);
+          const photoId = entry.offlineId || (entry.id ? entry.id.toString() : "unknown");
           return {
-            photoId: entry.offlineId || entry.id.toString(),
-            filename: `${entry.offlineId}.jpg`, // This assumes a convention
+            photoId: photoId,
+            filename: `${photoId}.jpg`,
             location: entryData.location || "N/A",
             description: entryData.description || "",
             timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
             uploadedAt: entry.createdAt,
             size: 0 // We don't have size in DB yet
           };
-        });
+        }).filter((photo: any) => photo.photoId !== "null" && photo.photoId !== "undefined");
         setPhotos(mappedPhotos);
       }
     } catch (error) {
