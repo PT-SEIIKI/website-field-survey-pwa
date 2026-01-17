@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises"
 import { join } from "path"
 import { type NextRequest, NextResponse } from "next/server"
+import { storage } from "@/server/storage"
 
 export const runtime = "nodejs"
 export const maxDuration = 30

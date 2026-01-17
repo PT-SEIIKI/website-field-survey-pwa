@@ -73,18 +73,18 @@ function AdminPageContent() {
         // Map survey entries to the Photo interface used in UI
         const mappedPhotos = data.entries.map((entry: any) => {
           const entryData = JSON.parse(entry.data);
-          // Prioritize offlineId for filename since that's what's saved in /uploads
-          // fallback to entry.id for database tracking
-          const displayId = entry.offlineId || entry.id.toString();
+          // Use offlineId for the actual filename on disk
+          // Fallback to entry.id (string) only if offlineId is missing
+          const photoId = entry.offlineId || entry.id.toString();
           return {
-            photoId: displayId,
+            photoId: photoId,
             dbId: entry.id.toString(),
-            filename: `${displayId}.jpg`,
+            filename: `${photoId}.jpg`,
             location: entryData.location || "N/A",
             description: entryData.description || "",
             timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
             uploadedAt: entry.createdAt,
-            size: 0 // We don't have size in DB yet
+            size: 0
           };
         }).filter((photo: any) => photo.photoId !== "null" && photo.photoId !== "undefined");
         setPhotos(mappedPhotos);
