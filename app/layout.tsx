@@ -40,6 +40,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').then(function(registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    
+                    // Force update if new worker found
+                    registration.onupdatefound = () => {
+                      const newWorker = registration.installing;
+                      newWorker.onstatechange = () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                          if (confirm('Aplikasi versi baru tersedia. Muat ulang sekarang?')) {
+                            window.location.reload();
+                          }
+                        }
+                      };
+                    };
                   }, function(err) {
                     console.log('ServiceWorker registration failed: ', err);
                   });

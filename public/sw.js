@@ -1,8 +1,21 @@
 // Service Worker untuk PWA - Offline support & Background Sync
 
-const CACHE_NAME = "survey-pwa-v1"
-const API_CACHE = "survey-api-v1"
-const ASSETS_TO_CACHE = ["/", "/offline.html", "/manifest.json"]
+const CACHE_NAME = "survey-pwa-v2"
+const API_CACHE = "survey-api-v2"
+const ASSETS_TO_CACHE = [
+  "/",
+  "/login",
+  "/survey/dashboard",
+  "/survey/upload",
+  "/survey/gallery",
+  "/offline.html",
+  "/manifest.json",
+  "/favicon.ico",
+  "/icon-light-32x32.png",
+  "/apple-icon.png",
+  "/icon-192x192.png",
+  "/icon-512x512.png"
+]
 
 // Install event - cache essential assets
 self.addEventListener("install", (event) => {
@@ -36,7 +49,7 @@ self.addEventListener("activate", (event) => {
   self.clients.claim()
 })
 
-// Fetch event - network first, fallback to cache
+// Fetch event - cache-first for assets, network-first for others
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url)
 
@@ -45,26 +58,36 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  // Skip non-GET requests
-  if (event.request.method !== "GET") {
-    return
-  }
-
-  // Handle API calls
+  // Handle API calls - Network Only (handled by app sync logic)
   if (url.pathname.startsWith("/api/")) {
-    event.respondWith(networkFirst(event.request))
     return
   }
 
-  // Handle HTML documents
+  // Handle HTML documents - Stale While Revalidate
   if (event.request.headers.get("Accept")?.includes("text/html")) {
-    event.respondWith(networkFirst(event.request))
+    event.respondWith(staleWhileRevalidate(event.request))
     return
   }
 
-  // Handle assets (CSS, JS, images)
+  // Handle assets (CSS, JS, images) - Cache First
   event.respondWith(cacheFirst(event.request))
 })
+
+// Stale While Revalidate strategy
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME)
+  const cachedResponse = await cache.match(request)
+  const fetchPromise = fetch(request).then((networkResponse) => {
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone())
+    }
+    return networkResponse
+  }).catch(() => {
+    return cachedResponse || caches.match("/offline.html")
+  })
+
+  return cachedResponse || fetchPromise
+}
 
 // Network first strategy
 async function networkFirst(request) {
@@ -72,9 +95,11 @@ async function networkFirst(request) {
     const response = await fetch(request)
 
     if (response.ok) {
-      // Cache successful responses
-      const cache = await caches.open(API_CACHE)
-      cache.put(request, response.clone())
+      // Cache successful responses for GET requests
+      if (request.method === "GET") {
+        const cache = await caches.open(API_CACHE)
+        cache.put(request, response.clone())
+      }
     }
 
     return response
