@@ -73,10 +73,13 @@ function AdminPageContent() {
         // Map survey entries to the Photo interface used in UI
         const mappedPhotos = data.entries.map((entry: any) => {
           const entryData = JSON.parse(entry.data);
-          const photoId = entry.offlineId || (entry.id ? entry.id.toString() : "unknown");
+          // Prioritize offlineId for filename since that's what's saved in /uploads
+          // fallback to entry.id for database tracking
+          const displayId = entry.offlineId || entry.id.toString();
           return {
-            photoId: photoId,
-            filename: `${photoId}.jpg`,
+            photoId: displayId,
+            dbId: entry.id.toString(),
+            filename: `${displayId}.jpg`,
             location: entryData.location || "N/A",
             description: entryData.description || "",
             timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
@@ -106,13 +109,15 @@ function AdminPageContent() {
     }
   }
 
-  const handleDelete = async (photoId: string) => {
+  const handleDelete = async (photoId: string, dbId?: string) => {
     if (!confirm("Yakin ingin menghapus foto ini?")) {
       return
     }
 
     try {
-      const response = await fetch(`/api/photos/${photoId}`, {
+      // Use dbId for database deletion if available, fallback to photoId
+      const deleteId = dbId || photoId;
+      const response = await fetch(`/api/photos/${deleteId}`, {
         method: "DELETE",
       })
 
@@ -328,7 +333,7 @@ function AdminPageContent() {
                             {photo.description || "-"}
                           </TableCell>
                           <TableCell className="hidden sm:table-cell text-xs sm:text-sm font-medium">
-                            {Math.round(photo.size / 1024)} KB
+                            {photo.size > 0 ? `${Math.round(photo.size / 1024)} KB` : "-"}
                           </TableCell>
                           <TableCell className="text-right p-1 sm:p-2 lg:p-4">
                             <div className="flex items-center justify-end gap-1 sm:gap-2">
@@ -352,7 +357,7 @@ function AdminPageContent() {
                                 <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                               </Button>
                               <Button
-                                onClick={() => handleDelete(photo.photoId)}
+                                onClick={() => handleDelete(photo.photoId, photo.dbId)}
                                 size="icon-sm"
                                 variant="ghost"
                                 className="rounded-lg h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9 text-destructive hover:bg-destructive/10"
@@ -418,7 +423,7 @@ function AdminPageContent() {
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Ukuran:</span>
-                    <span className="text-muted-foreground">{Math.round(selectedPhoto.size / 1024)} KB</span>
+                    <span className="text-muted-foreground">{selectedPhoto.size > 0 ? `${Math.round(selectedPhoto.size / 1024)} KB` : "-"}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Tanggal:</span>

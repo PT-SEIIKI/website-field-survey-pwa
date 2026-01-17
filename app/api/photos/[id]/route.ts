@@ -33,6 +33,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const uploadsDir = join(process.cwd(), "uploads")
     const fs = await import("fs/promises")
 
+    // If ID is numeric, it might be a direct entry ID deletion
+    if (!isNaN(Number(id))) {
+      await storage.deleteEntry(Number(id));
+    }
+
     // Delete photo file
     const photoPath = join(uploadsDir, `${id}.jpg`)
     await fs.unlink(photoPath).catch(() => null)

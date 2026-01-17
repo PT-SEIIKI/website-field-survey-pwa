@@ -19,6 +19,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(surveyEntries).where(eq(surveyEntries.surveyId, surveyId));
   }
 
+  async deleteEntry(id: number): Promise<void> {
+    await db.delete(surveyEntries).where(eq(surveyEntries.id, id));
+  }
+
   async createEntry(insertEntry: InsertEntry): Promise<Entry> {
     try {
       console.log("[Storage] Inserting entry:", JSON.stringify(insertEntry));
