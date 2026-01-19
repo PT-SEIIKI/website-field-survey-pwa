@@ -3,6 +3,21 @@ import { storage } from "@/server/storage";
 import { insertFolderSchema } from "@/shared/schema";
 import { z } from "zod";
 
+export async function GET(
+  _req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const folders = await storage.getFolders();
+    const folder = folders.find(f => f.id === id);
+    if (!folder) return NextResponse.json({ message: "Folder not found" }, { status: 404 });
+    return NextResponse.json(folder);
+  } catch (error) {
+    return NextResponse.json({ message: "Failed to fetch folder" }, { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
