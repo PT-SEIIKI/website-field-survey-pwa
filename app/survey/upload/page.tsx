@@ -143,7 +143,14 @@ function UploadPageContent() {
 
   const handleSync = async () => {
     await startSync()
-    await loadFolders() // Refresh folders after sync
+    
+    // Refresh folders after sync
+    try {
+      const data = await getFolders()
+      setFolders(data)
+    } catch (error) {
+      console.error("Error refreshing folders:", error)
+    }
   }
 
   return (
