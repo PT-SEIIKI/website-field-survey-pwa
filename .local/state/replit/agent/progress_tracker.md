@@ -43,4 +43,7 @@
 [x] 43. Implemented backend support for fetching photos in folder details API
 [x] 44. Updated Folder Detail UI to show uploaded photos with preview and download functionality
 [x] 45. Fixed photo display logic to use actual photo data from database instead of placeholder logic
+[x] 46. Implemented Service Worker update for API caching (stale-while-revalidate for GET requests)
+[x] 47. Enhanced Folder Detail page with local IndexedDB fallback for offline viewing
+[x] 48. Verified offline support for folder and photo viewing
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026
