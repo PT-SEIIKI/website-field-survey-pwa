@@ -15,10 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff } from "lucide-react"
+import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { Suspense, useEffect, useState } from "react"
+import { getFolders } from "@/lib/indexeddb"
 export default function UploadPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -40,6 +41,21 @@ function UploadPageContent() {
   const [location, setLocation] = useState("")
   const [description, setDescription] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [folders, setFolders] = useState<any[]>([])
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("")
+
+  useEffect(() => {
+    loadFolders()
+  }, [])
+
+  async function loadFolders() {
+    try {
+      const data = await getFolders()
+      setFolders(data)
+    } catch (error) {
+      console.error("Error loading folders:", error)
+    }
+  }
 
   useEffect(() => {
     // Initialize offline & sync features
@@ -66,8 +82,16 @@ function UploadPageContent() {
   const handleFilesSelected = async (files: File[]) => {
     setIsUploading(true)
     try {
-      const photoIds = await addPhotos(Array.from(files))
-      setSuccessMessage(`${photoIds.length} foto berhasil ditambahkan`)
+      // In a real implementation, we'd pass folderId to addPhotos
+      // For now we'll use metadata for all selected files
+      for (const file of files) {
+        await addPhotoWithMetadata(file, {
+          location: location || undefined,
+          description: description || undefined,
+          folderId: selectedFolderId || undefined
+        })
+      }
+      setSuccessMessage(`${files.length} foto berhasil ditambahkan`)
       await refreshPhotos()
 
       // Clear message after 3 seconds
@@ -90,6 +114,7 @@ function UploadPageContent() {
       await addPhotoWithMetadata(blob, {
         location: location || undefined,
         description: description || undefined,
+        folderId: selectedFolderId || undefined
       })
 
       setSuccessMessage("Foto berhasil ditambahkan")
@@ -192,6 +217,22 @@ function UploadPageContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pb-4 sm:pb-6">
+                <div className="space-y-2 mb-4">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <FolderIcon className="w-4 h-4 text-blue-600" />
+                    Pilih Folder Tujuan (Opsional)
+                  </label>
+                  <select 
+                    value={selectedFolderId}
+                    onChange={(e) => setSelectedFolderId(e.target.value)}
+                    className="w-full h-10 sm:h-11 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <option value="">-- Tanpa Folder --</option>
+                    {folders.map(f => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <UploadArea onFilesSelected={handleFilesSelected} isLoading={isUploading} />
               </CardContent>
             </Card>

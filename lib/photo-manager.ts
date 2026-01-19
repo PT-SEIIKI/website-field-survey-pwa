@@ -14,6 +14,7 @@ export interface PhotoMetadata {
   location?: string
   description?: string
   timestamp?: number
+  folderId?: string
 }
 
 export async function capturePhoto(canvas: HTMLCanvasElement, mimeType = "image/jpeg"): Promise<Blob> {
