@@ -73,13 +73,18 @@ export async function startSync() {
 
   try {
     // 1. Sync Folders first (because entries depend on folderId)
-    const folders = await getFolders()
-    const pendingFolders = folders.filter(f => f.syncStatus === "pending")
+    const allFolders = await getFolders()
+    const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
     
     if (pendingFolders.length > 0) {
       console.log(`[v0] Syncing ${pendingFolders.length} folders`)
       for (const folder of pendingFolders) {
-        await syncFolder(folder)
+        try {
+          await syncFolder(folder)
+        } catch (e) {
+          console.error(`[v0] Folder sync error for ${folder.id}:`, e)
+          // Continue with other folders even if one fails
+        }
       }
     }
 
