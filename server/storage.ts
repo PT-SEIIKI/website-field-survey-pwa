@@ -12,6 +12,8 @@ export interface IStorage {
   getFolders(): Promise<Folder[]>;
   createFolder(folder: InsertFolder): Promise<Folder>;
   getFolderByOfflineId(offlineId: string): Promise<Folder | undefined>;
+  updateFolder(id: number, folder: Partial<InsertFolder>): Promise<Folder>;
+  deleteFolder(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -75,6 +77,18 @@ export class DatabaseStorage implements IStorage {
   async getFolderByOfflineId(offlineId: string): Promise<Folder | undefined> {
     const [folder] = await db.select().from(folders).where(eq(folders.offlineId, offlineId));
     return folder || undefined;
+  }
+
+  async updateFolder(id: number, updateData: Partial<InsertFolder>): Promise<Folder> {
+    const [updated] = await db.update(folders)
+      .set(updateData)
+      .where(eq(folders.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteFolder(id: number): Promise<void> {
+    await db.delete(folders).where(eq(folders.id, id));
   }
 }
 

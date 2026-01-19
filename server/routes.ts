@@ -44,6 +44,26 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  app.patch("/api/folders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const folder = await storage.updateFolder(id, req.body);
+      res.json(folder);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update folder" });
+    }
+  });
+
+  app.delete("/api/folders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFolder(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete folder" });
+    }
+  });
+
   // Create a survey entry (sync from offline)
   app.post("/api/entries", async (req, res) => {
     try {
