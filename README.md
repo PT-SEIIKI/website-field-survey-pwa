@@ -1,86 +1,55 @@
-# Offline Survey PWA
+# Survey PWA - Dokumentasi Sistem Terpadu
 
-Progressive Web App untuk survei lapangan dengan dukungan offline penuh. Aplikasi ini memungkinkan tim survei untuk mengambil ratusan foto di lapangan dan menguploadnya ketika koneksi internet tersedia.
+Survey PWA adalah aplikasi web progresif (Progressive Web Application) yang dirancang khusus untuk kebutuhan pendataan lapangan yang menuntut reliabilitas tinggi dalam kondisi koneksi internet yang tidak stabil.
 
-## Fitur Utama
+## 🌟 Fitur Unggulan
 
-✅ **Progressive Web App (PWA)**
-- Dapat diinstal di Android, iOS, dan Desktop
-- Mode offline-first dengan IndexedDB
-- Service Worker untuk caching aset dan API
-- Background Sync untuk upload otomatis saat kembali online
+### 1. Arsitektur Offline-First (PWA)
+Aplikasi ini tetap dapat dioperasikan secara penuh meskipun tanpa koneksi internet.
+- **Instalasi**: Dapat diinstal langsung dari browser di Android, iOS, maupun Desktop (Add to Home Screen).
+- **Penyimpanan Lokal**: Foto dan data survei disimpan dengan aman di **IndexedDB** perangkat pengguna.
+- **Resiliensi**: Service Worker memastikan aplikasi dapat dibuka dan dijalankan tanpa bergantung pada server saat offline.
 
-✅ **Survei Lapangan & Pengambilan Data**
-- **Multi-File Upload**: Dukungan drag-and-drop untuk banyak file sekaligus.
-- **Kamera Langsung**: Ambil foto langsung dari kamera perangkat dengan preview.
-- **Metadata Lengkap**: Pencatatan lokasi (teks), deskripsi, dan stempel waktu otomatis untuk setiap foto.
-- **Manajemen Penyimpanan Proaktif**: Fitur pencegahan penyimpanan penuh yang otomatis menghapus foto yang sudah tersinkronisasi jika ruang penyimpanan perangkat menipis.
+### 2. Manajemen Folder (Pengorganisasian Data)
+Data survei dikelompokkan secara hierarkis untuk memudahkan manajemen ribuan entri data.
+- **Identitas Lengkap**: Folder mencakup Nama Folder, Nama Pemilik Rumah, dan NIK (Validasi 16 digit).
+- **Galeri Terintegrasi**: Setiap folder memiliki halaman detail untuk melihat koleksi foto terkait.
+- **Akses Cepat**: Fitur pencarian folder memudahkan pencarian data di lapangan.
 
-✅ **Sinkronisasi Cerdas**
-- **Deteksi Koneksi**: Pantauan status internet secara real-time.
-- **Antrean Sinkronisasi (Sync Queue)**: Foto yang diambil saat offline masuk ke antrean IndexedDB.
-- **Upload Otomatis**: Proses upload berjalan secara otomatis segera setelah perangkat mendapatkan koneksi internet.
+### 3. Sinkronisasi Cerdas (Smart Sync)
+Proses pengunggahan data yang efisien dan otomatis.
+- **Antrean Sinkronisasi**: Data masuk ke antrean (queue) saat offline.
+- **Auto-Detect**: Sistem mendeteksi kembalinya koneksi internet dan memulai sinkronisasi secara otomatis di latar belakang.
+- **Integritas Data**: Menggunakan logika "Folders-First" untuk menjamin semua foto terhubung dengan folder yang tepat di database pusat.
 
-✅ **Panel Admin & Analitik**
-- **Dashboard Admin**: Monitoring semua data survei yang masuk.
-- **Filter & Pencarian**: Filter data berdasarkan lokasi, rentang tanggal, dan surveyor.
-- **Manajemen Data**: Preview foto, download file, dan penghapusan data dari server.
-- **Statistik Visual**: Grafik dan ringkasan data survei menggunakan Recharts.
+### 4. Pengalaman Pengguna (UX)
+- **Preview & Download**: Pengguna dapat melihat hasil jepretan langsung di aplikasi dan mengunduhnya untuk keperluan laporan eksternal.
+- **Kamera Kustom**: Antarmuka pengambilan foto yang dioptimalkan untuk perangkat seluler.
 
-✅ **Keamanan & Teknis**
-- **Role-Based Access Control (RBAC)**: Pemisahan akses antara Surveyor dan Admin.
-- **PostgreSQL Ready**: Konfigurasi siap pakai untuk database PostgreSQL (via DATABASE_URL).
-- **Environment Driven**: Pengaturan fleksibel menggunakan variabel lingkungan (.env).
+## 🛠️ Detail Teknis
 
-## Teknologi yang Digunakan
+- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS.
+- **UI Components**: Shadcn UI (Radix UI), Lucide Icons, Sonner Toast.
+- **Backend & DB**: Node.js API Routes, PostgreSQL dengan Drizzle ORM.
+- **Storage**: File sistem lokal (server) untuk foto, PostgreSQL untuk metadata.
 
-- **Framework**: Next.js 16 (App Router)
-- **Bahasa**: TypeScript
-- **Styling**: Tailwind CSS & Radix UI (Shadcn UI)
-- **Database (Server)**: PostgreSQL
-- **Database (Client/Offline)**: IndexedDB
-- **State & Logic**: React Hook Form, Zod (Validation), Lucide React (Icons)
-- **Charts**: Recharts
-- **PWA**: Custom Service Worker & Web Manifest
+## 🚀 Cara Penggunaan Singkat
 
-## Struktur Folder Utama
+### Untuk Surveyor
+1. **Login** (`surveyor1` / `password123`).
+2. **Buat/Pilih Folder** yang sesuai dengan lokasi/rumah yang disurvei.
+3. **Klik "Ambil Foto"** di dalam folder tersebut.
+4. **Isi Deskripsi** dan simpan. Data akan tersimpan di HP jika offline, atau langsung ke server jika online.
 
-```
-project-root/
-├── app/                  # Next.js App Router (Pages, API, Layouts)
-├── components/           # Komponen UI Reusable (shadcn, camera, upload)
-├── hooks/                # Custom React Hooks (sync, online status, storage)
-├── lib/                  # Logika bisnis (auth, db, sync manager, photo ops)
-├── public/               # Aset statis, Service Worker, & Manifest
-└── styles/               # Global CSS
-```
+### Untuk Admin
+1. **Login** (`admin` / `admin123`).
+2. **Buka Portal Admin** untuk melihat rekapitulasi data dari seluruh surveyor.
+3. **Cari Folder** tertentu untuk memverifikasi foto dan mengunduhnya.
 
-## Instalasi & Deployment
-
-### 1. Persiapan
-Pastikan Anda memiliki Node.js 18+ dan database PostgreSQL.
-
-### 2. Variabel Lingkungan (.env)
-Buat file `.env` di root folder:
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
-JWT_SECRET="rahasia_anda"
-NEXTAUTH_SECRET="rahasia_anda"
-NEXTAUTH_URL="http://localhost:5000"
-UPLOAD_DIR="./public/uploads"
-```
-
-### 3. Jalankan Aplikasi
-```bash
-npm install
-npm run dev # Development (Port 5000)
-# atau
-npm run build && npm start # Production
-```
-
-## Demo Akun Default
-- **Surveyor**: `surveyor1` / `password123`
-- **Admin**: `admin` / `admin123`
+## 📦 Informasi Deployment (VPS)
+- **Alamat**: `0.0.0.0`
+- **Port**: `5000`
+- **Command Run**: `npm run dev -- -p 5000 -H 0.0.0.0` (Dev) atau `npm start` (Prod).
 
 ---
-**Dibuat untuk mempermudah pengambilan data di area dengan koneksi internet terbatas.**
+*Aplikasi ini dikembangkan untuk memberikan solusi pendataan lapangan yang modern, cepat, dan handal.*
