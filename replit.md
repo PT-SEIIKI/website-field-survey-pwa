@@ -36,3 +36,12 @@ Configured for autoscale deployment:
 ## Demo Credentials
 - **Surveyor**: surveyor1 / password123
 - **Admin**: admin / admin123
+
+## Recent Changes
+- **2026-01-19**: Implemented Folder Management system with full offline and online support.
+  - Added `folders` table to database schema with `houseName` and `nik` fields.
+  - Added `folderId` to `survey_entries` to link entries with folders.
+  - Implemented FolderManager UI component for CRUD operations.
+  - Integrated folder selection in the Upload and Camera pages.
+  - Updated SyncManager to handle folder and photo synchronization from IndexedDB to PostgreSQL.
+  - Added search functionality for folders in the Dashboard.
