@@ -107,13 +107,13 @@ function UploadPageContent() {
     }
   }
 
-  const handleCapturePhoto = async (blob: Blob) => {
+  const handleCapturePhoto = async (blob: Blob, folderId?: string) => {
     setIsUploading(true)
     try {
       await addPhotoWithMetadata(blob, {
         location: location || undefined,
         description: description || undefined,
-        folderId: selectedFolderId || undefined
+        folderId: folderId || selectedFolderId || undefined
       })
 
       setSuccessMessage("Foto berhasil ditambahkan")

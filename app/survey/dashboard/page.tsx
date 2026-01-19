@@ -7,9 +7,10 @@ import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/auth"
-import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw } from "lucide-react"
+import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw, Folder as FolderIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { FolderManager } from "@/components/folder-manager"
+import { getFolders } from "@/lib/indexeddb"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -17,6 +18,22 @@ export default function DashboardPage() {
   const syncStatus = useSyncStatus()
   const [user, setUser] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
+  const [folderStats, setFolderStats] = useState({ total: 0, pending: 0 })
+
+  useEffect(() => {
+    const loadFolderStats = async () => {
+      try {
+        const folders = await getFolders()
+        setFolderStats({
+          total: folders.length,
+          pending: folders.filter(f => f.syncStatus === "pending").length
+        })
+      } catch (err) {
+        console.error("Error loading folder stats:", err)
+      }
+    }
+    loadFolderStats()
+  }, [])
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -130,6 +147,20 @@ export default function DashboardPage() {
                   {stats ? stats.totalPhotos : "--"}
                 </div>
                 <p className="text-[8px] sm:text-[9px] lg:text-xs font-bold uppercase tracking-wider text-muted-foreground text-center leading-tight">Total Sync</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/50 dark:bg-white/5 border-none shadow-sm hover:-translate-y-1 transition-all">
+            <CardContent className="pt-2 sm:pt-3 lg:pt-6 px-2 sm:px-3 lg:px-4">
+              <div className="flex flex-col items-center">
+                <div className="p-1.5 sm:p-2 lg:p-3 bg-amber-100 dark:bg-amber-900/30 rounded-2xl text-amber-600 mb-1.5 sm:mb-2 lg:mb-4">
+                  <FolderIcon size={12} className="sm:size-16 lg:size-24" />
+                </div>
+                <div className="text-sm sm:text-base lg:text-2xl font-black text-amber-600 mb-0.5 sm:mb-1">
+                  {folderStats.total}
+                </div>
+                <p className="text-[8px] sm:text-[9px] lg:text-xs font-bold uppercase tracking-wider text-muted-foreground text-center leading-tight">Total Folders</p>
               </div>
             </CardContent>
           </Card>

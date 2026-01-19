@@ -1,10 +1,11 @@
 "use client"
 import { useRef, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Camera, X, Check } from "lucide-react"
+import { Camera, X, Check, Folder as FolderIcon } from "lucide-react"
+import { getFolders } from "@/lib/indexeddb"
 
 interface CameraCaptureProps {
-  onCapture: (blob: Blob) => void
+  onCapture: (blob: Blob, folderId?: string) => void
   onCancel: () => void
 }
 
@@ -13,6 +14,20 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string>("")
+  const [folders, setFolders] = useState<any[]>([])
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("")
+
+  useEffect(() => {
+    const loadFolders = async () => {
+      try {
+        const data = await getFolders()
+        setFolders(data)
+      } catch (err) {
+        console.error("Error loading folders for camera:", err)
+      }
+    }
+    loadFolders()
+  }, [])
 
   useEffect(() => {
     const startCamera = async () => {
@@ -57,7 +72,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     canvasRef.current.toBlob(
       (blob) => {
         if (blob) {
-          onCapture(blob)
+          onCapture(blob, selectedFolderId)
         }
       },
       "image/jpeg",
@@ -78,6 +93,23 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
 
   return (
     <div className="space-y-6">
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <FolderIcon className="w-4 h-4 text-blue-600" />
+          Simpan ke Folder (Opsional)
+        </label>
+        <select 
+          value={selectedFolderId}
+          onChange={(e) => setSelectedFolderId(e.target.value)}
+          className="w-full h-10 rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="">-- Tanpa Folder --</option>
+          {folders.map(f => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="relative bg-black rounded-3xl overflow-hidden aspect-[4/3] sm:aspect-video shadow-2xl ring-1 ring-white/10">
         <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
         <canvas ref={canvasRef} className="hidden" />
