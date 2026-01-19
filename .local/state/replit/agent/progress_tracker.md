@@ -35,3 +35,5 @@
 [x] 35. Added modern API routes for folders in app/api/folders
 [x] 36. Completed full CRUD cycle for folders with backend integrity and smart sync
 [x] 37. Reinstalled npm packages and restarted workflow - project running successfully on Jan 19, 2026
+[x] 38. Finalized folder CRUD with houseName and NIK support (offline & online)
+[x] 39. Enhanced sync manager to handle folder-photo association automatically
