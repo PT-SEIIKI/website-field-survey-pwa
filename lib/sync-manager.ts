@@ -81,12 +81,19 @@ export async function startSync() {
       await syncFolder(folder)
     }
 
+    // Cache folders to avoid redundant API calls within the same sync batch
+    let foldersCache: any[] | null = null;
+
     // 2. Sync Photos
     const pendingPhotos = await getPendingPhotos()
     console.log(`[v0] Starting sync for ${pendingPhotos.length} photos`)
 
     for (const photo of pendingPhotos) {
-      await syncPhoto(photo)
+      if (!foldersCache) {
+        const foldersRes = await fetch("/api/folders")
+        if (foldersRes.ok) foldersCache = await foldersRes.json()
+      }
+      await syncPhoto(photo, foldersCache)
     }
 
     currentSyncStatus.lastSyncTime = Date.now()
@@ -151,7 +158,7 @@ async function syncFolder(folder: any) {
   }
 }
 
-async function syncPhoto(photo: any) {
+async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
   const photoId = photo.id;
   try {
     await updatePhotoStatus(photoId, "syncing")
@@ -184,12 +191,13 @@ async function syncPhoto(photo: any) {
     // Find server-side folder ID if it exists
     let serverFolderId = null
     if (metadata?.folderId) {
-      const foldersRes = await fetch("/api/folders")
-      if (foldersRes.ok) {
-        const folders = await foldersRes.json()
-        const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
-        if (folder) serverFolderId = folder.id
-      }
+      const folders = foldersCache || await (async () => {
+        const res = await fetch("/api/folders")
+        return res.ok ? await res.json() : []
+      })()
+      
+      const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
+      if (folder) serverFolderId = folder.id
     }
 
     const response = await fetch("/api/entries", {

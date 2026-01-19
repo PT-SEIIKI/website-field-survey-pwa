@@ -20,6 +20,7 @@ interface Photo {
   timestamp: number
   uploadedAt: string
   size: number
+  folderName?: string
 }
 
 interface Stats {
@@ -67,15 +68,17 @@ function AdminPageContent() {
 
   const loadPhotos = async () => {
     try {
-      const response = await fetch('/api/entries?surveyId=1') // Assuming surveyId 1 for now
+      // Load folders first to map folderId to folderName
+      const foldersRes = await fetch('/api/folders')
+      const foldersData = await foldersRes.json()
+      const folderMap = new Map(foldersData.map((f: any) => [f.id, f.name]))
+
+      const response = await fetch('/api/entries?surveyId=1')
       const data = await response.json()
 
       if (data.success) {
-        // Map survey entries to the Photo interface used in UI
         const mappedPhotos = data.entries.map((entry: any) => {
           const entryData = JSON.parse(entry.data);
-          // Use offlineId for the actual filename on disk
-          // Fallback to entry.id (string) only if offlineId is missing
           const photoId = entry.offlineId || entry.id.toString();
           return {
             photoId: photoId,
@@ -85,7 +88,8 @@ function AdminPageContent() {
             description: entryData.description || "",
             timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
             uploadedAt: entry.createdAt,
-            size: 0
+            size: 0,
+            folderName: entry.folderId ? folderMap.get(entry.folderId) : "Tanpa Folder"
           };
         }).filter((photo: any) => photo.photoId !== "null" && photo.photoId !== "undefined");
         setPhotos(mappedPhotos);
@@ -299,6 +303,7 @@ function AdminPageContent() {
                     <TableHeader className="bg-muted/30">
                       <TableRow>
                         <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">ID</TableHead>
+                        <TableHead className="text-xs sm:text-sm">Folder</TableHead>
                         <TableHead className="text-xs sm:text-sm">Lokasi</TableHead>
                         <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Tanggal</TableHead>
                         <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Deskripsi</TableHead>
@@ -311,6 +316,11 @@ function AdminPageContent() {
                         <TableRow key={photo.photoId} className="group hover:bg-muted/20 transition-colors">
                           <TableCell className="font-mono text-[8px] sm:text-[10px] text-muted-foreground">
                             {photo.photoId.substring(0, 6)}...
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-[10px] font-bold">
+                              {photo.folderName || "Tanpa Folder"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
