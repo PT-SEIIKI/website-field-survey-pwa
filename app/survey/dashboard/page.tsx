@@ -177,7 +177,7 @@ export default function DashboardPage() {
             <CardHeader className="px-2 sm:px-3 lg:px-6 py-2 sm:py-3 lg:py-6">
               <CardTitle className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-blue-700 dark:text-blue-400 text-base sm:text-lg lg:text-2xl font-black">
                 <Camera className="w-3 h-3 sm:w-4 sm:h-4 lg:w-7 lg:h-7" />
-                <span className="text-sm sm:text-base lg:text-xl">Capture Evidence</span>
+                <span className="text-sm sm:text-base lg:text-xl">Mulai Survei</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm lg:text-base">Mulai dokumentasi lapangan baru dengan kamera perangkat</CardDescription>
             </CardHeader>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                 className="w-full h-8 sm:h-10 lg:h-16 text-xs sm:text-sm lg:text-xl font-black gap-1.5 sm:gap-2 lg:gap-3 shadow-xl transform active:scale-95"
               >
                 <Camera className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-7 lg:h-7" />
-                <span className="text-[10px] sm:text-xs lg:text-xl">OPEN CAMERA PORTAL</span>
+                <span className="text-[10px] sm:text-xs lg:text-xl">BUKA KAMERA</span>
               </Button>
             </CardContent>
           </Card>

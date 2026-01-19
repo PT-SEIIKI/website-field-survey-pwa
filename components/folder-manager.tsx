@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Folder as FolderIcon, Home, CreditCard, Trash2, Edit2, Loader2 } from "lucide-react"
+import { Plus, Folder as FolderIcon, Home, CreditCard, Trash2, Edit2, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { saveFolder, getFolders, deleteFolder } from "@/lib/indexeddb"
 import { v4 as uuidv4 } from "uuid"
 import { useOnlineStatus } from "@/hooks/use-online-status"
+import { useRouter } from "next/navigation"
 
 interface Folder {
   id: string
@@ -21,6 +22,7 @@ interface Folder {
 }
 
 export function FolderManager() {
+  const router = useRouter()
   const [folders, setFolders] = useState<Folder[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -31,6 +33,7 @@ export function FolderManager() {
   const [name, setName] = useState("")
   const [houseName, setHouseName] = useState("")
   const [nik, setNik] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     loadFolders()
@@ -99,20 +102,33 @@ export function FolderManager() {
     }
   }
 
+  const filteredFolders = folders.filter(f => 
+    f.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (f.houseName && f.houseName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (f.nik && f.nik.includes(searchTerm))
+  )
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-sm sm:text-base lg:text-xl font-black text-blue-700 flex items-center gap-2">
           <FolderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           MANAJEMEN FOLDER
         </h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()} size="sm" className="h-8 sm:h-10 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold">
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-              FOLDER BARU
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Input 
+            placeholder="Cari folder, nama, atau NIK..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-8 sm:h-10 text-xs w-full sm:w-64"
+          />
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => handleOpenDialog()} size="sm" className="h-8 sm:h-10 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold whitespace-nowrap">
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                FOLDER BARU
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>{editingFolder ? "Edit Folder" : "Buat Folder Baru"}</DialogTitle>
@@ -138,6 +154,7 @@ export function FolderManager() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {isLoading ? (
@@ -153,8 +170,8 @@ export function FolderManager() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-          {folders.map((folder) => (
-            <Card key={folder.id} className="group hover:border-blue-300 transition-all cursor-pointer overflow-hidden">
+          {filteredFolders.map((folder) => (
+            <Card key={folder.id} className="group hover:border-blue-300 transition-all cursor-pointer overflow-hidden" onClick={() => router.push(`/survey/upload?folderId=${folder.id}`)}>
               <CardHeader className="p-3 sm:p-4 pb-0">
                 <div className="flex items-start justify-between">
                   <div className="p-2 bg-blue-100 rounded-lg text-blue-600">

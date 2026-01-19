@@ -28,4 +28,7 @@
 [x] 28. Completed migration and confirmed system is fully operational
 [x] 29. Final npm install and workflow restart - project verified working on Jan 17, 2026
 [x] 30. Reinstalled npm packages and restarted workflow - project running successfully on Jan 19, 2026
-[x] 31. Reinstalled npm packages and restarted workflow - import verified complete on Jan 19, 2026
+[x] 31. Implemented backend CRUD for folders in storage.ts and routes.ts
+[x] 32. Updated FolderManager UI with search functionality and routing to upload with folderId
+[x] 33. Integrated folder selection in Upload page and updated dashboard stats
+[x] 34. Verified offline-to-online sync logic for folders and photos
