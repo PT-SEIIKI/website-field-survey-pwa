@@ -24,6 +24,18 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  app.get("/api/folders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const folders = await storage.getFolders();
+      const folder = folders.find(f => f.id === id);
+      if (!folder) return res.status(404).json({ message: "Folder not found" });
+      res.json(folder);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch folder" });
+    }
+  });
+
   app.post("/api/folders", async (req, res) => {
     try {
       const data = insertFolderSchema.parse(req.body);
