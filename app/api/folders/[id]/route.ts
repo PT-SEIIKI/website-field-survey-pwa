@@ -12,7 +12,18 @@ export async function GET(
     const folders = await storage.getFolders();
     const folder = folders.find(f => f.id === id);
     if (!folder) return NextResponse.json({ message: "Folder not found" }, { status: 404 });
-    return NextResponse.json(folder);
+    
+    // Fetch photos for this folder
+    const entries = await storage.getEntries(1); // Default surveyId 1
+    const folderEntries = entries.filter(e => e.folderId === id);
+    
+    const photos = [];
+    for (const entry of folderEntries) {
+      const entryPhotos = await storage.getPhotosByEntryId(entry.id);
+      photos.push(...entryPhotos);
+    }
+
+    return NextResponse.json({ ...folder, photos });
   } catch (error) {
     return NextResponse.json({ message: "Failed to fetch folder" }, { status: 500 });
   }

@@ -35,33 +35,21 @@ function FolderDetailPageContent() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      // Load folder details
+      // Load folder details including photos
       const folderRes = await fetch(`/api/folders/${folderId}`)
       if (folderRes.ok) {
-        const folderData = await folderRes.ok ? await folderRes.json() : null
+        const folderData = await folderRes.json()
         setFolder(folderData)
-      }
-
-      // Load photos for this folder
-      // We need to fetch all entries and filter by folderId
-      const entriesRes = await fetch("/api/entries?surveyId=1")
-      if (entriesRes.ok) {
-        const data = await entriesRes.json()
-        if (data.success) {
-          const folderPhotos = data.entries
-            .filter((entry: any) => entry.folderId === parseInt(folderId))
-            .map((entry: any) => {
-              const entryData = JSON.parse(entry.data)
-              const photoId = entry.offlineId || entry.id.toString()
-              return {
-                id: photoId,
-                url: `/uploads/${photoId}.jpg`,
-                location: entryData.location || "N/A",
-                description: entryData.description || "",
-                timestamp: entryData.timestamp || new Date(entry.createdAt).getTime(),
-                createdAt: entry.createdAt
-              }
-            })
+        
+        if (folderData.photos) {
+          const folderPhotos = folderData.photos.map((p: any) => ({
+            id: p.id.toString(),
+            url: p.url,
+            location: folderData.name || "N/A",
+            description: folderData.houseName || "",
+            timestamp: new Date(p.createdAt).getTime(),
+            createdAt: p.createdAt
+          }))
           setPhotos(folderPhotos)
         }
       }
@@ -72,10 +60,10 @@ function FolderDetailPageContent() {
     }
   }
 
-  const handleDownload = (photoId: string) => {
+  const handleDownload = (photoUrl: string, photoId: string) => {
     const link = document.createElement("a")
-    link.href = `/uploads/${photoId}.jpg`
-    link.download = `${photoId}.jpg`
+    link.href = photoUrl
+    link.download = `photo-${photoId}.jpg`
     link.click()
   }
 
@@ -154,7 +142,7 @@ function FolderDetailPageContent() {
                     }}>
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <Button size="icon" variant="secondary" className="rounded-full w-8 h-8" onClick={() => handleDownload(photo.id)}>
+                    <Button size="icon" variant="secondary" className="rounded-full w-8 h-8" onClick={() => handleDownload(photo.url, photo.id)}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
@@ -177,7 +165,7 @@ function FolderDetailPageContent() {
             <div className="flex justify-between items-center text-white">
               <h3 className="font-bold">{selectedPhoto.location}</h3>
               <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.id)} className="gap-2">
+                <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.url, selectedPhoto.id)} className="gap-2">
                   <Download className="w-4 h-4" />
                   UNDUH
                 </Button>

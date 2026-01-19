@@ -14,6 +14,7 @@ export interface IStorage {
   getFolderByOfflineId(offlineId: string): Promise<Folder | undefined>;
   updateFolder(id: number, folder: Partial<InsertFolder>): Promise<Folder>;
   deleteFolder(id: number): Promise<void>;
+  getPhotosByEntryId(entryId: number): Promise<Photo[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -94,6 +95,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(surveyEntries.folderId, id));
     
     await db.delete(folders).where(eq(folders.id, id));
+  }
+
+  async getPhotosByEntryId(entryId: number): Promise<Photo[]> {
+    return await db.select().from(photos).where(eq(photos.entryId, entryId));
   }
 }
 
