@@ -209,7 +209,7 @@ export function FolderManager() {
       ) : (
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
           {filteredFolders.map((folder) => (
-            <Card key={folder.id} className="group hover:border-blue-300 transition-all cursor-pointer overflow-hidden" onClick={() => router.push(`/survey/upload?folderId=${folder.id}`)}>
+            <Card key={folder.id} className="group hover:border-blue-300 transition-all cursor-pointer overflow-hidden" onClick={() => router.push(`/survey/folder/${folder.id}`)}>
               <CardHeader className="p-3 sm:p-4 pb-0">
                 <div className="flex items-start justify-between">
                   <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
