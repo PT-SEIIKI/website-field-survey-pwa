@@ -34,6 +34,21 @@ export const selectFolderSchema = createSelectSchema(folders);
 export type Folder = typeof folders.$inferSelect;
 export type InsertFolder = typeof folders.$inferInsert;
 
+export const folders = pgTable("folders", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  houseName: text("house_name"),
+  nik: text("nik"),
+  offlineId: text("offline_id").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  isSynced: boolean("is_synced").default(false),
+});
+
+export const insertFolderSchema = createInsertSchema(folders);
+export const selectFolderSchema = createSelectSchema(folders);
+export type Folder = typeof folders.$inferSelect;
+export type InsertFolder = typeof folders.$inferInsert;
+
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
   entryId: integer("entry_id").references(() => surveyEntries.id),
