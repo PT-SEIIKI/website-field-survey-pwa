@@ -45,7 +45,13 @@ function UploadPageContent() {
 
   useEffect(() => {
     loadFolders()
-  }, [])
+    
+    // Auto-select folder if folderId is in URL
+    const folderId = searchParams.get("folderId")
+    if (folderId) {
+      setSelectedFolderId(folderId)
+    }
+  }, [searchParams])
 
   async function loadFolders() {
     try {
@@ -138,6 +144,7 @@ function UploadPageContent() {
 
   const handleSync = async () => {
     await startSync()
+    await loadFolders() // Refresh folders after sync
   }
 
   return (

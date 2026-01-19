@@ -4,18 +4,29 @@ import { Button } from "@/components/ui/button"
 import { Camera, X, Check, Folder as FolderIcon } from "lucide-react"
 import { getFolders } from "@/lib/indexeddb"
 
+import { useRouter, useSearchParams } from "next/navigation"
+
 interface CameraCaptureProps {
   onCapture: (blob: Blob, folderId?: string) => void
   onCancel: () => void
 }
 
 export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string>("")
   const [folders, setFolders] = useState<any[]>([])
   const [selectedFolderId, setSelectedFolderId] = useState<string>("")
+
+  useEffect(() => {
+    const folderIdFromUrl = searchParams.get("folderId")
+    if (folderIdFromUrl) {
+      setSelectedFolderId(folderIdFromUrl)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const loadFolders = async () => {
