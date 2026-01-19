@@ -46,4 +46,7 @@
 [x] 46. Implemented Service Worker update for API caching (stale-while-revalidate for GET requests)
 [x] 47. Enhanced Folder Detail page with local IndexedDB fallback for offline viewing
 [x] 48. Verified offline support for folder and photo viewing
+[x] 49. Verified PostgreSQL database connection and persisted schema
+[x] 50. Initialized default survey data (ID: 1) in PostgreSQL
+[x] 51. Confirmed all folders and photos are correctly synced to the VPS database (PostgreSQL)
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026
