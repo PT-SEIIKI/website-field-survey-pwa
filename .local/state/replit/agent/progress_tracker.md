@@ -66,4 +66,6 @@
 [x] 66. Added core Next.js chunks to pre-cache list to ensure shell accessibility
 [x] 67. Implemented multi-level fallback in SW to prevent "Resource not available" errors
 [x] 68. Verified offline access for root domain and all internal sub-pages
+[x] 69. Fixed folder ID matching logic to handle string vs number comparison in offline mode
+[x] 70. Fixed "Ambil Foto" button navigation and safety checks in Folder Detail page
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026

@@ -38,7 +38,9 @@ function FolderDetailPageContent() {
       // Try local IndexedDB first for offline support
       const { getFolders, getMetadata, getPhoto } = await import("@/lib/indexeddb")
       const localFolders = await getFolders()
-      const localFolder = localFolders.find(f => f.id === folderId)
+      
+      // Normalize folderId comparison (string vs possible number/offlineId)
+      const localFolder = localFolders.find(f => String(f.id) === String(folderId))
       
       if (localFolder) {
         setFolder({
@@ -54,7 +56,8 @@ function FolderDetailPageContent() {
         
         for (const p of allPhotos) {
           const meta = await getMetadata(p.id)
-          if (meta?.folderId === folderId) {
+          // Ensure folderId comparison is robust
+          if (meta?.folderId && String(meta.folderId) === String(folderId)) {
             folderPhotos.push({
               id: p.id,
               url: URL.createObjectURL(p.blob),
@@ -92,7 +95,7 @@ function FolderDetailPageContent() {
           setPhotos(prev => {
             const merged = [...prev]
             serverPhotos.forEach((sp: any) => {
-              const index = merged.findIndex(mp => mp.id === sp.id || mp.id === sp.offlineId)
+              const index = merged.findIndex(mp => String(mp.id) === String(sp.id) || String(mp.id) === String(sp.offlineId))
               if (index >= 0) {
                 merged[index] = sp
               } else {
@@ -139,7 +142,11 @@ function FolderDetailPageContent() {
               <h1 className="text-lg font-bold truncate max-w-[200px]">{folder?.name || "Detail Folder"}</h1>
             </div>
           </div>
-          <Button size="sm" onClick={() => router.push(`/survey/upload?folderId=${folderId}&action=camera`)} className="gap-2">
+          <Button size="sm" onClick={() => {
+            if (folderId) {
+              router.push(`/survey/upload?folderId=${folderId}&action=camera`)
+            }
+          }} className="gap-2">
             <Camera className="w-4 h-4" />
             AMBIL FOTO
           </Button>
@@ -167,7 +174,11 @@ function FolderDetailPageContent() {
             <FolderIcon className="w-16 h-16 mx-auto text-gray-200 mb-4" />
             <h3 className="text-lg font-bold text-gray-400">Belum ada foto di folder ini</h3>
             <p className="text-sm text-gray-400 mb-6">Mulai ambil foto untuk mengisi folder ini</p>
-            <Button onClick={() => router.push(`/survey/upload?folderId=${folderId}&action=camera`)} className="gap-2">
+            <Button onClick={() => {
+              if (folderId) {
+                router.push(`/survey/upload?folderId=${folderId}&action=camera`)
+              }
+            }} className="gap-2">
               <Camera className="w-4 h-4" />
               AMBIL FOTO SEKARANG
             </Button>
