@@ -1,6 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useLocalPhotos } from "@/hooks/use-local-photos"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useSyncStatus } from "@/hooks/use-sync-status"
@@ -17,9 +16,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
 import { getFolders } from "@/lib/indexeddb"
+
 export default function UploadPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
