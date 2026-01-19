@@ -49,4 +49,7 @@
 [x] 49. Verified PostgreSQL database connection and persisted schema
 [x] 50. Initialized default survey data (ID: 1) in PostgreSQL
 [x] 51. Confirmed all folders and photos are correctly synced to the VPS database (PostgreSQL)
+[x] 52. Updated Service Worker version (v1.0.3) to force cache invalidation
+[x] 53. Improved update detection logic in RootLayout to show notification for existing users
+[x] 54. Added periodic update checks (every hour) to ensure PWA stays up to date
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026

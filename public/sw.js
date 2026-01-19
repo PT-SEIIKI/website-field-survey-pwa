@@ -1,7 +1,8 @@
 // Service Worker untuk PWA - Offline support & Background Sync
+// Version: 1.0.3 - Triggering update
 
-const CACHE_NAME = "survey-pwa-v2"
-const API_CACHE = "survey-api-v2"
+const CACHE_NAME = "survey-pwa-v1.0.3"
+const API_CACHE = "survey-api-v1.0.3"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",

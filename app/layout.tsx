@@ -43,15 +43,29 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     
                     // Force update if new worker found
                     registration.onupdatefound = () => {
-                      const newWorker = registration.installing;
-                      newWorker.onstatechange = () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                          if (confirm('Aplikasi versi baru tersedia. Muat ulang sekarang?')) {
-                            window.location.reload();
+                      const installingWorker = registration.installing;
+                      if (installingWorker) {
+                        installingWorker.onstatechange = () => {
+                          if (installingWorker.state === 'installed') {
+                            if (navigator.serviceWorker.controller) {
+                              // New update available
+                              console.log('New content is available; please refresh.');
+                              if (confirm('Aplikasi versi baru tersedia. Perbarui sekarang untuk mendapatkan fitur terbaru?')) {
+                                window.location.reload();
+                              }
+                            } else {
+                              // Content is cached for offline use
+                              console.log('Content is cached for offline use.');
+                            }
                           }
-                        }
-                      };
+                        };
+                      }
                     };
+
+                    // Check for updates every hour
+                    setInterval(() => {
+                      registration.update();
+                    }, 3600000);
                   }, function(err) {
                     console.log('ServiceWorker registration failed: ', err);
                   });
