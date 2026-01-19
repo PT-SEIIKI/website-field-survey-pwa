@@ -47,11 +47,13 @@ export async function POST(req: NextRequest) {
     
     const offlineId = body.offlineId || null;
     const isSynced = body.isSynced === true || body.isSynced === 'true';
+    const folderId = body.folderId ? parseInt(body.folderId.toString(), 10) : null;
 
-    console.log("[API] Final normalized data:", { surveyId, data, offlineId, isSynced });
+    console.log("[API] Final normalized data:", { surveyId, folderId, data, offlineId, isSynced });
 
     const entry = await storage.createEntry({
       surveyId,
+      folderId,
       data,
       offlineId,
       isSynced
