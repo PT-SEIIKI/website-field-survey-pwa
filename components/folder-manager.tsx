@@ -82,6 +82,24 @@ export function FolderManager() {
     }
 
     try {
+      if (isOnline && editingFolder?.syncStatus === "synced") {
+        const res = await fetch("/api/folders")
+        if (res.ok) {
+          const serverFolders = await res.json()
+          const serverFolder = serverFolders.find((f: any) => f.offlineId === folderData.id)
+          if (serverFolder) {
+            await fetch(`/api/folders/${serverFolder.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name,
+                houseName,
+                nik
+              })
+            })
+          }
+        }
+      }
       await saveFolder(folderData)
       await loadFolders()
       setIsDialogOpen(false)
@@ -91,9 +109,21 @@ export function FolderManager() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Hapus folder ini? Semua data di dalamnya mungkin tidak akan terhapus dari server.")) {
+  const handleDelete = async (folder: Folder) => {
+    const id = folder.id
+    if (confirm("Hapus folder ini? Semua data di dalamnya akan dipindahkan ke kategori 'Tanpa Folder'.")) {
       try {
+        // Find the folder ID from backend if synced
+        if (isOnline && folder.syncStatus === "synced") {
+          const res = await fetch("/api/folders")
+          if (res.ok) {
+            const serverFolders = await res.json()
+            const serverFolder = serverFolders.find((f: any) => f.offlineId === id)
+            if (serverFolder) {
+              await fetch(`/api/folders/${serverFolder.id}`, { method: "DELETE" })
+            }
+          }
+        }
         await deleteFolder(id)
         await loadFolders()
       } catch (error) {
@@ -181,7 +211,7 @@ export function FolderManager() {
                     <Button onClick={(e) => { e.stopPropagation(); handleOpenDialog(folder); }} variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <Edit2 className="w-3 h-3" />
                     </Button>
-                    <Button onClick={(e) => { e.stopPropagation(); handleDelete(folder.id); }} variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600">
+                    <Button onClick={(e) => { e.stopPropagation(); handleDelete(folder); }} variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600">
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
