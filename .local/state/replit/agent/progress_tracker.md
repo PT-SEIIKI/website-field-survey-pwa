@@ -59,4 +59,7 @@
 [x] 59. Added "/survey/folder" to pre-cached assets list
 [x] 60. Implemented unified networkFirst and staleWhileRevalidate helpers in Service Worker
 [x] 61. Verified offline access to all main routes and ensured fallback to offline.html works correctly
+[x] 62. Updated Service Worker to version 1.0.4 for improved offline navigation
+[x] 63. Fixed navigation fallback for /survey/upload when offline by improving URL matching logic in SW
+[x] 64. Confirmed /survey/upload is properly pre-cached and accessible without internet connection
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026

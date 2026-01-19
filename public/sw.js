@@ -1,8 +1,8 @@
 // Service Worker untuk PWA - Offline support & Background Sync
-// Version: 1.0.3 - Triggering update
+// Version: 1.0.4 - Fixing offline navigation for /survey/upload
 
-const CACHE_NAME = "survey-pwa-v1.0.3"
-const API_CACHE = "survey-api-v1.0.3"
+const CACHE_NAME = "survey-pwa-v1.0.4"
+const API_CACHE = "survey-api-v1.0.4"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",
@@ -26,6 +26,8 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[SW] Caching essential assets")
+      // Map routes to their actual compiled HTML paths if necessary
+      // In Next.js, /survey/upload often needs to be cached explicitly
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
         console.log("[SW] Some assets failed to cache (expected):", err)
       })
@@ -53,7 +55,7 @@ self.addEventListener("activate", (event) => {
   )
 })
 
-// Fetch event - network-first for HTML, stale-while-revalidate for assets
+// Fetch event
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url)
 
@@ -70,9 +72,41 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  // Handle HTML documents - Network First with Cache Fallback
-  if (event.request.headers.get("Accept")?.includes("text/html") || event.request.mode === 'navigate') {
-    event.respondWith(networkFirst(event.request, CACHE_NAME, "/offline.html"))
+  // Special handling for navigation requests (HTML)
+  if (event.request.mode === 'navigate' || event.request.headers.get("Accept")?.includes("text/html")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy))
+            return response
+          }
+          throw new Error('Network response was not ok')
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME)
+          // Try exact match first
+          let matched = await cache.match(event.request)
+          if (matched) return matched
+
+          // Try matching without query params or trailing slashes
+          const cleanUrl = url.origin + url.pathname.replace(/\/$/, "")
+          matched = await cache.match(cleanUrl)
+          if (matched) return matched
+
+          // Fallback to pre-cached routes
+          const routes = ["/", "/login", "/survey/dashboard", "/survey/upload", "/survey/gallery"]
+          for (const route of routes) {
+            if (url.pathname.startsWith(route)) {
+              const routeMatch = await cache.match(route)
+              if (routeMatch) return routeMatch
+            }
+          }
+
+          return cache.match("/offline.html")
+        })
+    )
     return
   }
 
