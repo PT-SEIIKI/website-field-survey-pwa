@@ -5,6 +5,7 @@ const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
   METADATA: "metadata",
+  FOLDERS: "folders",
 } as const
 
 let db: IDBDatabase | null = null
@@ -46,6 +47,13 @@ export async function initDB(): Promise<IDBDatabase> {
         const metaStore = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
         metaStore.createIndex("location", "location", { unique: false })
         metaStore.createIndex("timestamp", "timestamp", { unique: false })
+      }
+
+      // Store untuk Folders
+      if (!database.objectStoreNames.contains(STORES.FOLDERS)) {
+        const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
+        folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
+        folderStore.createIndex("createdAt", "createdAt", { unique: false })
       }
     }
   })
@@ -303,4 +311,45 @@ export async function cleanupSyncedPhotos(): Promise<number> {
     };
     tx.onerror = () => reject(tx.error);
   });
+}
+
+// Folder Operations
+export async function saveFolder(folder: {
+  id: string
+  name: string
+  houseName?: string
+  nik?: string
+  createdAt: number
+  syncStatus: "pending" | "synced"
+}): Promise<string> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.FOLDERS], "readwrite")
+    const store = tx.objectStore(STORES.FOLDERS)
+    const request = store.put(folder)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(folder.id)
+  })
+}
+
+export async function getFolders(): Promise<any[]> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.FOLDERS], "readonly")
+    const store = tx.objectStore(STORES.FOLDERS)
+    const request = store.getAll()
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result || [])
+  })
+}
+
+export async function deleteFolder(id: string): Promise<void> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.FOLDERS], "readwrite")
+    const store = tx.objectStore(STORES.FOLDERS)
+    const request = store.delete(id)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve()
+  })
 }

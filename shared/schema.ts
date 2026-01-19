@@ -12,11 +12,27 @@ export const surveys = pgTable("surveys", {
 export const surveyEntries = pgTable("survey_entries", {
   id: serial("id").primaryKey(),
   surveyId: integer("survey_id").references(() => surveys.id),
+  folderId: integer("folder_id").references(() => folders.id),
   data: text("data").notNull(), // JSON string of survey data
   offlineId: text("offline_id").unique(), // For tracking sync from IndexedDB
   createdAt: timestamp("created_at").defaultNow(),
   isSynced: boolean("is_synced").default(false),
 });
+
+export const folders = pgTable("folders", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  houseName: text("house_name"),
+  nik: text("nik"),
+  offlineId: text("offline_id").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  isSynced: boolean("is_synced").default(false),
+});
+
+export const insertFolderSchema = createInsertSchema(folders);
+export const selectFolderSchema = createSelectSchema(folders);
+export type Folder = typeof folders.$inferSelect;
+export type InsertFolder = typeof folders.$inferInsert;
 
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
