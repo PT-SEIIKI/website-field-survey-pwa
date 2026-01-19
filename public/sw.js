@@ -58,8 +58,11 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  // Handle API calls - Network Only (handled by app sync logic)
+  // Handle API calls - Stale While Revalidate for GET, Network Only for others
   if (url.pathname.startsWith("/api/")) {
+    if (event.request.method === "GET") {
+      event.respondWith(networkFirst(event.request))
+    }
     return
   }
 

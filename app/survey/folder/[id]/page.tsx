@@ -35,14 +35,51 @@ function FolderDetailPageContent() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      // Load folder details including photos
+      // Try local IndexedDB first for offline support
+      const { getFolders, getMetadata, getPhoto } = await import("@/lib/indexeddb")
+      const localFolders = await getFolders()
+      const localFolder = localFolders.find(f => f.id === folderId)
+      
+      if (localFolder) {
+        setFolder({
+          id: localFolder.id,
+          name: localFolder.name,
+          houseName: localFolder.houseName,
+          nik: localFolder.nik
+        })
+        
+        // Find photos associated with this folder in local storage
+        const allPhotos = await (await import("@/lib/indexeddb")).getAllPhotos()
+        const folderPhotos = []
+        
+        for (const p of allPhotos) {
+          const meta = await getMetadata(p.id)
+          if (meta?.folderId === folderId) {
+            folderPhotos.push({
+              id: p.id,
+              url: URL.createObjectURL(p.blob),
+              location: meta.location || "N/A",
+              description: meta.description || "",
+              timestamp: p.timestamp,
+              createdAt: new Date(p.timestamp).toISOString(),
+              isOffline: true
+            })
+          }
+        }
+        
+        if (folderPhotos.length > 0) {
+          setPhotos(folderPhotos)
+        }
+      }
+
+      // Then try to load folder details including photos from server
       const folderRes = await fetch(`/api/folders/${folderId}`)
       if (folderRes.ok) {
         const folderData = await folderRes.json()
-        setFolder(folderData)
+        setFolder(prev => ({ ...prev, ...folderData }))
         
         if (folderData.photos) {
-          const folderPhotos = folderData.photos.map((p: any) => ({
+          const serverPhotos = folderData.photos.map((p: any) => ({
             id: p.id.toString(),
             url: p.url,
             location: folderData.name || "N/A",
@@ -50,7 +87,20 @@ function FolderDetailPageContent() {
             timestamp: new Date(p.createdAt).getTime(),
             createdAt: p.createdAt
           }))
-          setPhotos(folderPhotos)
+          
+          // Merge server photos with local ones, preferring server if synced
+          setPhotos(prev => {
+            const merged = [...prev]
+            serverPhotos.forEach((sp: any) => {
+              const index = merged.findIndex(mp => mp.id === sp.id || mp.id === sp.offlineId)
+              if (index >= 0) {
+                merged[index] = sp
+              } else {
+                merged.push(sp)
+              }
+            })
+            return merged
+          })
         }
       }
     } catch (error) {
