@@ -55,4 +55,8 @@
 [x] 55. Fixed IndexedDB store missing error by incrementing DB version (v2)
 [x] 56. Fixed offline navigation by changing HTML strategy to network-first (with cache fallback)
 [x] 57. Ensured all JS/CSS assets are cached for offline navigation functionality
+[x] 58. Refactored Service Worker strategies to ensure robust offline support
+[x] 59. Added "/survey/folder" to pre-cached assets list
+[x] 60. Implemented unified networkFirst and staleWhileRevalidate helpers in Service Worker
+[x] 61. Verified offline access to all main routes and ensured fallback to offline.html works correctly
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026
