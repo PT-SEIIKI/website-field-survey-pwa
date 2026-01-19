@@ -44,23 +44,22 @@ function UploadPageContent() {
   const [selectedFolderId, setSelectedFolderId] = useState<string>("")
 
   useEffect(() => {
+    const loadFolders = async () => {
+      try {
+        const data = await getFolders()
+        setFolders(data)
+        
+        // Auto-select folder if folderId is in URL
+        const folderId = searchParams.get("folderId")
+        if (folderId) {
+          setSelectedFolderId(folderId)
+        }
+      } catch (error) {
+        console.error("Error loading folders:", error)
+      }
+    }
     loadFolders()
-    
-    // Auto-select folder if folderId is in URL
-    const folderId = searchParams.get("folderId")
-    if (folderId) {
-      setSelectedFolderId(folderId)
-    }
   }, [searchParams])
-
-  async function loadFolders() {
-    try {
-      const data = await getFolders()
-      setFolders(data)
-    } catch (error) {
-      console.error("Error loading folders:", error)
-    }
-  }
 
   useEffect(() => {
     // Initialize offline & sync features
