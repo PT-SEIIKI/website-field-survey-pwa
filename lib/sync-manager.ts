@@ -111,50 +111,62 @@ export async function startSync() {
 }
 
 async function syncFolder(folder: any) {
-  try {
-    // Check if folder already exists on server by offlineId
-    const foldersRes = await fetch("/api/folders")
-    if (foldersRes.ok) {
-      const serverFolders = await foldersRes.json()
-      const existingServerFolder = serverFolders.find((f: any) => f.offlineId === folder.id)
-      
-      if (existingServerFolder) {
-        // If exists, update it to ensure names match
-        await fetch(`/api/folders/${existingServerFolder.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: folder.name,
-            houseName: folder.houseName,
-            nik: folder.nik
-          })
-        })
-      } else {
-        // If not exists, create new
-        const response = await fetch("/api/folders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: folder.name,
-            houseName: folder.houseName,
-            nik: folder.nik,
-            offlineId: folder.id,
-            isSynced: true
-          })
-        })
-        if (!response.ok) throw new Error("Folder creation failed")
-      }
-    }
+  let retryCount = 0
+  const maxRetries = 3
 
-    // Update local status
-    await saveFolder({
-      ...folder,
-      syncStatus: "synced"
-    })
-    console.log("[v0] Folder synced:", folder.id)
-  } catch (error) {
-    console.error("[v0] Failed to sync folder:", folder.id, error)
-    throw error
+  while (retryCount < maxRetries) {
+    try {
+      // Check if folder already exists on server by offlineId
+      const foldersRes = await fetch("/api/folders")
+      if (foldersRes.ok) {
+        const serverFolders = await foldersRes.json()
+        const existingServerFolder = serverFolders.find((f: any) => f.offlineId === folder.id)
+        
+        if (existingServerFolder) {
+          // If exists, update it to ensure names match
+          const updateRes = await fetch(`/api/folders/${existingServerFolder.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: folder.name,
+              houseName: folder.houseName,
+              nik: folder.nik
+            })
+          })
+          if (!updateRes.ok) throw new Error("Update failed")
+        } else {
+          // If not exists, create new
+          const response = await fetch("/api/folders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: folder.name,
+              houseName: folder.houseName,
+              nik: folder.nik,
+              offlineId: folder.id,
+              isSynced: true
+            })
+          })
+          if (!response.ok) throw new Error("Folder creation failed")
+        }
+      } else {
+        throw new Error("Failed to fetch folders")
+      }
+
+      // Update local status
+      await saveFolder({
+        ...folder,
+        syncStatus: "synced"
+      })
+      console.log("[v0] Folder synced:", folder.id)
+      return // Success
+    } catch (error) {
+      retryCount++
+      console.error(`[v0] Failed to sync folder (attempt ${retryCount}):`, folder.id, error)
+      if (retryCount >= maxRetries) throw error
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000 * retryCount))
+    }
   }
 }
 

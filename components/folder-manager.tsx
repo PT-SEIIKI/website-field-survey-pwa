@@ -72,11 +72,19 @@ export function FolderManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Simple validation
+    if (!name.trim()) return
+    if (nik && !/^\d{16}$/.test(nik)) {
+      alert("NIK harus 16 digit angka.")
+      return
+    }
+
     const folderData: Folder = {
       id: editingFolder?.id || uuidv4(),
-      name,
-      houseName,
-      nik,
+      name: name.trim(),
+      houseName: houseName.trim(),
+      nik: nik.trim(),
       createdAt: editingFolder?.createdAt || Date.now(),
       syncStatus: "pending",
     }
