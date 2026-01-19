@@ -32,3 +32,5 @@
 [x] 32. Updated FolderManager UI with search functionality and routing to upload with folderId
 [x] 33. Integrated folder selection in Upload page and updated dashboard stats
 [x] 34. Verified offline-to-online sync logic for folders and photos
+[x] 35. Added modern API routes for folders in app/api/folders
+[x] 36. Completed full CRUD cycle for folders with backend integrity and smart sync
