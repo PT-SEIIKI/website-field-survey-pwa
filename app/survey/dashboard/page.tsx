@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getCurrentUser } from "@/lib/auth"
 import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw } from "lucide-react"
 import { useEffect, useState } from "react"
+import { FolderManager } from "@/components/folder-manager"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -132,6 +133,11 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Folder Management Section */}
+        <div className="mb-4 sm:mb-6 lg:mb-10">
+          <FolderManager />
         </div>
 
         {/* Actions */}
