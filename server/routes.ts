@@ -105,15 +105,19 @@ export function registerRoutes(app: express.Express) {
 
   // Upload photo for an entry
   app.post("/api/photos", async (req, res) => {
-    // Note: In a real app, we'd use multer for file uploads
-    // For this migration, we'll assume the URL is sent or handled by a separate storage service
     try {
       const { entryId, url, offlineId } = req.body;
       const photo = await storage.createPhoto({ entryId, url, offlineId });
       res.status(201).json(photo);
     } catch (error) {
+      console.error("Error creating photo:", error);
       res.status(500).json({ message: "Failed to save photo metadata" });
     }
+  });
+
+  // Health check
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
   });
 
   return app;

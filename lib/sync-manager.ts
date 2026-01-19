@@ -177,6 +177,11 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
     photoFormData.append("location", metadata?.location || "");
     photoFormData.append("description", metadata?.description || "");
     photoFormData.append("timestamp", photoData.timestamp.toString());
+    
+    // Add folder info to upload metadata if exists
+    if (metadata?.folderId) {
+      photoFormData.append("folderId", metadata.folderId);
+    }
 
     const uploadResponse = await fetch("/api/upload", {
       method: "POST",
