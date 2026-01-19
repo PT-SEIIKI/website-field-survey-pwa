@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
-import { insertEntrySchema } from "@shared/schema";
+import { insertEntrySchema, insertFolderSchema } from "@shared/schema";
 import { z } from "zod";
 
 export function registerRoutes(app: express.Express) {
@@ -11,6 +11,36 @@ export function registerRoutes(app: express.Express) {
       res.json(surveys);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch surveys" });
+    }
+  });
+
+  // Folder Routes
+  app.get("/api/folders", async (_req, res) => {
+    try {
+      const folders = await storage.getFolders();
+      res.json(folders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch folders" });
+    }
+  });
+
+  app.post("/api/folders", async (req, res) => {
+    try {
+      const data = insertFolderSchema.parse(req.body);
+      
+      const existing = await storage.getFolderByOfflineId(data.offlineId || "");
+      if (existing) {
+        return res.json(existing);
+      }
+
+      const folder = await storage.createFolder(data);
+      res.status(201).json(folder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid folder data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create folder" });
+      }
     }
   });
 

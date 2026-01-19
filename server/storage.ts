@@ -1,4 +1,4 @@
-import { surveys, surveyEntries, photos, type Survey, type InsertSurvey, type Entry, type InsertEntry, type Photo, type InsertPhoto } from "@shared/schema";
+import { surveys, surveyEntries, photos, folders, type Survey, type InsertSurvey, type Entry, type InsertEntry, type Photo, type InsertPhoto, type Folder, type InsertFolder } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -8,6 +8,10 @@ export interface IStorage {
   createEntry(entry: InsertEntry): Promise<Entry>;
   createPhoto(photo: InsertPhoto): Promise<Photo>;
   getEntryByOfflineId(offlineId: string): Promise<Entry | undefined>;
+  // Folder methods
+  getFolders(): Promise<Folder[]>;
+  createFolder(folder: InsertFolder): Promise<Folder>;
+  getFolderByOfflineId(offlineId: string): Promise<Folder | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -50,6 +54,27 @@ export class DatabaseStorage implements IStorage {
   async getEntryByOfflineId(offlineId: string): Promise<Entry | undefined> {
     const [entry] = await db.select().from(surveyEntries).where(eq(surveyEntries.offlineId, offlineId));
     return entry || undefined;
+  }
+
+  // Folder implementation
+  async getFolders(): Promise<Folder[]> {
+    return await db.select().from(folders);
+  }
+
+  async createFolder(insertFolder: InsertFolder): Promise<Folder> {
+    try {
+      console.log("[Storage] Inserting folder:", JSON.stringify(insertFolder));
+      const [folder] = await db.insert(folders).values(insertFolder).returning();
+      return folder;
+    } catch (error) {
+      console.error("[Storage] createFolder error:", error);
+      throw error;
+    }
+  }
+
+  async getFolderByOfflineId(offlineId: string): Promise<Folder | undefined> {
+    const [folder] = await db.select().from(folders).where(eq(folders.offlineId, offlineId));
+    return folder || undefined;
   }
 }
 

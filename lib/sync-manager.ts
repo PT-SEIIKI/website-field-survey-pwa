@@ -1,5 +1,5 @@
 // Sync manager untuk handle upload queue dan auto-sync
-import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto } from "./indexeddb"
+import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto, getFolders, saveFolder } from "./indexeddb"
 import { checkConnectivity, subscribeToConnectivity } from "./connectivity"
 
 export interface SyncStatus {
@@ -48,7 +48,10 @@ function notifySyncListeners() {
 
 async function updateSyncStatus() {
   const pendingPhotos = await getPendingPhotos()
-  currentSyncStatus.totalPending = pendingPhotos.length
+  const folders = await getFolders()
+  const pendingFolders = folders.filter(f => f.syncStatus === "pending")
+  
+  currentSyncStatus.totalPending = pendingPhotos.length + pendingFolders.length
   notifySyncListeners()
 }
 
@@ -69,6 +72,16 @@ export async function startSync() {
   notifySyncListeners()
 
   try {
+    // 1. Sync Folders first (because entries depend on folderId)
+    const allFolders = await getFolders()
+    const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
+    console.log(`[v0] Syncing ${pendingFolders.length} folders`)
+    
+    for (const folder of pendingFolders) {
+      await syncFolder(folder)
+    }
+
+    // 2. Sync Photos
     const pendingPhotos = await getPendingPhotos()
     console.log(`[v0] Starting sync for ${pendingPhotos.length} photos`)
 
@@ -87,6 +100,34 @@ export async function startSync() {
     currentSyncStatus.isSyncing = false
     await updateSyncStatus()
     notifySyncListeners()
+  }
+}
+
+async function syncFolder(folder: any) {
+  try {
+    const response = await fetch("/api/folders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: folder.name,
+        houseName: folder.houseName,
+        nik: folder.nik,
+        offlineId: folder.id,
+        isSynced: true
+      })
+    })
+
+    if (!response.ok) throw new Error("Folder sync failed")
+    
+    // Update local status
+    await saveFolder({
+      ...folder,
+      syncStatus: "synced"
+    })
+    console.log("[v0] Folder synced:", folder.id)
+  } catch (error) {
+    console.error("[v0] Failed to sync folder:", folder.id, error)
+    throw error
   }
 }
 
@@ -120,17 +161,30 @@ async function syncPhoto(photo: any) {
       throw new Error(`File upload failed: ${errorText}`);
     }
 
+    // Find server-side folder ID if it exists
+    let serverFolderId = null
+    if (metadata?.folderId) {
+      const foldersRes = await fetch("/api/folders")
+      if (foldersRes.ok) {
+        const folders = await foldersRes.json()
+        const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
+        if (folder) serverFolderId = folder.id
+      }
+    }
+
     const response = await fetch("/api/entries", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        surveyId: metadata?.surveyId || 1, // Default or from metadata
+        surveyId: metadata?.surveyId || 1,
+        folderId: serverFolderId,
         data: JSON.stringify({
           description: metadata?.description,
           location: metadata?.location,
-          timestamp: photoData.timestamp
+          timestamp: photoData.timestamp,
+          folderId: metadata?.folderId // Keep offline folder ID in metadata for ref
         }),
         offlineId: photoId,
         isSynced: true
