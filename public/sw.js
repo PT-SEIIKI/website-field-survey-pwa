@@ -69,6 +69,12 @@ self.addEventListener("fetch", (event) => {
 
   // Handle HTML documents - Stale While Revalidate
   if (event.request.headers.get("Accept")?.includes("text/html")) {
+    event.respondWith(networkFirst(event.request))
+    return
+  }
+
+  // Handle JS/CSS files - Stale While Revalidate
+  if (event.request.destination === "script" || event.request.destination === "style") {
     event.respondWith(staleWhileRevalidate(event.request))
     return
   }

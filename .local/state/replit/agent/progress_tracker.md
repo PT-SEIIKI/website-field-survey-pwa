@@ -52,4 +52,7 @@
 [x] 52. Updated Service Worker version (v1.0.3) to force cache invalidation
 [x] 53. Improved update detection logic in RootLayout to show notification for existing users
 [x] 54. Added periodic update checks (every hour) to ensure PWA stays up to date
+[x] 55. Fixed IndexedDB store missing error by incrementing DB version (v2)
+[x] 56. Fixed offline navigation by changing HTML strategy to network-first (with cache fallback)
+[x] 57. Ensured all JS/CSS assets are cached for offline navigation functionality
 [x] 43. Reinstalled npm packages and restarted workflow - project verified working on Jan 19, 2026

@@ -1,6 +1,6 @@
 // IndexedDB utilities untuk offline storage
 const DB_NAME = "SurveyOfflineDB"
-const DB_VERSION = 1
+const DB_VERSION = 2 // Incrementing version to trigger onupgradeneeded
 const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
