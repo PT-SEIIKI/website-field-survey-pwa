@@ -88,6 +88,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFolder(id: number): Promise<void> {
+    // Optional: Update entries associated with this folder to null or delete them
+    await db.update(surveyEntries)
+      .set({ folderId: null })
+      .where(eq(surveyEntries.folderId, id));
+    
     await db.delete(folders).where(eq(folders.id, id));
   }
 }

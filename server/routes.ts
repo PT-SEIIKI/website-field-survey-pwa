@@ -47,10 +47,15 @@ export function registerRoutes(app: express.Express) {
   app.patch("/api/folders/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const folder = await storage.updateFolder(id, req.body);
+      const data = insertFolderSchema.partial().parse(req.body);
+      const folder = await storage.updateFolder(id, data);
       res.json(folder);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update folder" });
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid update data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update folder" });
+      }
     }
   });
 

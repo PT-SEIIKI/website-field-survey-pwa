@@ -105,20 +105,40 @@ export async function startSync() {
 
 async function syncFolder(folder: any) {
   try {
-    const response = await fetch("/api/folders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: folder.name,
-        houseName: folder.houseName,
-        nik: folder.nik,
-        offlineId: folder.id,
-        isSynced: true
-      })
-    })
+    // Check if folder already exists on server by offlineId
+    const foldersRes = await fetch("/api/folders")
+    if (foldersRes.ok) {
+      const serverFolders = await foldersRes.json()
+      const existingServerFolder = serverFolders.find((f: any) => f.offlineId === folder.id)
+      
+      if (existingServerFolder) {
+        // If exists, update it to ensure names match
+        await fetch(`/api/folders/${existingServerFolder.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: folder.name,
+            houseName: folder.houseName,
+            nik: folder.nik
+          })
+        })
+      } else {
+        // If not exists, create new
+        const response = await fetch("/api/folders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: folder.name,
+            houseName: folder.houseName,
+            nik: folder.nik,
+            offlineId: folder.id,
+            isSynced: true
+          })
+        })
+        if (!response.ok) throw new Error("Folder creation failed")
+      }
+    }
 
-    if (!response.ok) throw new Error("Folder sync failed")
-    
     // Update local status
     await saveFolder({
       ...folder,
