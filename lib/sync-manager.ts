@@ -73,12 +73,14 @@ export async function startSync() {
 
   try {
     // 1. Sync Folders first (because entries depend on folderId)
-    const allFolders = await getFolders()
-    const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
-    console.log(`[v0] Syncing ${pendingFolders.length} folders`)
+    const folders = await getFolders()
+    const pendingFolders = folders.filter(f => f.syncStatus === "pending")
     
-    for (const folder of pendingFolders) {
-      await syncFolder(folder)
+    if (pendingFolders.length > 0) {
+      console.log(`[v0] Syncing ${pendingFolders.length} folders`)
+      for (const folder of pendingFolders) {
+        await syncFolder(folder)
+      }
     }
 
     // Cache folders to avoid redundant API calls within the same sync batch
