@@ -40,14 +40,19 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
       <div className="w-full max-w-[400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="space-y-2 text-center">
-          <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 mb-4">
-            Survey PWA v1.0
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tighter">Login to Portal</h1>
-          <p className="text-sm text-muted-foreground">
-            Akses sistem survei lapangan profesional.
-          </p>
+        <div className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <img src="/logo.png" alt="SEIIKI Logo" className="h-20 w-auto" />
+          </div>
+          <div className="space-y-2">
+            <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5">
+              Survey PWA v1.0
+            </Badge>
+            <h1 className="text-3xl font-bold tracking-tighter">Login to Portal</h1>
+            <p className="text-sm text-muted-foreground font-medium">
+              PT. SOLUSI ENERGI KELISTRIKAN INDONESIA
+            </p>
+          </div>
         </div>
 
         <Card className="border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-black/5">

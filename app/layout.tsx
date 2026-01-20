@@ -10,8 +10,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Offline Survey PWA",
-  description: "Progressive Web App untuk survei lapangan dengan mode offline",
+  title: "SEIIKI Survey PWA",
+  description: "PT. SOLUSI ENERGI KELISTRIKAN INDONESIA - Survey Portal",
   manifest: "/manifest.json",
 }
 
@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#303030",
+  themeColor: "#000000",
   viewportFit: "cover",
 }
 
@@ -30,9 +30,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Survey" />
-        <link rel="icon" href="/icon-light-32x32.png" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="SEIIKI" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

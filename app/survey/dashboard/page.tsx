@@ -63,9 +63,7 @@ export default function DashboardPage() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center text-background font-bold text-lg">
-              S
-            </div>
+            <img src="/logo.png" alt="SEIIKI" className="h-8 w-auto" />
             <h1 className="text-sm font-bold uppercase tracking-widest hidden sm:block">Dashboard</h1>
           </div>
 

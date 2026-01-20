@@ -147,8 +147,9 @@ function AdminPageContent() {
             <Button variant="ghost" size="icon" onClick={() => router.push("/survey/dashboard")} className="rounded-full h-9 w-9">
               <Home className="w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="SEIIKI" className="h-6 w-auto" />
+              <div className="h-4 w-px bg-border" />
               <h1 className="text-sm font-bold uppercase tracking-widest">Admin Portal</h1>
             </div>
           </div>
