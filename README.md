@@ -1,55 +1,81 @@
-# Survey PWA - Dokumentasi Sistem Terpadu
+# SEIIKI Survey PWA - Dokumentasi Lengkap
 
-Survey PWA adalah aplikasi web progresif (Progressive Web Application) yang dirancang khusus untuk kebutuhan pendataan lapangan yang menuntut reliabilitas tinggi dalam kondisi koneksi internet yang tidak stabil.
+Survey PWA adalah aplikasi web progresif (Progressive Web Application) yang dirancang untuk pendataan lapangan yang handal dengan kemampuan offline-first, manajemen folder, dan sinkronisasi otomatis ke database pusat.
 
-## 🌟 Fitur Unggulan
+## 🌟 Fitur Utama
+- **Offline-First**: Dapat digunakan tanpa koneksi internet. Data disimpan di IndexedDB.
+- **Manajemen Folder**: Organisasi data berdasarkan rumah/NIK/lokasi.
+- **Sinkronisasi Otomatis**: Mendeteksi koneksi internet untuk mengunggah data yang tertunda.
+- **Manajemen User**: Admin dapat membuat, mengelola, dan menghapus akun surveyor.
+- **Admin Dashboard**: Statistik rekapitulasi data dan galeri foto terpusat.
 
-### 1. Arsitektur Offline-First (PWA)
-Aplikasi ini tetap dapat dioperasikan secara penuh meskipun tanpa koneksi internet.
-- **Instalasi**: Dapat diinstal langsung dari browser di Android, iOS, maupun Desktop (Add to Home Screen).
-- **Penyimpanan Lokal**: Foto dan data survei disimpan dengan aman di **IndexedDB** perangkat pengguna.
-- **Resiliensi**: Service Worker memastikan aplikasi dapat dibuka dan dijalankan tanpa bergantung pada server saat offline.
+## 🛠️ Prasyarat (Prerequisites)
+- **Node.js**: v18 atau lebih baru.
+- **npm**: v9 atau lebih baru.
+- **PostgreSQL**: Database relasional untuk penyimpanan permanen.
 
-### 2. Manajemen Folder (Pengorganisasian Data)
-Data survei dikelompokkan secara hierarkis untuk memudahkan manajemen ribuan entri data.
-- **Identitas Lengkap**: Folder mencakup Nama Folder, Nama Pemilik Rumah, dan NIK (Validasi 16 digit).
-- **Galeri Terintegrasi**: Setiap folder memiliki halaman detail untuk melihat koleksi foto terkait.
-- **Akses Cepat**: Fitur pencarian folder memudahkan pencarian data di lapangan.
+## 🚀 Cara Instalasi
 
-### 3. Sinkronisasi Cerdas (Smart Sync)
-Proses pengunggahan data yang efisien dan otomatis.
-- **Antrean Sinkronisasi**: Data masuk ke antrean (queue) saat offline.
-- **Auto-Detect**: Sistem mendeteksi kembalinya koneksi internet dan memulai sinkronisasi secara otomatis di latar belakang.
-- **Integritas Data**: Menggunakan logika "Folders-First" untuk menjamin semua foto terhubung dengan folder yang tepat di database pusat.
+1. **Clone Repository**:
+   ```bash
+   git clone <url-repository>
+   cd website-survey-pwa
+   ```
 
-### 4. Pengalaman Pengguna (UX)
-- **Preview & Download**: Pengguna dapat melihat hasil jepretan langsung di aplikasi dan mengunduhnya untuk keperluan laporan eksternal.
-- **Kamera Kustom**: Antarmuka pengambilan foto yang dioptimalkan untuk perangkat seluler.
+2. **Install Dependensi**:
+   ```bash
+   npm install
+   ```
 
-## 🛠️ Detail Teknis
+3. **Konfigurasi Environment**:
+   Salin file `.env.example` (jika ada) atau buat file `.env` dan tambahkan variabel berikut:
+   ```env
+   DATABASE_URL=postgres://user:password@localhost:5432/survey_db
+   ```
 
-- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS.
-- **UI Components**: Shadcn UI (Radix UI), Lucide Icons, Sonner Toast.
-- **Backend & DB**: Node.js API Routes, PostgreSQL dengan Drizzle ORM.
-- **Storage**: File sistem lokal (server) untuk foto, PostgreSQL untuk metadata.
+4. **Persiapan Database**:
+   Push skema database ke PostgreSQL:
+   ```bash
+   npm run db:push
+   ```
 
-## 🚀 Cara Penggunaan Singkat
+## 🌱 Seeder (Data Awal)
+Sistem dilengkapi dengan seeder untuk membuat akun administrator default. Jalankan perintah berikut:
+```bash
+npx tsx server/seed.ts
+```
+**Kredensial Default Admin:**
+- **Username**: `admin`
+- **Password**: `adminpassword`
 
-### Untuk Surveyor
-1. **Login** (`surveyor1` / `password123`).
-2. **Buat/Pilih Folder** yang sesuai dengan lokasi/rumah yang disurvei.
-3. **Klik "Ambil Foto"** di dalam folder tersebut.
-4. **Isi Deskripsi** dan simpan. Data akan tersimpan di HP jika offline, atau langsung ke server jika online.
+## 🏃 Cara Menjalankan
 
-### Untuk Admin
-1. **Login** (`admin` / `admin123`).
-2. **Buka Portal Admin** untuk melihat rekapitulasi data dari seluruh surveyor.
-3. **Cari Folder** tertentu untuk memverifikasi foto dan mengunduhnya.
+### Mode Pengembangan (Development)
+Untuk menjalankan server dengan fitur hot-reload:
+```bash
+npm run dev -- -p 5000 -H 0.0.0.0
+```
 
-## 📦 Informasi Deployment (VPS)
-- **Alamat**: `0.0.0.0`
-- **Port**: `5000`
-- **Command Run**: `npm run dev -- -p 5000 -H 0.0.0.0` (Dev) atau `npm start` (Prod).
+### Mode Produksi (Production)
+1. **Build Aplikasi**:
+   ```bash
+   npm run build
+   ```
+2. **Start Server**:
+   ```bash
+   npm start -- -p 5000 -H 0.0.0.0
+   ```
+
+## 📂 Struktur Proyek
+- `app/`: Routing Next.js (App Router) dan halaman UI.
+- `server/`: Logika backend, storage layer, dan database connection.
+- `shared/`: Skema database dan tipe data TypeScript yang digunakan bersama.
+- `public/`: Aset statis, Service Worker (`sw.js`), dan manifest PWA.
+- `components/`: Komponen UI reusable (Shadcn UI).
+
+## 🔒 Keamanan
+- Password pada demo disimpan secara plain text. Untuk produksi, sangat disarankan untuk mengimplementasikan hashing menggunakan `bcrypt` atau `argon2`.
+- Role-based Access Control (RBAC) membatasi akses menu Manajemen User hanya untuk akun dengan role `admin`.
 
 ---
-*Aplikasi ini dikembangkan untuk memberikan solusi pendataan lapangan yang modern, cepat, dan handal.*
+© 2026 PT. SOLUSI ENERGI KELISTRIKAN INDONESIA
