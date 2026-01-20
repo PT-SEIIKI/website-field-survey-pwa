@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation"
 import { getCurrentUser, isAdmin } from "@/lib/auth"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search } from "lucide-react"
+import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search, X, ChevronRight } from "lucide-react"
 
 interface Photo {
   photoId: string
@@ -47,35 +46,27 @@ function AdminPageContent() {
 
   useEffect(() => {
     const currentUser = getCurrentUser()
-
     if (!currentUser || !isAdmin()) {
       router.push("/login")
       return
     }
-
     setUser(currentUser)
     loadPhotos()
     loadStats()
-
-    // Reload every 30 seconds
     const interval = setInterval(() => {
       loadPhotos()
       loadStats()
     }, 30000)
-
     return () => clearInterval(interval)
   }, [router])
 
   const loadPhotos = async () => {
     try {
-      // Load folders first to map folderId to folderName
       const foldersRes = await fetch('/api/folders')
       const foldersData = await foldersRes.json()
       const folderMap = new Map(foldersData.map((f: any) => [f.id, f.name]))
-
       const response = await fetch('/api/entries?surveyId=1')
       const data = await response.json()
-
       if (data.success) {
         const mappedPhotos = data.entries.map((entry: any) => {
           const entryData = JSON.parse(entry.data);
@@ -95,7 +86,7 @@ function AdminPageContent() {
         setPhotos(mappedPhotos);
       }
     } catch (error) {
-      console.error("[v0] Load photos error:", error);
+      console.error("Load photos error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -105,33 +96,23 @@ function AdminPageContent() {
     try {
       const response = await fetch("/api/stats")
       const data = await response.json()
-
-      if (data.success) {
-        setStats(data.stats)
-      }
+      if (data.success) setStats(data.stats)
     } catch (error) {
-      console.error("[v0] Load stats error:", error)
+      console.error("Load stats error:", error)
     }
   }
 
   const handleDelete = async (photoId: string, dbId?: string) => {
-    if (!confirm("Yakin ingin menghapus foto ini?")) {
-      return
-    }
-
+    if (!confirm("Yakin ingin menghapus foto ini?")) return
     try {
-      // Use dbId for database deletion if available, fallback to photoId
       const deleteId = dbId || photoId;
-      const response = await fetch(`/api/photos/${deleteId}`, {
-        method: "DELETE",
-      })
-
+      const response = await fetch(`/api/photos/${deleteId}`, { method: "DELETE" })
       if (response.ok) {
         setPhotos(photos.filter((p) => p.photoId !== photoId))
         loadStats()
       }
     } catch (error) {
-      console.error("[v0] Delete error:", error)
+      console.error("Delete error:", error)
     }
   }
 
@@ -155,309 +136,236 @@ function AdminPageContent() {
     loadPhotos()
   }
 
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-primary/5 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3 lg:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button 
-              onClick={() => router.push("/survey/dashboard")} 
-              className="p-1.5 sm:p-2 lg:p-2.5 hover:bg-primary/5 rounded-xl transition-colors text-primary"
-            >
-              <Home className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
-            </button>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-indigo-600 dark:text-indigo-400" />
-              <h1 className="text-base sm:text-lg lg:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-400 dark:to-indigo-300">
-                Admin Portal
-              </h1>
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.push("/survey/dashboard")} className="rounded-full h-9 w-9">
+              <Home className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              <h1 className="text-sm font-bold uppercase tracking-widest">Admin Portal</h1>
             </div>
           </div>
-
           <LogoutButton />
         </div>
-      </header>
+      </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Stats Grid */}
-        {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8">
-            <Card className="px-2 sm:px-3 lg:px-4">
-              <CardContent className="pt-3 sm:pt-4 lg:pt-6">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600 mb-1 sm:mb-2">{stats.totalPhotos}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Total Foto</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="px-2 sm:px-3 lg:px-4">
-              <CardContent className="pt-3 sm:pt-4 lg:pt-6">
-                <div className="text-center">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 mb-1 sm:mb-2">{stats.totalSizeMB}MB</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Total Ukuran</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="px-2 sm:px-3 lg:px-4">
-              <CardContent className="pt-3 sm:pt-4 lg:pt-6">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 mb-1 sm:mb-2">{stats.locations.length}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Lokasi Unik</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="px-2 sm:px-3 lg:px-4">
-              <CardContent className="pt-3 sm:pt-4 lg:pt-6">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">{stats.uniqueDates}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Hari Survei</p>
-                </div>
-              </CardContent>
-            </Card>
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        {/* Stats Section */}
+        <div className="mb-12 border-b border-border pb-10">
+          <div className="flex flex-col gap-2 mb-8">
+            <Badge variant="outline" className="w-fit font-mono text-[10px] uppercase px-1.5 py-0 h-4">SYSTEM STATISTICS</Badge>
+            <h2 className="text-4xl font-bold tracking-tighter">Data Overview</h2>
           </div>
-        )}
+          {stats && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <AdminStatCard label="Total Photos" value={stats.totalPhotos} sub="Uploaded items" />
+              <AdminStatCard label="Storage Size" value={`${stats.totalSizeMB} MB`} sub="Total consumption" />
+              <AdminStatCard label="Unique Areas" value={stats.locations.length} sub="Surveyed points" />
+              <AdminStatCard label="Active Days" value={stats.uniqueDates} sub="Collection period" />
+            </div>
+          )}
+        </div>
 
-        {/* Filter Section */}
-        <Card className="mb-3 sm:mb-4 lg:mb-6">
-          <CardHeader className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-              <Search className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
-              Filter & Pencarian
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-              <div>
-                <label className="text-sm font-medium mb-1 sm:mb-2 block">Lokasi</label>
-                <Input
-                  type="text"
-                  placeholder="Cari lokasi..."
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  className="h-9 sm:h-10 lg:h-11 text-xs sm:text-sm"
-                />
+        {/* Filter Toolbar */}
+        <div className="mb-10 p-6 border border-border rounded-xl bg-card/50">
+          <div className="flex items-center gap-3 mb-6">
+            <Search className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Search & Filters</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 items-end">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Location</label>
+              <Input
+                placeholder="Search location..."
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                className="h-10 bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">From Date</label>
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-10 bg-background/50 border-border" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">To Date</label>
+              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-10 bg-background/50 border-border" />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSearch} className="flex-1 h-10 font-bold uppercase tracking-widest text-[11px]">
+                Apply
+              </Button>
+              <Button onClick={handleReset} variant="outline" className="h-10 px-4 border-border">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Entries Table */}
+        <div className="border border-border rounded-xl bg-card/50 overflow-hidden">
+          <div className="p-6 border-b border-border flex items-center justify-between bg-background/30">
+            <div className="flex items-center gap-4">
+              <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Survey Entries</h3>
+              <Badge variant="outline" className="font-mono text-[10px] px-1.5 h-4">{photos.length}</Badge>
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-secondary/20 border-none hover:bg-secondary/20">
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">ID</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">Folder</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">Location</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-20 text-center">
+                      <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ) : photos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-20 text-center">
+                      <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground">No records found</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  photos.map((photo) => (
+                    <TableRow key={photo.photoId} className="group hover:bg-secondary/30 transition-colors border-border/50">
+                      <TableCell className="font-mono text-[9px] text-muted-foreground uppercase">{photo.photoId.substring(0, 8)}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-tight h-5 px-1.5">
+                          {photo.folderName || "UNFOLDERED"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-sm font-medium tracking-tight">{photo.location || "N/A"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(photo.timestamp).toLocaleDateString("id-ID")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-full"
+                            onClick={() => { setSelectedPhoto(photo); setShowPreview(true); }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-full"
+                            onClick={() => handleDownload(photo.filename)}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(photo.photoId, photo.dbId)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </main>
+
+      {/* Preview Modal */}
+      {showPreview && selectedPhoto && (
+        <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-6" onClick={() => setShowPreview(false)}>
+          <div className="max-w-5xl w-full flex flex-col gap-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <div className="space-y-0.5">
+                <Badge variant="outline" className="font-mono text-[9px] px-1 h-4 uppercase">{selectedPhoto.photoId}</Badge>
+                <h3 className="text-xl font-bold tracking-tight uppercase">{selectedPhoto.location}</h3>
               </div>
-
-              <div>
-                <label className="text-sm font-medium mb-1 sm:mb-2 block">Dari Tanggal</label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 sm:h-10 lg:h-11 text-xs sm:text-sm" />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-1 sm:mb-2 block">Sampai Tanggal</label>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 sm:h-10 lg:h-11 text-xs sm:text-sm" />
-              </div>
-
-              <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-end gap-2 sm:gap-3">
-                <Button onClick={handleSearch} className="flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm">
-                  <Search className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Cari</span>
-                  <span className="sm:hidden">🔍</span>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.filename)} className="h-9 px-4 border border-border uppercase text-[10px] font-bold tracking-widest">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
                 </Button>
-                <Button onClick={handleReset} variant="outline" className="flex-1 bg-transparent h-9 sm:h-10 lg:h-11 text-xs sm:text-sm">
-                  <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Reset</span>
-                  <span className="sm:hidden">↻</span>
+                <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)} className="rounded-full h-9 w-9">
+                  <X className="w-6 h-6" />
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Photos Table */}
-        <Card className="overflow-hidden">
-          <CardHeader className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-            <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-              <span className="text-sm sm:text-base">Daftar Foto Survei</span>
-              <Badge variant="secondary" className="w-fit text-xs sm:text-sm">{photos.length} foto</Badge>
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Kelola foto yang telah diupload oleh tim survei</CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 sm:p-4 lg:p-6">
-            {isLoading ? (
-              <div className="text-center py-6 sm:py-8 lg:py-12 px-3 sm:px-4">
-                <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 mx-auto text-primary/40 animate-spin mb-2 sm:mb-3 lg:mb-4" />
-                <p className="text-muted-foreground font-medium text-xs sm:text-sm lg:text-base">Memuat data survei...</p>
-              </div>
-            ) : photos.length === 0 ? (
-              <div className="text-center py-8 sm:py-12 lg:py-16 px-3 sm:px-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 lg:mb-4">
-                  <Search className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-muted-foreground/40" />
+            
+            <div className="relative aspect-video sm:aspect-[16/10] w-full bg-secondary/20 rounded-2xl overflow-hidden border border-border shadow-2xl">
+              <img 
+                src={selectedPhoto.filename.startsWith('http') ? selectedPhoto.filename : `/uploads/${selectedPhoto.filename}`}
+                alt={selectedPhoto.description} 
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('/uploads/linked_uploads/')) {
+                    target.src = `/uploads/linked_uploads/${selectedPhoto.filename}`;
+                  } else {
+                    target.src = "https://placehold.co/800x600?text=Photo+Not+Found"
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="max-w-2xl">
+              <p className="text-sm leading-relaxed text-foreground/80">{selectedPhoto.description || "No additional description available."}</p>
+              <div className="flex items-center gap-4 mt-6">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                  Uploaded: {new Date(selectedPhoto.uploadedAt).toLocaleString()}
                 </div>
-                <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-1">Tidak ada foto ditemukan</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground max-w-[200px] sm:max-w-[250px] lg:max-w-none mx-auto">Coba sesuaikan filter pencarian untuk melihat data lain</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="min-w-full inline-block align-middle">
-                  <Table>
-                    <TableHeader className="bg-muted/30">
-                      <TableRow>
-                        <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">ID</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Folder</TableHead>
-                        <TableHead className="text-xs sm:text-sm">Lokasi</TableHead>
-                        <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Tanggal</TableHead>
-                        <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Deskripsi</TableHead>
-                        <TableHead className="hidden sm:table-cell text-xs sm:text-sm">Ukuran</TableHead>
-                        <TableHead className="text-right text-xs sm:text-sm">Aksi</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {photos.map((photo) => (
-                        <TableRow key={photo.photoId} className="group hover:bg-muted/20 transition-colors">
-                          <TableCell className="font-mono text-[8px] sm:text-[10px] text-muted-foreground">
-                            {photo.photoId.substring(0, 6)}...
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[10px] font-bold">
-                              {photo.folderName || "Tanpa Folder"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-1 font-semibold text-xs sm:text-sm">
-                                <MapPin className="w-3.5 h-3.5 text-primary/60" />
-                                <span className="truncate max-w-[100px] sm:max-w-[150px] lg:max-w-[200px]">{photo.location || "N/A"}</span>
-                              </div>
-                              <div className="sm:hidden text-[10px] text-muted-foreground flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(photo.timestamp).toLocaleDateString("id-ID")}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <div className="flex items-center gap-2 text-xs sm:text-sm">
-                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
-                              {new Date(photo.timestamp).toLocaleDateString("id-ID")}
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell max-w-xs truncate text-xs sm:text-sm text-muted-foreground">
-                            {photo.description || "-"}
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell text-xs sm:text-sm font-medium">
-                            {photo.size > 0 ? `${Math.round(photo.size / 1024)} KB` : "-"}
-                          </TableCell>
-                          <TableCell className="text-right p-1 sm:p-2 lg:p-4">
-                            <div className="flex items-center justify-end gap-1 sm:gap-2">
-                              <Button
-                                onClick={() => {
-                                  setSelectedPhoto(photo)
-                                  setShowPreview(true)
-                                }}
-                                size="icon-sm"
-                                variant="ghost"
-                                className="rounded-lg h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9"
-                              >
-                                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDownload(photo.filename)}
-                                size="icon-sm"
-                                variant="ghost"
-                                className="rounded-lg h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9"
-                              >
-                                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDelete(photo.photoId, photo.dbId)}
-                                size="icon-sm"
-                                variant="ghost"
-                                className="rounded-lg h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9 text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                  Folder: {selectedPhoto.folderName}
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-
-      {/* Photo Preview Modal */}
-      {showPreview && selectedPhoto && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4 lg:p-6"
-          onClick={() => setShowPreview(false)}
-        >
-          <Card className="max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <CardHeader className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
-              <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-xs sm:text-sm lg:text-base">Preview Foto</CardTitle>
-                <Button
-                  onClick={() => setShowPreview(false)}
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-xl font-bold"
-                >
-                  &times;
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="relative bg-gray-100 flex items-center justify-center p-2 sm:p-4 h-[300px] sm:h-[400px] lg:h-[500px]">
-              <div className="relative w-full h-full">
-                <img
-                  src={selectedPhoto.filename.startsWith('http') ? selectedPhoto.filename : `/uploads/${selectedPhoto.filename}`}
-                  alt={selectedPhoto.description || `Photo ${selectedPhoto.photoId}`}
-                  className="w-full h-full object-contain rounded-lg"
-                  onClick={(e) => e.stopPropagation()}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (!target.src.includes('/uploads/linked_uploads/')) {
-                      console.log('Falling back to symlinked path');
-                      target.src = `/uploads/linked_uploads/${selectedPhoto.filename}`;
-                    } else {
-                      console.error('Image failed to load even with fallback:', e);
-                    }
-                  }}
-                  onLoad={() => {
-                    console.log('Image loaded successfully:', selectedPhoto.filename);
-                  }}
-                />
-              </div>
-            </CardContent>
-            {selectedPhoto.location && (
-              <CardContent className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 border-t">
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm">
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Lokasi:</span>
-                    <span className="text-muted-foreground">{selectedPhoto.location}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Ukuran:</span>
-                    <span className="text-muted-foreground">{selectedPhoto.size > 0 ? `${Math.round(selectedPhoto.size / 1024)} KB` : "-"}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-medium">Tanggal:</span>
-                    <span className="text-muted-foreground">{new Date(selectedPhoto.timestamp).toLocaleDateString("id-ID")}</span>
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
+            </div>
+          </div>
         </div>
       )}
     </div>
   )
 }
 
+function AdminStatCard({ label, value, sub }: { label: string, value: string | number, sub: string }) {
+  return (
+    <div className="p-6 border border-border rounded-xl bg-card/50 hover:border-foreground/20 transition-all">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">{label}</p>
+      <div className="text-3xl font-bold tracking-tighter mb-1">{value}</div>
+      <p className="text-[10px] uppercase font-bold tracking-tight text-muted-foreground/60">{sub}</p>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
       <AdminPageContent />
     </Suspense>
   )
