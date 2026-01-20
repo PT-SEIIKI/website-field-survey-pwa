@@ -12,16 +12,16 @@
   --popover-foreground: #000000;
   --primary: #000000;
   --primary-foreground: #ffffff;
-  --secondary: #fafafa;
+  --secondary: #f0f0f0;
   --secondary-foreground: #000000;
-  --muted: #fafafa;
+  --muted: #f0f0f0;
   --muted-foreground: #666666;
   --accent: #fafafa;
   --accent-foreground: #000000;
   --destructive: #ee0000;
   --destructive-foreground: #ffffff;
-  --border: #eaeaea;
-  --input: #eaeaea;
+  --border: #cccccc;
+  --input: #cccccc;
   --ring: #000000;
   --radius: 0.5rem;
 }
