@@ -124,20 +124,7 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="pt-6 border-t border-border space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-md bg-secondary/50 border border-border">
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Surveyor</p>
-                  <p className="text-[11px] font-mono truncate">surveyor1</p>
-                  <p className="text-[10px] text-muted-foreground font-mono">password123</p>
-                </div>
-                <div className="p-3 rounded-md bg-secondary/50 border border-border">
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Admin</p>
-                  <p className="text-[11px] font-mono truncate">admin</p>
-                  <p className="text-[10px] text-muted-foreground font-mono">admin123</p>
-                </div>
-              </div>
-              
+            <div className="pt-6 border-t border-border">
               <div className="flex justify-center gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
                 <span className="flex items-center gap-1.5">• Offline Ready</span>
                 <span className="flex items-center gap-1.5">• Secure Sync</span>
