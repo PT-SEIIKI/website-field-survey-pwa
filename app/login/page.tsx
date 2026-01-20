@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { initializeDefaultUsers, login } from "@/lib/auth"
+import { login } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    initializeDefaultUsers()
+    // initializeDefaultUsers removed for RBAC
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,23 +27,17 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      })
+      const result = await login({ username, password });
 
-      if (response.ok) {
-        const userData = await response.json()
-        localStorage.setItem("surveyUserLogin", JSON.stringify(userData))
-        
-        if (userData.role === "admin") {
+      if (result.success) {
+        const userData = result.user;
+        if (userData?.role === "admin") {
           router.push("/admin")
         } else {
           router.push("/survey/dashboard")
         }
       } else {
-        setError("Username atau password salah")
+        setError(result.error || "Username atau password salah")
       }
     } catch (err) {
       setError("Terjadi kesalahan koneksi")

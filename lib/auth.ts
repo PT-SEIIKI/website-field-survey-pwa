@@ -1,13 +1,12 @@
-// Simple auth utility (production harus lebih secure)
-const USERS_KEY = "survey_users"
+// RBAC enabled auth utility
 const SESSION_KEY = "surveyUserLogin"
 
 export interface User {
-  id: string
+  id: number
   username: string
-  email: string
-  role: "surveyor" | "admin"
-  createdAt: number
+  role: "admin" | "user"
+  createdAt: string
+  expiresAt?: number
 }
 
 export interface LoginCredentials {
@@ -15,70 +14,29 @@ export interface LoginCredentials {
   password: string
 }
 
-// Initialize default users
-export function initializeDefaultUsers() {
-  if (typeof window === "undefined") return
+export async function login(credentials: LoginCredentials): Promise<{ success: boolean; user?: User; error?: string }> {
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
 
-  const existingUsers = localStorage.getItem(USERS_KEY)
-  const defaultUsers = [
-    {
-      id: "user-1",
-      username: "surveyor1",
-      password: "password123", // Hanya untuk demo - production harus hash!
-      email: "surveyor1@example.com",
-      role: "surveyor" as const,
-      createdAt: 1704643200000,
-    },
-    {
-      id: "admin-1",
-      username: "admin",
-      password: "admin123",
-      email: "admin@example.com",
-      role: "admin" as const,
-      createdAt: 1704643200000,
-    },
-  ]
-
-  // Selalu setel ulang user demo setiap kali aplikasi dimuat untuk memastikan data bersih
-  localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers))
-}
-
-export function login(credentials: LoginCredentials): { success: boolean; user?: User; error?: string } {
-  if (typeof window === "undefined") {
-    return { success: false, error: "Cannot login on server" }
+    if (response.ok) {
+      const user = await response.json();
+      // Create session with expiry (24 hours)
+      const expiry = Date.now() + 24 * 60 * 60 * 1000;
+      const sessionUser = { ...user, expiresAt: expiry };
+      
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      return { success: true, user: sessionUser };
+    } else {
+      const errorData = await response.json();
+      return { success: false, error: errorData.message || "Username atau password salah" };
+    }
+  } catch (err) {
+    return { success: false, error: "Terjadi kesalahan koneksi" };
   }
-
-  const usersJson = localStorage.getItem(USERS_KEY)
-  if (!usersJson) {
-    initializeDefaultUsers()
-    return login(credentials)
-  }
-
-  const users = JSON.parse(usersJson)
-  // Security: Use constant time comparison if possible, but for demo simple find is okay
-  // Adding basic trim for better UX
-  const username = credentials.username.trim()
-  const password = credentials.password
-  
-  const user = users.find((u: any) => u.username === username && u.password === password)
-
-  if (!user) {
-    return { success: false, error: "Username atau password salah" }
-  }
-
-  // Create session with expiry (e.g., 24 hours)
-  const expiry = Date.now() + 24 * 60 * 60 * 1000
-  const sessionUser = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    createdAt: user.createdAt,
-    expiresAt: expiry,
-  }
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser))
-  return { success: true, user: sessionUser }
 }
 
 export function logout(): void {
@@ -114,4 +72,9 @@ export function isLoggedIn(): boolean {
 export function isAdmin(): boolean {
   const user = getCurrentUser()
   return user?.role === "admin"
+}
+
+export function hasRole(role: "admin" | "user"): boolean {
+  const user = getCurrentUser()
+  return user?.role === role
 }
