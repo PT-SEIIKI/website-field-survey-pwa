@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
   "/apple-icon.png",
   "/icon-192x192.png",
   "/icon-512x512.png",
-  "/globals.css",
+  "/app/globals.css",
 ]
 
 // Install event - cache essential assets
