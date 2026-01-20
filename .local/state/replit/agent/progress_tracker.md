@@ -82,4 +82,5 @@
 [x] 83. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
 [x] 84. Enhanced SyncManager to fetch and merge data from server on login/init.
 [x] 85. Triggered automatic sync on successful login to ensure multi-device data consistency.
+[x] 86. Verified offline safety: Added robust connectivity checks to the data merge logic to prevent failures in offline mode.
 [x] 84. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026

@@ -280,6 +280,12 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
 }
 
 async function fetchAndMergeFromServer() {
+  const isOnline = await checkConnectivity()
+  if (!isOnline) {
+    console.log("[v0] Offline - skipping merge from server")
+    return
+  }
+
   try {
     // Get current survey ID (usually 1 for this app)
     const surveyId = 1;
