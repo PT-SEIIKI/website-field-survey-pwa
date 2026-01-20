@@ -29,6 +29,10 @@ export async function login(credentials: LoginCredentials): Promise<{ success: b
       const sessionUser = { ...user, expiresAt: expiry };
       
       localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      
+      // Trigger sync immediately on login to fetch data from server
+      import("./sync-manager").then(m => m.startSync()).catch(console.error);
+
       return { success: true, user: sessionUser };
     } else {
       const errorData = await response.json();

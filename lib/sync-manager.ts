@@ -1,5 +1,5 @@
 // Sync manager untuk handle upload queue dan auto-sync
-import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto, getFolders, saveFolder } from "./indexeddb"
+import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto, getFolders, saveFolder, saveMetadata } from "./indexeddb"
 import { checkConnectivity, subscribeToConnectivity } from "./connectivity"
 
 export interface SyncStatus {
@@ -72,6 +72,10 @@ export async function startSync() {
   notifySyncListeners()
 
   try {
+    // 0. Fetch from server first to merge with local
+    console.log("[v0] Fetching data from server to merge")
+    await fetchAndMergeFromServer()
+
     // 1. Sync Folders first (because entries depend on folderId)
     const allFolders = await getFolders()
     const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
@@ -272,6 +276,85 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
     console.error("[v0] Failed to sync photo:", photoId, error)
     await updatePhotoStatus(photoId, "failed")
     throw error
+  }
+}
+
+async function fetchAndMergeFromServer() {
+  try {
+    // Get current survey ID (usually 1 for this app)
+    const surveyId = 1;
+
+    // Fetch Folders
+    const foldersRes = await fetch("/api/folders")
+    if (foldersRes.ok) {
+      const serverFolders = await foldersRes.json()
+      const localFolders = await getFolders()
+      
+      for (const sFolder of serverFolders) {
+        // Match by offlineId (if it was created locally first) or by server id
+        const local = localFolders.find(f => f.id === sFolder.offlineId || f.id === sFolder.id.toString())
+        if (!local) {
+          await saveFolder({
+            id: sFolder.offlineId || sFolder.id.toString(),
+            name: sFolder.name,
+            houseName: sFolder.houseName,
+            nik: sFolder.nik,
+            createdAt: new Date(sFolder.createdAt).getTime(),
+            syncStatus: "synced"
+          })
+        }
+      }
+    }
+
+    // Fetch Entries to get photo metadata
+    const entriesRes = await fetch(`/api/entries?surveyId=${surveyId}`)
+    if (entriesRes.ok) {
+      const data = await entriesRes.json()
+      const serverEntries = data.entries || []
+      
+      for (const entry of serverEntries) {
+        // Check if we have photos for this entry
+        const photosRes = await fetch(`/api/photos/list?entryId=${entry.id}`)
+        if (photosRes.ok) {
+          const photos = await photosRes.json()
+          for (const photo of photos) {
+            // Check if photo exists in local metadata
+            const localMeta = await getMetadata(photo.offlineId || photo.id.toString())
+            if (!localMeta) {
+              // Parse entry data for location/description
+              let entryData: any = {}
+              try {
+                entryData = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data
+              } catch (e) {}
+
+              const photoId = photo.offlineId || photo.id.toString()
+              
+              // Save metadata so it appears in UI
+              await saveMetadata(photoId, {
+                location: entryData?.location || "",
+                description: entryData?.description || "",
+                timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
+              })
+
+              // Mark photo as synced in local DB if not present
+              const localPhoto = await getPhoto(photoId)
+              if (!localPhoto) {
+                // We don't have the blob, but we mark it synced so we don't try to upload it
+                // The UI will use the server URL if the blob is missing
+                await (await import("./indexeddb")).savePhoto({
+                  id: photoId,
+                  blob: new Blob(), // Empty blob as placeholder
+                  timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
+                  syncStatus: "synced"
+                })
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("[v0] Merge error:", e)
   }
 }
 
