@@ -80,4 +80,6 @@
 [x] 81. Resolved TypeScript error in dashboard icon sizing.
 [x] 82. Reinstalled npm packages and restarted workflow - environment migration completed Jan 20, 2026
 [x] 83. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
+[x] 84. Enhanced SyncManager to fetch and merge data from server on login/init.
+[x] 85. Triggered automatic sync on successful login to ensure multi-device data consistency.
 [x] 84. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
