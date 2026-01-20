@@ -1,8 +1,13 @@
 import type React from "react"
+import { AdminSidebar } from "@/components/admin-sidebar"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Note: In production, this check should be done server-side properly
-  // For now this is a basic check
-
-  return <>{children}</>
+  return (
+    <div className="flex min-h-screen bg-background">
+      <AdminSidebar />
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  )
 }

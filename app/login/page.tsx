@@ -27,12 +27,26 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const result = login({ username, password })
-      if (result.success) {
-        router.push("/survey/dashboard")
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        localStorage.setItem("surveyUserLogin", JSON.stringify(userData))
+        
+        if (userData.role === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/survey/dashboard")
+        }
       } else {
-        setError(result.error || "Login gagal")
+        setError("Username atau password salah")
       }
+    } catch (err) {
+      setError("Terjadi kesalahan koneksi")
     } finally {
       setIsLoading(false)
     }
