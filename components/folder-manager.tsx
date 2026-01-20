@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Folder as FolderIcon, Home, CreditCard, Trash2, Edit2, Loader2, Search } from "lucide-react"
+import { Plus, Folder as FolderIcon, Home, CreditCard, Trash2, Edit2, Loader2, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -11,6 +11,7 @@ import { saveFolder, getFolders, deleteFolder } from "@/lib/indexeddb"
 import { v4 as uuidv4 } from "uuid"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
 interface Folder {
   id: string
@@ -29,7 +30,6 @@ export function FolderManager() {
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
   const isOnline = useOnlineStatus()
 
-  // Form states
   const [name, setName] = useState("")
   const [houseName, setHouseName] = useState("")
   const [nik, setNik] = useState("")
@@ -72,8 +72,6 @@ export function FolderManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Simple validation
     if (!name.trim()) return
     if (nik && !/^\d{16}$/.test(nik)) {
       alert("NIK harus 16 digit angka.")
@@ -99,11 +97,7 @@ export function FolderManager() {
             await fetch(`/api/folders/${serverFolder.id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name,
-                houseName,
-                nik
-              })
+              body: JSON.stringify({ name, houseName, nik })
             })
           }
         }
@@ -119,9 +113,8 @@ export function FolderManager() {
 
   const handleDelete = async (folder: Folder) => {
     const id = folder.id
-    if (confirm("Hapus folder ini? Semua data di dalamnya akan dipindahkan ke kategori 'Tanpa Folder'.")) {
+    if (confirm("Hapus folder ini?")) {
       try {
-        // Find the folder ID from backend if synced
         if (isOnline && folder.syncStatus === "synced") {
           const res = await fetch("/api/folders")
           if (res.ok) {
@@ -147,112 +140,121 @@ export function FolderManager() {
   )
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-sm sm:text-base lg:text-xl font-black text-blue-700 flex items-center gap-2">
-          <FolderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-          MANAJEMEN FOLDER
-        </h2>
-        <div className="flex items-center gap-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Cari folder, nama, atau NIK..." 
+            placeholder="Search folders, NIK, or names..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-8 sm:h-10 text-xs w-full sm:w-64"
+            className="pl-9 h-10 text-sm bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
           />
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()} size="sm" className="h-8 sm:h-10 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold whitespace-nowrap">
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                FOLDER BARU
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{editingFolder ? "Edit Folder" : "Buat Folder Baru"}</DialogTitle>
+        </div>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => handleOpenDialog()} variant="outline" className="h-10 rounded-full px-6 border-border font-bold uppercase tracking-widest text-[10px]">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Folder
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[400px] bg-background border-border p-8 rounded-2xl shadow-2xl">
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-xl font-bold tracking-tight uppercase">{editingFolder ? "Edit Folder" : "New Folder"}</DialogTitle>
+              <CardDescription className="text-xs">Enter survey container details below.</CardDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nama Folder</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Contoh: Blok A - Sektor 1" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="houseName">Nama Rumah / Pemilik</Label>
-                <Input id="houseName" value={houseName} onChange={(e) => setHouseName(e.target.value)} placeholder="Nama Pemilik" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nik">NIK (Opsional)</Label>
-                <Input id="nik" value={nik} onChange={(e) => setNik(e.target.value)} placeholder="16 Digit NIK" maxLength={16} />
+            <form onSubmit={handleSubmit} className="space-y-6 pt-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Folder Name</Label>
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Contoh: Blok A - Sektor 1" className="h-10 bg-secondary/20" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="houseName" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">House Owner</Label>
+                  <Input id="houseName" value={houseName} onChange={(e) => setHouseName(e.target.value)} placeholder="Nama Pemilik" className="h-10 bg-secondary/20" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nik" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">NIK (16 Digits)</Label>
+                  <Input id="nik" value={nik} onChange={(e) => setNik(e.target.value)} placeholder="16 Digit NIK" maxLength={16} className="h-10 bg-secondary/20" />
+                </div>
               </div>
               <DialogFooter>
-                <Button type="submit" className="w-full h-10 sm:h-12 text-xs sm:text-sm font-black">
-                  {editingFolder ? "SIMPAN PERUBAHAN" : "BUAT FOLDER"}
+                <Button type="submit" className="w-full h-11 font-bold uppercase tracking-widest text-[11px]">
+                  {editingFolder ? "Save Changes" : "Create Folder"}
                 </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
-        </div>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-blue-600" />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       ) : folders.length === 0 ? (
-        <Card className="border-dashed border-2 bg-transparent">
-          <CardContent className="py-6 sm:py-10 text-center">
-            <FolderIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-2 sm:mb-4" />
-            <p className="text-xs sm:text-sm text-muted-foreground font-medium">Belum ada folder. Buat folder untuk mengelompokkan hasil survei.</p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-xl bg-secondary/10">
+          <FolderIcon className="w-10 h-10 text-muted-foreground/20 mb-4" />
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">No active folders found</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFolders.map((folder) => (
-            <Card key={folder.id} className="group hover:border-blue-300 transition-all cursor-pointer overflow-hidden" onClick={() => router.push(`/survey/folder/${folder.id}`)}>
-              <CardHeader className="p-3 sm:p-4 pb-0">
-                <div className="flex items-start justify-between">
-                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                    <FolderIcon className="w-4 h-4 sm:w-6 sm:h-6" />
-                  </div>
-                  <div className="flex gap-1">
-                    <Button onClick={(e) => { e.stopPropagation(); handleOpenDialog(folder); }} variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Edit2 className="w-3 h-3" />
-                    </Button>
-                    <Button onClick={(e) => { e.stopPropagation(); handleDelete(folder); }} variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
+            <div 
+              key={folder.id} 
+              className="group relative flex flex-col p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all cursor-pointer" 
+              onClick={() => router.push(`/survey/folder/${folder.id}`)}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <FolderIcon size={18} />
                 </div>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm lg:text-base font-bold mb-1 truncate">{folder.name}</CardTitle>
-                <div className="space-y-1">
+                <div className="flex gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleOpenDialog(folder); }} 
+                    className="p-1.5 rounded-md hover:bg-foreground hover:text-background transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Edit2 size={12} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDelete(folder); }} 
+                    className="p-1.5 rounded-md hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1 mb-6">
+                <h4 className="text-lg font-bold tracking-tight uppercase truncate">{folder.name}</h4>
+                <div className="flex flex-col gap-1 text-[11px] text-muted-foreground uppercase font-medium">
                   {folder.houseName && (
-                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
-                      <Home className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      <span className="truncate">{folder.houseName}</span>
-                    </div>
+                    <span className="flex items-center gap-1.5">
+                      <Home className="w-3 h-3" />
+                      {folder.houseName}
+                    </span>
                   )}
                   {folder.nik && (
-                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
-                      <CreditCard className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      <span>{folder.nik}</span>
-                    </div>
+                    <span className="flex items-center gap-1.5">
+                      <CreditCard className="w-3 h-3" />
+                      {folder.nik}
+                    </span>
                   )}
                 </div>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className={`text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                    folder.syncStatus === "synced" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
-                  }`}>
-                    {folder.syncStatus === "synced" ? "Synced" : "Offline"}
-                  </span>
-                  <span className="text-[8px] sm:text-[9px] text-muted-foreground">
-                    {new Date(folder.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
+                <Badge variant="outline" className={`font-mono text-[9px] px-1.5 h-4 border-none ${
+                  folder.syncStatus === "synced" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                }`}>
+                  {folder.syncStatus === "synced" ? "SYNCED" : "OFFLINE"}
+                </Badge>
+                <span className="text-[9px] font-mono text-muted-foreground">
+                  {new Date(folder.createdAt).toLocaleDateString('en-GB')}
+                </span>
+              </div>
+            </div>
           ))}
         </div>
       )}

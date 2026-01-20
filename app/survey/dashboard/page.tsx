@@ -5,12 +5,12 @@ import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentUser } from "@/lib/auth"
-import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw, Folder as FolderIcon } from "lucide-react"
+import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw, Folder as FolderIcon, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { FolderManager } from "@/components/folder-manager"
 import { getFolders } from "@/lib/indexeddb"
+import { Badge } from "@/components/ui/badge"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -58,126 +58,132 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Dashboard</h1>
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center text-background font-bold text-lg">
+              S
+            </div>
+            <h1 className="text-sm font-bold uppercase tracking-widest hidden sm:block">Dashboard</h1>
+          </div>
 
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium ${
-                isOnline ? "bg-green-50 text-green-700 border border-green-200" : "bg-gray-50 text-gray-600 border border-gray-200"
-              }`}
-            >
-              {isOnline ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-              <span>{isOnline ? "Online" : "Offline"}</span>
+          <div className="flex items-center gap-4">
+            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-tight ${
+              isOnline ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-muted text-muted-foreground border-border"
+            }`}>
+              {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              {isOnline ? "Online" : "Offline"}
             </div>
             <LogoutButton />
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Welcome Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Selamat datang, {user.username}!</h2>
-          <p className="text-gray-600 text-lg">
-            {user.role === "admin" ? "Kelola semua data survei dan aktivitas pengguna" : "Kelola dan unggah survei lapangan Anda"}
-          </p>
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        {/* Hero / Welcome */}
+        <div className="mb-12 border-b border-border pb-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-1">
+              <Badge variant="outline" className="font-mono text-[10px] uppercase px-1.5 py-0 h-4 mb-2">SYSTEM ACCESS GRANTED</Badge>
+              <h2 className="text-4xl font-bold tracking-tighter">Welcome, {user.username}</h2>
+              <p className="text-muted-foreground max-w-lg text-sm leading-relaxed">
+                {user.role === "admin" 
+                  ? "Manage all survey data, user activities, and system statistics from this central console." 
+                  : "Collect field data, manage survey folders, and sync your findings with the central database."}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={() => router.push("/survey/upload")} className="rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
+                <Plus className="w-4 h-4 mr-2" />
+                New Survey
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          <div className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2 bg-gray-100 rounded-md">
-                <Upload size={20} className="text-gray-700" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{syncStatus.totalPending}</div>
-            <p className="text-sm text-gray-600">Foto menunggu sinkronisasi</p>
-          </div>
-
-          <div className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className={`p-2 rounded-md ${isOnline ? "bg-green-50" : "bg-gray-100"}`}>
-                {isOnline ? <Wifi size={20} className="text-green-600" /> : <WifiOff size={20} className="text-gray-700" />}
-              </div>
-            </div>
-            <div className={`text-2xl font-bold mb-1 ${isOnline ? "text-green-600" : "text-gray-900"}`}>{isOnline ? "Online" : "Offline"}</div>
-            <p className="text-sm text-gray-600">Status koneksi</p>
-          </div>
-
-          <div className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2 bg-gray-100 rounded-md">
-                <RefreshCw size={20} className={`text-gray-700 ${syncStatus.isSyncing ? "animate-spin" : ""}`} />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{syncStatus.isSyncing ? "Sinkronisasi..." : "Siap"}</div>
-            <p className="text-sm text-gray-600">Status sinkronisasi</p>
-          </div>
-
-          <div className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2 bg-gray-100 rounded-md">
-                <BarChart3 size={20} className="text-gray-700" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{stats ? stats.totalPhotos : "0"}</div>
-            <p className="text-sm text-gray-600">Total foto tersinkronisasi</p>
-          </div>
-
-          <div className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-2 bg-gray-100 rounded-md">
-                <FolderIcon size={20} className="text-gray-700" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{folderStats.total}</div>
-            <p className="text-sm text-gray-600">Total folder</p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <StatCard 
+            label="Pending Sync" 
+            value={syncStatus.totalPending} 
+            description="Photos waiting for connection" 
+            icon={<Upload size={16} />}
+            urgent={syncStatus.totalPending > 0}
+          />
+          <StatCard 
+            label="Cloud Photos" 
+            value={stats ? stats.totalPhotos : "0"} 
+            description="Total synced to server" 
+            icon={<BarChart3 size={16} />}
+          />
+          <StatCard 
+            label="Folders" 
+            value={folderStats.total} 
+            description="Active survey containers" 
+            icon={<FolderIcon size={16} />}
+          />
+          <StatCard 
+            label="Sync State" 
+            value={syncStatus.isSyncing ? "Syncing" : "Active"} 
+            description={syncStatus.isSyncing ? "Transferring data..." : "System is idle"} 
+            icon={<RefreshCw size={16} className={syncStatus.isSyncing ? "animate-spin" : ""} />}
+            active={syncStatus.isSyncing}
+          />
         </div>
 
-        {/* Folder Management Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Folder Survei</h3>
+        {/* Folder Management */}
+        <div className="space-y-10">
+          <div className="flex items-center gap-4">
+            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Survey Folders</h3>
+            <div className="h-px bg-border flex-1" />
+          </div>
           <FolderManager />
         </div>
 
-        {/* Actions Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <button
-            onClick={() => router.push("/survey/upload")} 
-            className="border border-gray-200 rounded-lg p-8 hover:border-gray-300 hover:bg-gray-50 transition-all group"
-          >
-            <div className="flex items-start justify-between mb-6">
-              <div className="p-3 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors">
-                <Upload size={24} className="text-gray-700" />
-              </div>
-            </div>
-            <h4 className="text-lg font-semibold text-gray-900 text-left mb-2">Upload Foto</h4>
-            <p className="text-sm text-gray-600 text-left">Pilih foto dari galeri untuk diupload ke sistem</p>
-          </button>
-
-          {user.role === "admin" && (
-            <button
-              onClick={() => router.push("/admin")} 
-              className="border border-gray-200 rounded-lg p-8 hover:border-gray-300 hover:bg-gray-50 transition-all group"
-            >
-              <div className="flex items-start justify-between mb-6">
-                <div className="p-3 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors">
-                  <BarChart3 size={24} className="text-gray-700" />
+        {/* Quick Actions (Admin) */}
+        {user.role === "admin" && (
+          <div className="mt-20 pt-10 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-6">Administrative</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                onClick={() => router.push("/admin")} 
+                className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              >
+                <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+                  <BarChart3 size={20} />
                 </div>
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 text-left mb-2">Admin Panel</h4>
-              <p className="text-sm text-gray-600 text-left">Kelola semua data foto dalam sistem</p>
-            </button>
-          )}
-        </div>
+                <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Open Admin Panel</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">Analyze all collected data, export reports, and manage high-level system configurations.</p>
+              </button>
+            </div>
+          </div>
+        )}
       </main>
+      
+      <footer className="max-w-6xl mx-auto px-6 py-10 border-t border-border mt-20">
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-center">
+          &copy; 2026 FIELD SURVEY SYSTEM. BUILT WITH VERCEL DESIGN PRINCIPLES.
+        </p>
+      </footer>
+    </div>
+  )
+}
+
+function StatCard({ label, value, description, icon, urgent, active }: { label: string, value: string | number, description: string, icon: React.ReactNode, urgent?: boolean, active?: boolean }) {
+  return (
+    <div className={`p-6 border rounded-xl transition-all ${
+      urgent ? "bg-amber-500/5 border-amber-500/20" : 
+      active ? "bg-emerald-500/5 border-emerald-500/20" : 
+      "bg-card/50 border-border hover:border-foreground/20"
+    }`}>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
+        <div className="text-muted-foreground">{icon}</div>
+      </div>
+      <div className="text-3xl font-bold tracking-tighter mb-1">{value}</div>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-tight">{description}</p>
     </div>
   )
 }
