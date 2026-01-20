@@ -3,26 +3,48 @@ import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 async function seed() {
-  console.log("Seeding database...");
+  console.log("[DB] Seeding database...");
 
-  // Seed Admin User
-  const existingAdmin = await db.select().from(users).where(eq(users.username, "admin")).limit(1);
-  if (existingAdmin.length === 0) {
-    await db.insert(users).values({
-      username: "admin",
-      password: "adminpassword", // In production, this should be hashed
-      role: "admin",
-    });
-    console.log("Admin user created.");
-  } else {
-    console.log("Admin user already exists.");
+  try {
+    // Seed Admin User
+    const existingAdmin = await db.select().from(users).where(eq(users.username, "admin")).limit(1);
+    if (existingAdmin.length === 0) {
+      await db.insert(users).values({
+        username: "admin",
+        password: "admin123",
+        role: "admin",
+      });
+      console.log("[DB] Admin user created.");
+    } else {
+      // Update password to match documentation if it's different
+      await db.update(users)
+        .set({ password: "admin123", role: "admin" })
+        .where(eq(users.username, "admin"));
+      console.log("[DB] Admin user updated.");
+    }
+
+    // Seed Surveyor User
+    const existingSurveyor = await db.select().from(users).where(eq(users.username, "surveyor1")).limit(1);
+    if (existingSurveyor.length === 0) {
+      await db.insert(users).values({
+        username: "surveyor1",
+        password: "password123",
+        role: "user", // "user" mapping to "surveyor" role in schema or using default
+      });
+      console.log("[DB] Surveyor user created.");
+    } else {
+      await db.update(users)
+        .set({ password: "password123" })
+        .where(eq(users.username, "surveyor1"));
+      console.log("[DB] Surveyor user updated.");
+    }
+
+    console.log("[DB] Seeding completed successfully.");
+    process.exit(0);
+  } catch (error) {
+    console.error("[DB] Seeding failed:", error);
+    process.exit(1);
   }
-
-  console.log("Seeding completed.");
-  process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+seed();
