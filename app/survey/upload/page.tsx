@@ -1,4 +1,3 @@
-"use client"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useLocalPhotos } from "@/hooks/use-local-photos"
 import { useOnlineStatus } from "@/hooks/use-online-status"
@@ -6,7 +5,6 @@ import { useSyncStatus } from "@/hooks/use-sync-status"
 import { addPhotos, addPhotoWithMetadata } from "@/lib/photo-manager"
 import { initConnectivityListener } from "@/lib/connectivity"
 import { initSyncManager, startSync } from "@/lib/sync-manager"
-import { CameraCapture } from "@/components/camera-capture"
 import { UploadArea } from "@/components/upload-area"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
@@ -14,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, Camera, Home, RefreshCw, Upload, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
+import { AlertCircle, Home, RefreshCw, Upload, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Suspense, useEffect, useState } from "react"
 import { getFolders } from "@/lib/indexeddb"
@@ -34,7 +32,6 @@ function UploadPageContent() {
   const isOnline = useOnlineStatus()
   const syncStatus = useSyncStatus()
 
-  const [showCamera, setShowCamera] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [location, setLocation] = useState("")
@@ -72,17 +69,6 @@ function UploadPageContent() {
     }
   }, [isOnline])
 
-  useEffect(() => {
-    // Check if camera should be opened immediately
-    if (searchParams.get("action") === "camera") {
-      setShowCamera(true)
-      // Scroll to camera section
-      setTimeout(() => {
-        document.getElementById("camera-section")?.scrollIntoView({ behavior: "smooth" })
-      }, 500)
-    }
-  }, [searchParams])
-
   const handleFilesSelected = async (files: File[]) => {
     setIsUploading(true)
     try {
@@ -107,35 +93,6 @@ function UploadPageContent() {
       }
     } catch (error) {
       console.error("[v0] Upload error:", error)
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleCapturePhoto = async (blob: Blob, folderId?: string) => {
-    setIsUploading(true)
-    try {
-      await addPhotoWithMetadata(blob, {
-        location: location || undefined,
-        description: description || undefined,
-        folderId: folderId || selectedFolderId || undefined
-      })
-
-      setSuccessMessage("Foto berhasil ditambahkan")
-      await refreshPhotos()
-      setShowCamera(false)
-      setLocation("")
-      setDescription("")
-
-      // Clear message after 3 seconds
-      setTimeout(() => setSuccessMessage(""), 3000)
-
-      // Auto-sync if online
-      if (isOnline) {
-        startSync()
-      }
-    } catch (error) {
-      console.error("[v0] Capture error:", error)
     } finally {
       setIsUploading(false)
     }
@@ -245,68 +202,35 @@ function UploadPageContent() {
                     ))}
                   </select>
                 </div>
-                <UploadArea onFilesSelected={handleFilesSelected} isLoading={isUploading} />
-              </CardContent>
-            </Card>
 
-            {/* Camera Capture Section */}
-            <Card id="camera-section" className="px-4 sm:px-6">
-              <CardHeader className="pb-4 sm:pb-6 pt-4 sm:pt-6">
-                <CardTitle className="flex items-center gap-2 text-blue-700 text-sm sm:text-base lg:text-lg">
-                  <Camera className="w-4 h-4 sm:w-6 sm:h-6" />
-                  Ambil Foto Langsung
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Gunakan kamera HP Anda untuk mengambil foto bukti lapangan</CardDescription>
-              </CardHeader>
-              <CardContent className="pb-4 sm:pb-6">
-                {showCamera ? (
-                  <>
-                    {/* Metadata Form */}
-                    <div className="space-y-3 sm:space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-100">
-                      <div>
-                        <label className="text-sm font-semibold text-gray-700">Lokasi Survei</label>
-                        <Input
-                          type="text"
-                          placeholder="Masukkan lokasi (misal: Lantai 2, Area Parkir)"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          disabled={isUploading}
-                          className="mt-1 h-10 sm:h-11"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-semibold text-gray-700">Keterangan Foto</label>
-                        <Textarea
-                          placeholder="Tambahkan catatan penting tentang foto ini..."
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          disabled={isUploading}
-                          className="resize-none mt-1 h-20 sm:h-24"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Camera */}
-                    <CameraCapture
-                      onCapture={handleCapturePhoto}
-                      onCancel={() => {
-                        setShowCamera(false)
-                        setLocation("")
-                        setDescription("")
-                      }}
+                {/* Metadata Form */}
+                <div className="space-y-3 sm:space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Lokasi Survei</label>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan lokasi (misal: Lantai 2, Area Parkir)"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      disabled={isUploading}
+                      className="mt-1 h-10 sm:h-11"
                     />
-                  </>
-                ) : (
-                  <Button 
-                    onClick={() => setShowCamera(true)} 
-                    className="w-full py-6 sm:py-8 text-base sm:text-lg font-bold gap-2 sm:gap-3 bg-blue-600 hover:bg-blue-700 shadow-lg animate-pulse hover:animate-none h-12 sm:h-14"
-                  >
-                    <Camera className="w-5 h-5 sm:w-8 sm:h-8" />
-                    <span className="text-sm sm:text-base">BUKA KAMERA SEKARANG</span>
-                  </Button>
-                )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Keterangan Foto</label>
+                    <Textarea
+                      placeholder="Tambahkan catatan penting tentang foto ini..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={isUploading}
+                      className="resize-none mt-1 h-20 sm:h-24"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <UploadArea onFilesSelected={handleFilesSelected} isLoading={isUploading} />
               </CardContent>
             </Card>
           </div>

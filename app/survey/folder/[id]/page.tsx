@@ -142,13 +142,9 @@ function FolderDetailPageContent() {
               <h1 className="text-lg font-bold truncate max-w-[200px]">{folder?.name || "Detail Folder"}</h1>
             </div>
           </div>
-          <Button size="sm" onClick={() => {
-            if (folderId) {
-              router.push(`/survey/upload?folderId=${folderId}&action=camera`)
-            }
-          }} className="gap-2">
-            <Camera className="w-4 h-4" />
-            AMBIL FOTO
+          <Button size="sm" onClick={() => router.push("/survey/upload?folderId=" + folderId)} className="gap-2">
+            <Upload className="w-4 h-4" />
+            UPLOAD FOTO
           </Button>
         </div>
       </header>
@@ -173,14 +169,10 @@ function FolderDetailPageContent() {
           <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
             <FolderIcon className="w-16 h-16 mx-auto text-gray-200 mb-4" />
             <h3 className="text-lg font-bold text-gray-400">Belum ada foto di folder ini</h3>
-            <p className="text-sm text-gray-400 mb-6">Mulai ambil foto untuk mengisi folder ini</p>
-            <Button onClick={() => {
-              if (folderId) {
-                router.push(`/survey/upload?folderId=${folderId}&action=camera`)
-              }
-            }} className="gap-2">
-              <Camera className="w-4 h-4" />
-              AMBIL FOTO SEKARANG
+            <p className="text-sm text-gray-400 mb-6">Silakan upload foto dari galeri perangkat Anda</p>
+            <Button onClick={() => router.push("/survey/upload?folderId=" + folderId)} className="gap-2">
+              <Upload className="w-4 h-4" />
+              UPLOAD FOTO SEKARANG
             </Button>
           </div>
         ) : (
