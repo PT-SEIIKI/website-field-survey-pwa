@@ -69,20 +69,18 @@ export default function GalleryPage() {
       })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-primary/5 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => router.push("/survey/dashboard")} 
-              className="p-2 sm:p-2.5 hover:bg-primary/5 rounded-xl transition-colors text-primary"
+              className="p-2 hover:bg-secondary rounded-full transition-colors"
             >
-              <Home className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Home className="w-5 h-5" />
             </button>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-400 dark:to-indigo-300">
-              Local Gallery
-            </h1>
+            <h1 className="text-sm font-bold uppercase tracking-widest">Local Gallery</h1>
           </div>
 
           <LogoutButton />
@@ -90,123 +88,121 @@ export default function GalleryPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <Card className="flex-1">
-            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-              <CardTitle className="flex items-center justify-between text-sm sm:text-base lg:text-lg">
-                <span>Foto yang Tersimpan Lokal</span>
-                <Badge variant="secondary" className="text-xs sm:text-sm">{filteredPhotos.length}</Badge>
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        <div className="flex flex-col md:flex-row gap-6 mb-10">
+          <Card className="flex-1 border-border bg-card/50">
+            <CardHeader className="p-6">
+              <CardTitle className="flex items-center justify-between text-lg font-bold tracking-tight uppercase">
+                <span>Stored Locally</span>
+                <Badge variant="outline" className="font-mono text-xs">{filteredPhotos.length}</Badge>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Foto yang belum tersinkronisasi atau gagal sinkronisasi</CardDescription>
+              <CardDescription className="text-xs uppercase tracking-wider font-medium text-muted-foreground">Photos awaiting synchronization</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="w-full md:w-72">
-            <CardHeader className="px-4 py-3 pb-2">
-              <CardTitle className="text-[10px] font-black flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
+          <Card className="w-full md:w-72 border-border bg-card/50">
+            <CardHeader className="px-6 py-4 pb-2">
+              <CardTitle className="text-[10px] font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-[0.2em]">
                 <Filter className="w-3 h-3" />
-                Filter Folder
+                Folder Filter
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4">
+            <CardContent className="px-6 pb-6">
               <select 
                 value={selectedFolder}
                 onChange={(e) => setSelectedFolder(e.target.value)}
-                className="w-full h-10 rounded-xl border-2 border-primary/10 bg-background px-3 py-1 text-sm font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
               >
-                <option value="all">📁 Semua Folder</option>
+                <option value="all">ALL FOLDERS</option>
                 {folders.map(f => (
-                  <option key={f.id} value={f.id}>📁 {f.name}</option>
+                  <option key={f.id} value={f.id}>{f.name.toUpperCase()}</option>
                 ))}
-                <option value="none">⚪ Tanpa Folder</option>
+                <option value="none">NO FOLDER</option>
               </select>
             </CardContent>
           </Card>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8 sm:py-12">
-            <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-gray-400 animate-spin mb-2 sm:mb-3" />
-            <p className="text-xs sm:text-sm text-muted-foreground">Memuat foto...</p>
+          <div className="text-center py-20">
+            <RefreshCw className="w-8 h-8 mx-auto text-muted-foreground animate-spin mb-4" />
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Loading Gallery...</p>
           </div>
         ) : filteredPhotos.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8 sm:py-12 px-4">
-              <ImageIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-3 sm:mb-4" />
-              <p className="text-gray-600 font-medium mb-2 text-sm sm:text-base">Belum ada foto</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-                {selectedFolder === "all" 
-                  ? "Mulai dengan upload atau ambil foto menggunakan kamera"
-                  : "Tidak ada foto dalam folder ini"}
-              </p>
-              {selectedFolder === "all" && (
-                <Button onClick={() => router.push("/survey/upload")} className="gap-2 bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
-                  <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  Upload Foto
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-xl bg-secondary/10">
+            <ImageIcon className="w-12 h-12 text-muted-foreground/20 mb-6" />
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
+              {selectedFolder === "all" 
+                ? "Gallery is empty"
+                : "No photos in this folder"}
+            </p>
+            {selectedFolder === "all" && (
+              <Button onClick={() => router.push("/survey/upload")} className="rounded-full px-8 h-10 font-bold uppercase tracking-widest text-[11px]">
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Upload New
+              </Button>
+            )}
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPhotos.map((photo) => (
-              <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative w-full aspect-square bg-gray-100 group">
+              <Card key={photo.id} className="overflow-hidden border-border bg-card/50 hover:border-foreground/20 transition-all group">
+                <div className="relative w-full aspect-square bg-secondary/20">
                   <Image
                     src={URL.createObjectURL(photo.blob) || "/placeholder.svg"}
                     alt="Local photo"
                     fill
-                    className="object-contain group-hover:scale-105 transition-transform"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
 
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                     <Button
                       onClick={() => handleDelete(photo.id)}
                       disabled={deleting === photo.id}
                       variant="destructive"
-                      size="sm"
-                      className="gap-1 sm:gap-2 h-8 w-8 sm:h-9 sm:w-9 text-xs sm:text-sm"
+                      size="icon"
+                      className="h-10 w-10 rounded-full border border-destructive/20 shadow-xl"
                     >
-                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Hapus</span>
+                      <Trash2 className="w-5 h-5" />
                     </Button>
                   </div>
 
                   {photoMetadata[photo.id]?.folderId && (
-                    <div className="absolute top-2 left-2">
-                      <Badge className="bg-white/90 backdrop-blur text-blue-700 hover:bg-white flex items-center gap-1 border-none shadow-sm text-[9px] py-0 px-1.5 h-5 font-bold">
-                        <FolderIcon className="w-2.5 h-2.5" />
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="secondary" className="bg-background/90 backdrop-blur border border-border text-[9px] py-0 px-2 h-5 font-bold uppercase tracking-tight">
+                        <FolderIcon className="w-2.5 h-2.5 mr-1" />
                         {folders.find(f => f.id === photoMetadata[photo.id].folderId)?.name || "Folder"}
                       </Badge>
                     </div>
                   )}
                 </div>
 
-                <CardContent className="pt-3 sm:pt-4 px-3 sm:px-4 pb-3 sm:pb-4">
-                  <div className="space-y-2">
-                    <p className="text-[10px] sm:text-xs font-mono text-gray-600">{photo.id.substring(0, 12)}...</p>
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] sm:text-xs ${
-                        photo.syncStatus === "synced"
-                          ? "bg-green-100 text-green-700 border-green-200"
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-tight">{photo.id.substring(0, 12)}...</p>
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        variant="outline"
+                        className={`text-[9px] font-bold uppercase tracking-widest border-none ${
+                          photo.syncStatus === "synced"
+                            ? "bg-emerald-500/10 text-emerald-600"
+                            : photo.syncStatus === "syncing"
+                              ? "bg-amber-500/10 text-amber-600 animate-pulse"
+                              : photo.syncStatus === "failed"
+                                ? "bg-rose-500/10 text-rose-600"
+                                : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {photo.syncStatus === "synced"
+                          ? "Synced"
                           : photo.syncStatus === "syncing"
-                            ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                            ? "Syncing"
                             : photo.syncStatus === "failed"
-                              ? "bg-red-100 text-red-700 border-red-200"
-                              : "bg-gray-100 text-gray-700 border-gray-200"
-                      }`}
-                    >
-                      {photo.syncStatus === "synced"
-                        ? "✓ Tersinkronisasi"
-                        : photo.syncStatus === "syncing"
-                          ? "⟳ Sedang Sinkronisasi"
-                          : photo.syncStatus === "failed"
-                            ? "✗ Gagal"
-                            : "⧖ Pending"}
-                    </Badge>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">{new Date(photo.timestamp).toLocaleString("id-ID")}</p>
+                              ? "Failed"
+                              : "Pending"}
+                      </Badge>
+                      <p className="text-[9px] font-mono text-muted-foreground uppercase">{new Date(photo.timestamp).toLocaleDateString("en-GB")}</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
