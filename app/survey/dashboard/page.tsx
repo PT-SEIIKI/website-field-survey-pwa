@@ -79,21 +79,21 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-6 py-6 sm:py-10">
         {/* Hero / Welcome */}
-        <div className="mb-12 border-b border-border pb-10">
+        <div className="mb-8 sm:mb-12 border-b border-border pb-8 sm:pb-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-1">
               <Badge variant="outline" className="font-mono text-[10px] uppercase px-1.5 py-0 h-4 mb-2">SYSTEM ACCESS GRANTED</Badge>
-              <h2 className="text-4xl font-bold tracking-tighter">Welcome, {user.username}</h2>
-              <p className="text-muted-foreground max-w-lg text-sm leading-relaxed">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter">Welcome, {user.username}</h2>
+              <p className="text-muted-foreground max-w-lg text-xs sm:text-sm leading-relaxed">
                 {user.role === "admin" 
                   ? "Manage all survey data, user activities, and system statistics from this central console." 
                   : "Collect field data, manage survey folders, and sync your findings with the central database."}
               </p>
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => router.push("/survey/upload")} className="rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
+              <Button onClick={() => router.push("/survey/upload")} className="w-full sm:w-auto rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
                 <Plus className="w-4 h-4 mr-2" />
                 New Survey
               </Button>
@@ -102,39 +102,39 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-16">
           <StatCard 
             label="Pending Sync" 
             value={syncStatus.totalPending} 
-            description="Photos waiting for connection" 
-            icon={<Upload size={16} />}
+            description="Waiting Photos" 
+            icon={<Upload size={14} />}
             urgent={syncStatus.totalPending > 0}
           />
           <StatCard 
-            label="Cloud Photos" 
+            label="Cloud" 
             value={stats ? stats.totalPhotos : "0"} 
-            description="Total synced to server" 
-            icon={<BarChart3 size={16} />}
+            description="Synced Photos" 
+            icon={<BarChart3 size={14} />}
           />
           <StatCard 
             label="Folders" 
             value={folderStats.total} 
-            description="Active survey containers" 
-            icon={<FolderIcon size={16} />}
+            description="Survey Containers" 
+            icon={<FolderIcon size={14} />}
           />
           <StatCard 
-            label="Sync State" 
+            label="State" 
             value={syncStatus.isSyncing ? "Syncing" : "Active"} 
-            description={syncStatus.isSyncing ? "Transferring data..." : "System is idle"} 
-            icon={<RefreshCw size={16} className={syncStatus.isSyncing ? "animate-spin" : ""} />}
+            description={syncStatus.isSyncing ? "Transferring..." : "System Idle"} 
+            icon={<RefreshCw size={14} className={syncStatus.isSyncing ? "animate-spin" : ""} />}
             active={syncStatus.isSyncing}
           />
         </div>
 
         {/* Folder Management */}
-        <div className="space-y-10">
+        <div className="space-y-6 sm:space-y-10">
           <div className="flex items-center gap-4">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Survey Folders</h3>
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">Survey Folders</h3>
             <div className="h-px bg-border flex-1" />
           </div>
           <FolderManager />
@@ -142,26 +142,26 @@ export default function DashboardPage() {
 
         {/* Quick Actions (Admin) */}
         {user.role === "admin" && (
-          <div className="mt-20 pt-10 border-t border-border">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-6">Administrative</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-border">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-6">Administrative</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <button
                 onClick={() => router.push("/admin")} 
-                className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+                className="group flex flex-col items-start p-6 sm:p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
               >
-                <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
-                  <BarChart3 size={20} />
+                <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                  <BarChart3 className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
                 </div>
-                <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Open Admin Panel</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">Analyze all collected data, export reports, and manage high-level system configurations.</p>
+                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">Open Admin Panel</h4>
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Analyze all collected data, export reports, and manage high-level system configurations.</p>
               </button>
             </div>
           </div>
         )}
       </main>
       
-      <footer className="max-w-6xl mx-auto px-6 py-10 border-t border-border mt-20">
-        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-center">
+      <footer className="max-w-6xl mx-auto px-6 py-6 sm:py-10 border-t border-border mt-12 sm:mt-20">
+        <p className="text-[9px] sm:text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-center">
           &copy; 2026 FIELD SURVEY SYSTEM. BUILT WITH VERCEL DESIGN PRINCIPLES.
         </p>
       </footer>
@@ -171,17 +171,17 @@ export default function DashboardPage() {
 
 function StatCard({ label, value, description, icon, urgent, active }: { label: string, value: string | number, description: string, icon: React.ReactNode, urgent?: boolean, active?: boolean }) {
   return (
-    <div className={`p-6 border rounded-xl transition-all ${
+    <div className={`p-4 sm:p-6 border rounded-xl transition-all ${
       urgent ? "bg-amber-500/5 border-amber-500/20" : 
       active ? "bg-emerald-500/5 border-emerald-500/20" : 
       "bg-card/50 border-border hover:border-foreground/20"
     }`}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
-        <div className="text-muted-foreground">{icon}</div>
+      <div className="flex items-center justify-between mb-2 sm:mb-4">
+        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
+        <div className="text-muted-foreground scale-90 sm:scale-100">{icon}</div>
       </div>
-      <div className="text-3xl font-bold tracking-tighter mb-1">{value}</div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-tight">{description}</p>
+      <div className="text-2xl sm:text-3xl font-bold tracking-tighter mb-0.5 sm:mb-1">{value}</div>
+      <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-tight truncate">{description}</p>
     </div>
   )
 }

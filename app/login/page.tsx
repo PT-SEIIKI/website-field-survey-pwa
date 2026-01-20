@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { TutorialDialog } from "@/components/tutorial-dialog"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -132,9 +133,12 @@ export default function LoginPage() {
           </CardContent>
         </Card>
         
-        <p className="text-center text-[10px] text-muted-foreground font-mono">
-          &copy; 2026 FIELD SURVEY SYSTEM. ALL RIGHTS RESERVED.
-        </p>
+        <div className="flex flex-col items-center gap-4">
+          <TutorialDialog />
+          <p className="text-center text-[10px] text-muted-foreground font-mono">
+            &copy; 2026 FIELD SURVEY SYSTEM. ALL RIGHTS RESERVED.
+          </p>
+        </div>
       </div>
     </div>
   )
