@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search, X, ChevronRight, Camera, Upload, Plus } from "lucide-react"
+import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search, X, ChevronRight, Camera, Upload, Plus, UserPlus } from "lucide-react"
 
 interface Photo {
   photoId: string
