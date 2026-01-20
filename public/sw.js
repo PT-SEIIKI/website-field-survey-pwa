@@ -1,14 +1,12 @@
 // Service Worker untuk PWA - Offline support & Background Sync
-// Version: 1.0.5 - Comprehensive offline routing fix
-
-const CACHE_NAME = "survey-pwa-v1.0.5"
-const API_CACHE = "survey-api-v1.0.5"
+// Version: 1.0.6 - Enhanced offline routing & caching
+const CACHE_NAME = "survey-pwa-v1.0.6"
+const API_CACHE = "survey-api-v1.0.6"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",
   "/survey/dashboard",
   "/survey/upload",
-  "/survey/gallery",
   "/survey/folder",
   "/offline.html",
   "/manifest.json",
@@ -18,9 +16,6 @@ const ASSETS_TO_CACHE = [
   "/icon-192x192.png",
   "/icon-512x512.png",
   "/globals.css",
-  "/_next/static/chunks/main-app.js",
-  "/_next/static/chunks/webpack.js",
-  "/_next/static/chunks/pages/_app.js"
 ]
 
 // Install event - cache essential assets
@@ -54,7 +49,6 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Skip non-HTTP(S) requests
   if (!url.protocol.startsWith("http")) return;
 
   // API calls: Network First
@@ -62,6 +56,16 @@ self.addEventListener("fetch", (event) => {
     if (event.request.method === "GET") {
       event.respondWith(networkFirst(event.request, API_CACHE));
     }
+    return;
+  }
+
+  // Static Assets: Stale While Revalidate
+  if (
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/static/") ||
+    ASSETS_TO_CACHE.includes(url.pathname)
+  ) {
+    event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
     return;
   }
 
@@ -82,7 +86,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Assets: Stale While Revalidate
+  // Default: Stale While Revalidate
   event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
 });
 
@@ -94,13 +98,13 @@ async function cacheFallback(request) {
   let matched = await cache.match(request);
   if (matched) return matched;
 
-  // 2. Clean URL match (no trailing slash/params)
+  // 2. Clean URL match
   const cleanUrl = url.origin + url.pathname.replace(/\/$/, "");
   matched = await cache.match(cleanUrl);
   if (matched) return matched;
 
   // 3. Known routes fallback
-  const routes = ["/login", "/survey/dashboard", "/survey/upload", "/survey/gallery", "/survey/folder"];
+  const routes = ["/login", "/survey/dashboard", "/survey/upload", "/survey/folder"];
   for (const route of routes) {
     if (url.pathname.startsWith(route)) {
       const routeMatch = await cache.match(route);
@@ -138,37 +142,8 @@ async function staleWhileRevalidate(request, cacheName) {
   return cachedResponse || fetchPromise;
 }
 
-// Handle background sync
-self.addEventListener("sync", (event) => {
-  console.log("[SW] Background sync event:", event.tag)
-
-  if (event.tag === "sync-photos") {
-    event.waitUntil(syncPhotos())
-  }
-})
-
-async function syncPhotos() {
-  try {
-    console.log("[SW] Starting background sync")
-
-    // Send message to client to trigger sync
-    const clients = await self.clients.matchAll()
-    clients.forEach((client) => {
-      client.postMessage({
-        type: "BACKGROUND_SYNC",
-        tag: "sync-photos",
-      })
-    })
-  } catch (error) {
-    console.error("[SW] Background sync failed:", error)
-    throw error
-  }
-}
-
 // Handle messages from client
 self.addEventListener("message", (event) => {
-  console.log("[SW] Message received:", event.data)
-
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting()
   }
