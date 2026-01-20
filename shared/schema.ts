@@ -2,6 +2,14 @@ import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull().default("user"), // "admin" or "user"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const surveys = pgTable("surveys", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -37,6 +45,8 @@ export const photos = pgTable("photos", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
 export const insertSurveySchema = createInsertSchema(surveys);
 export const selectSurveySchema = createSelectSchema(surveys);
 export const insertFolderSchema = createInsertSchema(folders);
@@ -46,6 +56,8 @@ export const selectEntrySchema = createSelectSchema(surveyEntries);
 export const insertPhotoSchema = createInsertSchema(photos);
 export const selectPhotoSchema = createSelectSchema(photos);
 
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
 export type Survey = typeof surveys.$inferSelect;
 export type InsertSurvey = typeof surveys.$inferInsert;
 export type Folder = typeof folders.$inferSelect;

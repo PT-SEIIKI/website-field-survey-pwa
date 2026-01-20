@@ -1,9 +1,54 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
-import { insertEntrySchema, insertFolderSchema } from "@shared/schema";
+import { insertEntrySchema, insertFolderSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 
 export function registerRoutes(app: express.Express) {
+  // User Management Routes
+  app.get("/api/users", async (_req, res) => {
+    try {
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const data = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(data);
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create user" });
+      }
+    }
+  });
+
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertUserSchema.partial().parse(req.body);
+      const user = await storage.updateUser(id, data);
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteUser(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   // Get all surveys
   app.get("/api/surveys", async (_req, res) => {
     try {

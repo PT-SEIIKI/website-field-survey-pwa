@@ -1,8 +1,23 @@
-import { surveys, surveyEntries, photos, folders, type Survey, type InsertSurvey, type Entry, type InsertEntry, type Photo, type InsertPhoto, type Folder, type InsertFolder } from "@shared/schema";
+import { 
+  users, surveys, surveyEntries, photos, folders, 
+  type User, type InsertUser, 
+  type Survey, type InsertSurvey, 
+  type Entry, type InsertEntry, 
+  type Photo, type InsertPhoto, 
+  type Folder, type InsertFolder 
+} from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
+  // User methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  getUsers(): Promise<User[]>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: number): Promise<void>;
+
   getSurveys(): Promise<Survey[]>;
   getEntries(surveyId: number): Promise<Entry[]>;
   createEntry(entry: InsertEntry): Promise<Entry>;
@@ -18,6 +33,37 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async updateUser(id: number, updateData: Partial<InsertUser>): Promise<User> {
+    const [updated] = await db.update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   async getSurveys(): Promise<Survey[]> {
     return await db.select().from(surveys);
   }
