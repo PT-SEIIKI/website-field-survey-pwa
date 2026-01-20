@@ -174,7 +174,7 @@ function FolderDetailPageContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
             {photos.map((photo) => (
               <div key={photo.id} className="group relative">
-                <div className="aspect-[4/3] rounded-lg overflow-hidden border border-border bg-secondary/50 relative">
+                <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border bg-card shadow-sm relative">
                   <img 
                     src={photo.url} 
                     alt={photo.description} 

@@ -160,7 +160,7 @@ function UploadPageContent() {
             )}
 
             <div className="space-y-6">
-              <div className="space-y-4">
+              <div className="space-y-4 p-6 border border-border rounded-xl bg-card/50">
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Folder</label>
                   <select 
