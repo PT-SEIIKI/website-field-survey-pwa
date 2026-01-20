@@ -4,24 +4,23 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useLocalPhotos } from "@/hooks/use-local-photos"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useSyncStatus } from "@/hooks/use-sync-status"
-import { addPhotos, addPhotoWithMetadata } from "@/lib/photo-manager"
+import { addPhotoWithMetadata } from "@/lib/photo-manager"
 import { initConnectivityListener } from "@/lib/connectivity"
 import { initSyncManager, startSync } from "@/lib/sync-manager"
 import { UploadArea } from "@/components/upload-area"
-import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, Home, RefreshCw, Upload, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
+import { AlertCircle, ArrowLeft, RefreshCw, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Suspense, useEffect, useState } from "react"
 import { getFolders } from "@/lib/indexeddb"
 
 export default function UploadPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
       <UploadPageContent />
     </Suspense>
   )
@@ -35,7 +34,6 @@ function UploadPageContent() {
   const syncStatus = useSyncStatus()
 
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [location, setLocation] = useState("")
   const [description, setDescription] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
@@ -48,7 +46,6 @@ function UploadPageContent() {
         const data = await getFolders()
         setFolders(data)
         
-        // Auto-select folder if folderId is in URL
         const folderId = searchParams.get("folderId")
         if (folderId) {
           setSelectedFolderId(folderId)
@@ -61,11 +58,8 @@ function UploadPageContent() {
   }, [searchParams])
 
   useEffect(() => {
-    // Initialize offline & sync features
     initConnectivityListener()
     initSyncManager()
-
-    // Auto-sync when online
     if (isOnline) {
       startSync()
     }
@@ -74,8 +68,6 @@ function UploadPageContent() {
   const handleFilesSelected = async (files: File[]) => {
     setIsUploading(true)
     try {
-      // In a real implementation, we'd pass folderId to addPhotos
-      // For now we'll use metadata for all selected files
       for (const file of files) {
         await addPhotoWithMetadata(file, {
           location: location || undefined,
@@ -85,16 +77,12 @@ function UploadPageContent() {
       }
       setSuccessMessage(`${files.length} foto berhasil ditambahkan`)
       await refreshPhotos()
-
-      // Clear message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000)
-
-      // Auto-sync if online
       if (isOnline) {
         startSync()
       }
     } catch (error) {
-      console.error("[v0] Upload error:", error)
+      console.error("Upload error:", error)
     } finally {
       setIsUploading(false)
     }
@@ -102,8 +90,6 @@ function UploadPageContent() {
 
   const handleSync = async () => {
     await startSync()
-    
-    // Refresh folders after sync
     try {
       const data = await getFolders()
       setFolders(data)
@@ -113,242 +99,186 @@ function UploadPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-primary/5 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button 
-              onClick={() => router.push("/survey/dashboard")} 
-              className="p-2 sm:p-2.5 hover:bg-primary/5 rounded-xl transition-colors text-primary"
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => router.back()} 
+              className="rounded-full h-9 w-9"
             >
-              <Home className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-400 dark:to-indigo-300">
-              Upload Survey
-            </h1>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-lg font-semibold tracking-tight">Upload Foto</h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full ${
-                isOnline ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
-              }`}
-            >
-              {isOnline ? <Wifi className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <WifiOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              <span className="text-xs sm:text-sm font-medium">{isOnline ? "Online" : "Offline"}</span>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-medium tracking-wide uppercase ${
+              isOnline 
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+            }`}>
+              {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              {isOnline ? "Online" : "Offline"}
             </div>
-            <LogoutButton />
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Status Banner */}
-        {syncStatus.totalPending > 0 && (
-          <Card className="mb-4 sm:mb-6 border-blue-200 bg-blue-50">
-            <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+      <main className="max-w-4xl mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7 space-y-8">
+            {syncStatus.totalPending > 0 && (
+              <div className="bg-secondary border border-border rounded-lg p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium text-blue-900 text-sm sm:text-base">{syncStatus.totalPending} foto menunggu sinkronisasi</p>
-                    <p className="text-xs sm:text-sm text-blue-700">Foto akan dikirim otomatis saat koneksi tersedia</p>
+                    <p className="text-sm font-medium">{syncStatus.totalPending} foto tertunda</p>
+                    <p className="text-xs text-muted-foreground">Otomatis sinkron saat online</p>
                   </div>
                 </div>
-                <Button onClick={handleSync} disabled={syncStatus.isSyncing || !isOnline} size="sm" className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
-                  <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${syncStatus.isSyncing ? "animate-spin" : ""}`} />
-                  <span className="hidden xs:inline">{syncStatus.isSyncing ? "Sinkronisasi..." : "Sinkronisasi Sekarang"}</span>
-                  <span className="xs:hidden">{syncStatus.isSyncing ? "..." : "Sync"}</span>
+                <Button 
+                  onClick={handleSync} 
+                  disabled={syncStatus.isSyncing || !isOnline} 
+                  size="sm" 
+                  variant="outline"
+                  className="h-8 text-xs bg-background"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 mr-2 ${syncStatus.isSyncing ? "animate-spin" : ""}`} />
+                  Sync
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
 
-        {successMessage && (
-          <Card className="mb-4 sm:mb-6 border-green-200 bg-green-50">
-            <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
-              <p className="text-green-700 font-medium text-sm sm:text-base">{successMessage}</p>
-            </CardContent>
-          </Card>
-        )}
+            {successMessage && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-lg p-4 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                {successMessage}
+              </div>
+            )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-          {/* Upload Section */}
-          <div className="xl:col-span-2 space-y-4 sm:space-y-6">
-            <Card className="px-4 sm:px-6">
-              <CardHeader className="pb-4 sm:pb-6 pt-4 sm:pt-6">
-                <CardTitle className="text-sm sm:text-base lg:text-lg">Upload Foto Survei</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  {isOnline
-                    ? "Foto akan diupload secara langsung ke server"
-                    : "Foto akan disimpan lokal dan dikirim saat online"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 pb-4 sm:pb-6">
-                <div className="space-y-2 mb-4">
-                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <FolderIcon className="w-4 h-4 text-blue-600" />
-                    Pilih Folder Tujuan (Opsional)
-                  </label>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Folder</label>
                   <select 
                     value={selectedFolderId}
                     onChange={(e) => setSelectedFolderId(e.target.value)}
-                    className="w-full h-10 sm:h-11 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
                   >
-                    <option value="">-- Tanpa Folder --</option>
+                    <option value="">Tanpa Folder</option>
                     {folders.map(f => (
                       <option key={f.id} value={f.id}>{f.name}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Metadata Form */}
-                <div className="space-y-3 sm:space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Lokasi Survei</label>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan lokasi (misal: Lantai 2, Area Parkir)"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      disabled={isUploading}
-                      className="mt-1 h-10 sm:h-11"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Keterangan Foto</label>
-                    <Textarea
-                      placeholder="Tambahkan catatan penting tentang foto ini..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      disabled={isUploading}
-                      className="resize-none mt-1 h-20 sm:h-24"
-                      rows={3}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Lokasi</label>
+                  <Input
+                    placeholder="Contoh: Lantai 2, Area Parkir"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    disabled={isUploading}
+                    className="bg-background border-border focus:ring-1 focus:ring-foreground"
+                  />
                 </div>
 
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Keterangan</label>
+                  <Textarea
+                    placeholder="Catatan tambahan..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    disabled={isUploading}
+                    className="bg-background border-border focus:ring-1 focus:ring-foreground min-h-[100px] resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border">
                 <UploadArea onFilesSelected={handleFilesSelected} isLoading={isUploading} />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Sidebar - Local Gallery */}
-          <Card className="sticky top-20 sm:top-24 h-fit">
-            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-              <CardTitle className="text-base sm:text-lg flex items-center justify-between">
-                <span>Galeri Lokal</span>
-                <Badge variant="secondary" className="text-xs sm:text-sm">{photos.length}</Badge>
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">Status sinkronisasi foto di perangkat ini</CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              {isLoading ? (
-                <div className="text-center py-6 sm:py-8">
-                  <div className="animate-spin mb-2">
-                    <Upload className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-gray-400" />
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Memuat foto...</p>
-                </div>
-              ) : (
-                <Tabs defaultValue="pending" className="w-full">
-                  <TabsList className="grid grid-cols-4 w-full h-9 mb-4">
-                    <TabsTrigger value="failed" className="text-[10px] px-0">Gagal</TabsTrigger>
-                    <TabsTrigger value="pending" className="text-[10px] px-0">Pending</TabsTrigger>
-                    <TabsTrigger value="syncing" className="text-[10px] px-0">Sync</TabsTrigger>
-                    <TabsTrigger value="synced" className="text-[10px] px-0">Berhasil</TabsTrigger>
+          <aside className="lg:col-span-5">
+            <div className="sticky top-24 border border-border rounded-lg overflow-hidden bg-background">
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Status Sinkronisasi</h3>
+                <Badge variant="outline" className="font-mono text-[10px]">{photos.length}</Badge>
+              </div>
+              <div className="p-4">
+                <Tabs defaultValue="pending">
+                  <TabsList className="grid grid-cols-4 w-full h-8 p-0 bg-secondary rounded-md overflow-hidden mb-4">
+                    <TabsTrigger value="pending" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Pending</TabsTrigger>
+                    <TabsTrigger value="syncing" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Syncing</TabsTrigger>
+                    <TabsTrigger value="synced" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Done</TabsTrigger>
+                    <TabsTrigger value="failed" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Fail</TabsTrigger>
                   </TabsList>
 
-                  <div className="max-h-80 sm:max-h-96 overflow-y-auto space-y-2">
-                    <TabsContent value="failed" className="mt-0 space-y-2">
-                      {photos.filter(p => p.syncStatus === "failed").length === 0 ? (
-                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
-                      ) : (
-                        photos.filter(p => p.syncStatus === "failed").map((photo) => (
-                          <PhotoItem key={photo.id} photo={photo} />
-                        ))
-                      )}
+                  <div className="min-h-[200px] max-h-[400px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                    <TabsContent value="pending" className="m-0 space-y-1">
+                      <PhotoList status="pending" photos={photos} />
                     </TabsContent>
-
-                    <TabsContent value="pending" className="mt-0 space-y-2">
-                      {photos.filter(p => !p.syncStatus || p.syncStatus === "pending").length === 0 ? (
-                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
-                      ) : (
-                        photos.filter(p => !p.syncStatus || p.syncStatus === "pending").map((photo) => (
-                          <PhotoItem key={photo.id} photo={photo} />
-                        ))
-                      )}
+                    <TabsContent value="syncing" className="m-0 space-y-1">
+                      <PhotoList status="syncing" photos={photos} />
                     </TabsContent>
-
-                    <TabsContent value="syncing" className="mt-0 space-y-2">
-                      {photos.filter(p => p.syncStatus === "syncing").length === 0 ? (
-                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
-                      ) : (
-                        photos.filter(p => p.syncStatus === "syncing").map((photo) => (
-                          <PhotoItem key={photo.id} photo={photo} />
-                        ))
-                      )}
+                    <TabsContent value="synced" className="m-0 space-y-1">
+                      <PhotoList status="synced" photos={photos} />
                     </TabsContent>
-
-                    <TabsContent value="synced" className="mt-0 space-y-2">
-                      {photos.filter(p => p.syncStatus === "synced").length === 0 ? (
-                        <p className="text-center py-4 text-[10px] text-muted-foreground">Tidak ada</p>
-                      ) : (
-                        photos.filter(p => p.syncStatus === "synced").map((photo) => (
-                          <PhotoItem key={photo.id} photo={photo} />
-                        ))
-                      )}
+                    <TabsContent value="failed" className="m-0 space-y-1">
+                      <PhotoList status="failed" photos={photos} />
                     </TabsContent>
                   </div>
                 </Tabs>
-              )}
 
-              <Button
-                onClick={refreshPhotos}
-                variant="outline"
-                className="w-full mt-4 bg-transparent h-9 sm:h-10 text-xs sm:text-sm"
-                disabled={isLoading}
-              >
-                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                Refresh
-              </Button>
-            </CardContent>
-          </Card>
+                <Button
+                  onClick={refreshPhotos}
+                  variant="ghost"
+                  className="w-full mt-4 h-9 text-xs text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
+                >
+                  <RefreshCw className={`w-3 h-3 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh List
+                </Button>
+              </div>
+            </div>
+          </aside>
         </div>
       </main>
     </div>
   )
 }
 
-function PhotoItem({ photo }: { photo: any }) {
+function PhotoList({ status, photos }: { status: string, photos: any[] }) {
+  const filtered = photos.filter(p => {
+    if (status === "pending") return !p.syncStatus || p.syncStatus === "pending"
+    return p.syncStatus === status
+  })
+
+  if (filtered.length === 0) {
+    return <p className="text-center py-10 text-[10px] text-muted-foreground italic uppercase tracking-widest">Kosong</p>
+  }
+
   return (
-    <div
-      className={`p-2 rounded border text-[10px] ${
-        photo.syncStatus === "synced"
-          ? "bg-green-50 border-green-200"
-          : photo.syncStatus === "failed"
-            ? "bg-red-50 border-red-200"
-            : photo.syncStatus === "syncing"
-              ? "bg-yellow-50 border-yellow-200"
-              : "bg-gray-50 border-gray-200"
-      }`}
-    >
-      <p className="font-medium truncate">{photo.id.substring(0, 8)}...</p>
-      <div className="mt-1 flex items-center justify-between">
-        <span className="text-muted-foreground">
-          {photo.syncStatus === "synced"
-            ? "Berhasil"
-            : photo.syncStatus === "syncing"
-              ? "Sinkronisasi..."
-              : photo.syncStatus === "failed"
-                ? "Gagal"
-                : "Menunggu"}
-        </span>
-      </div>
+    <div className="space-y-1.5">
+      {filtered.map((photo) => (
+        <div key={photo.id} className="flex items-center justify-between p-2.5 rounded-md border border-border bg-secondary/30">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-[10px] font-mono text-muted-foreground truncate">{photo.id.substring(0, 8)}</span>
+            <span className="text-[11px] font-medium truncate">{photo.location || "Tanpa Lokasi"}</span>
+          </div>
+          <div className={`h-1.5 w-1.5 rounded-full ${
+            photo.syncStatus === 'synced' ? 'bg-emerald-500' :
+            photo.syncStatus === 'failed' ? 'bg-rose-500' :
+            photo.syncStatus === 'syncing' ? 'bg-amber-500 animate-pulse' :
+            'bg-muted-foreground/30'
+          }`} />
+        </div>
+      ))}
     </div>
   )
 }

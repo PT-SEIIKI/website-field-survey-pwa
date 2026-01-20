@@ -2,9 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { Home, Folder as FolderIcon, Camera, Download, Eye, RefreshCw, ArrowLeft } from "lucide-react"
+import { Folder as FolderIcon, Download, Eye, RefreshCw, ArrowLeft, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 interface Photo {
@@ -14,6 +13,7 @@ interface Photo {
   description: string
   timestamp: number
   createdAt: string
+  isOffline?: boolean
 }
 
 function FolderDetailPageContent() {
@@ -35,11 +35,8 @@ function FolderDetailPageContent() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      // Try local IndexedDB first for offline support
-      const { getFolders, getMetadata, getPhoto } = await import("@/lib/indexeddb")
+      const { getFolders, getMetadata, getAllPhotos } = await import("@/lib/indexeddb")
       const localFolders = await getFolders()
-      
-      // Normalize folderId comparison (string vs possible number/offlineId)
       const localFolder = localFolders.find(f => String(f.id) === String(folderId))
       
       if (localFolder) {
@@ -50,18 +47,16 @@ function FolderDetailPageContent() {
           nik: localFolder.nik
         })
         
-        // Find photos associated with this folder in local storage
-        const allPhotos = await (await import("@/lib/indexeddb")).getAllPhotos()
+        const allPhotos = await getAllPhotos()
         const folderPhotos = []
         
         for (const p of allPhotos) {
           const meta = await getMetadata(p.id)
-          // Ensure folderId comparison is robust
           if (meta?.folderId && String(meta.folderId) === String(folderId)) {
             folderPhotos.push({
               id: p.id,
               url: URL.createObjectURL(p.blob),
-              location: meta.location || "N/A",
+              location: meta.location || "Tanpa Lokasi",
               description: meta.description || "",
               timestamp: p.timestamp,
               createdAt: new Date(p.timestamp).toISOString(),
@@ -69,13 +64,9 @@ function FolderDetailPageContent() {
             })
           }
         }
-        
-        if (folderPhotos.length > 0) {
-          setPhotos(folderPhotos)
-        }
+        setPhotos(folderPhotos)
       }
 
-      // Then try to load folder details including photos from server
       const folderRes = await fetch(`/api/folders/${folderId}`)
       if (folderRes.ok) {
         const folderData = await folderRes.json()
@@ -85,24 +76,23 @@ function FolderDetailPageContent() {
           const serverPhotos = folderData.photos.map((p: any) => ({
             id: p.id.toString(),
             url: p.url,
-            location: folderData.name || "N/A",
+            location: folderData.name || "Tanpa Lokasi",
             description: folderData.houseName || "",
             timestamp: new Date(p.createdAt).getTime(),
             createdAt: p.createdAt
           }))
           
-          // Merge server photos with local ones, preferring server if synced
           setPhotos(prev => {
             const merged = [...prev]
             serverPhotos.forEach((sp: any) => {
-              const index = merged.findIndex(mp => String(mp.id) === String(sp.id) || String(mp.id) === String(sp.offlineId))
+              const index = merged.findIndex(mp => String(mp.id) === String(sp.id) || (mp.isOffline && String(mp.id) === String(sp.offlineId)))
               if (index >= 0) {
                 merged[index] = sp
               } else {
                 merged.push(sp)
               }
             })
-            return merged
+            return merged.sort((a, b) => b.timestamp - a.timestamp)
           })
         }
       }
@@ -122,121 +112,144 @@ function FolderDetailPageContent() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mb-4" />
-        <p className="text-muted-foreground font-medium">Memuat data folder...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground mb-4" />
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Loading Folder</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => router.push("/survey/dashboard")}>
+    <div className="min-h-screen bg-background text-foreground">
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.push("/survey/dashboard")} className="rounded-full h-9 w-9">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-2">
-              <FolderIcon className="w-5 h-5 text-blue-600" />
-              <h1 className="text-lg font-bold truncate max-w-[200px]">{folder?.name || "Detail Folder"}</h1>
+            <div>
+              <h1 className="text-sm font-semibold tracking-tight uppercase">{folder?.name || "Folder"}</h1>
+              <p className="text-[10px] text-muted-foreground font-mono">{folderId}</p>
             </div>
           </div>
-          <Button size="sm" onClick={() => router.push("/survey/upload?folderId=" + folderId)} className="gap-2">
-            <Upload className="w-4 h-4" />
-            UPLOAD FOTO
+          <Button 
+            size="sm" 
+            onClick={() => router.push("/survey/upload?folderId=" + folderId)} 
+            className="rounded-full px-4 h-9 font-medium"
+          >
+            <Upload className="w-3.5 h-3.5 mr-2" />
+            Upload
           </Button>
         </div>
-      </header>
+      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <Card className="mb-6">
-          <CardHeader className="pb-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-xl font-black text-blue-700 uppercase">{folder?.name}</CardTitle>
-                <CardDescription className="font-medium mt-1">
-                  {folder?.houseName && <span className="block">Pemilik: {folder.houseName}</span>}
-                  {folder?.nik && <span className="block">NIK: {folder.nik}</span>}
-                </CardDescription>
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        <div className="mb-12 border-b border-border pb-8">
+          <div className="flex flex-wrap justify-between items-end gap-6">
+            <div className="space-y-1">
+              <Badge variant="secondary" className="font-mono text-[10px] px-1.5 py-0 h-4 mb-2">FOLDER DETAIL</Badge>
+              <h2 className="text-4xl font-bold tracking-tighter">{folder?.name}</h2>
+              <div className="flex gap-4 text-sm text-muted-foreground pt-2">
+                {folder?.houseName && <span className="flex items-center gap-1.5">• {folder.houseName}</span>}
+                {folder?.nik && <span className="flex items-center gap-1.5">• NIK: {folder.nik}</span>}
               </div>
-              <Badge variant="secondary">{photos.length} Foto</Badge>
             </div>
-          </CardHeader>
-        </Card>
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Total Photos</p>
+              <p className="text-3xl font-mono leading-none">{photos.length}</p>
+            </div>
+          </div>
+        </div>
 
         {photos.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-            <FolderIcon className="w-16 h-16 mx-auto text-gray-200 mb-4" />
-            <h3 className="text-lg font-bold text-gray-400">Belum ada foto di folder ini</h3>
-            <p className="text-sm text-gray-400 mb-6">Silakan upload foto dari galeri perangkat Anda</p>
-            <Button onClick={() => router.push("/survey/upload?folderId=" + folderId)} className="gap-2">
-              <Upload className="w-4 h-4" />
-              UPLOAD FOTO SEKARANG
+          <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-xl bg-secondary/20">
+            <FolderIcon className="w-12 h-12 text-muted-foreground/30 mb-4" />
+            <h3 className="text-sm font-medium">No photos found</h3>
+            <p className="text-xs text-muted-foreground mt-1 mb-6">Start by uploading some photos to this folder.</p>
+            <Button onClick={() => router.push("/survey/upload?folderId=" + folderId)} variant="outline" size="sm">
+              Upload Now
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
             {photos.map((photo) => (
-              <Card key={photo.id} className="overflow-hidden group hover:border-blue-400 transition-all shadow-sm">
-                <div className="aspect-square relative bg-gray-100 overflow-hidden">
+              <div key={photo.id} className="group relative">
+                <div className="aspect-[4/3] rounded-lg overflow-hidden border border-border bg-secondary/50 relative">
                   <img 
                     src={photo.url} 
                     alt={photo.description} 
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://placehold.co/400x400?text=Foto+Tidak+Ditemukan"
+                      (e.target as HTMLImageElement).src = "https://placehold.co/400x300?text=Photo+Not+Found"
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button size="icon" variant="secondary" className="rounded-full w-8 h-8" onClick={() => {
-                      setSelectedPhoto(photo)
-                      setShowPreview(true)
-                    }}>
-                      <Eye className="w-4 h-4" />
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                    <Button 
+                      size="icon" 
+                      variant="secondary" 
+                      className="rounded-full w-10 h-10 border border-border shadow-sm" 
+                      onClick={() => {
+                        setSelectedPhoto(photo)
+                        setShowPreview(true)
+                      }}
+                    >
+                      <Eye className="w-5 h-5" />
                     </Button>
-                    <Button size="icon" variant="secondary" className="rounded-full w-8 h-8" onClick={() => handleDownload(photo.url, photo.id)}>
-                      <Download className="w-4 h-4" />
+                    <Button 
+                      size="icon" 
+                      variant="secondary" 
+                      className="rounded-full w-10 h-10 border border-border shadow-sm" 
+                      onClick={() => handleDownload(photo.url, photo.id)}
+                    >
+                      <Download className="w-5 h-5" />
                     </Button>
                   </div>
+                  {photo.isOffline && (
+                    <Badge className="absolute top-2 right-2 bg-amber-500 text-white border-none text-[8px] h-4 px-1">OFFLINE</Badge>
+                  )}
                 </div>
-                <CardContent className="p-2 sm:p-3">
-                  <p className="text-[10px] sm:text-xs font-bold truncate mb-1">{photo.location || "Tanpa Lokasi"}</p>
-                  <p className="text-[8px] sm:text-[10px] text-muted-foreground line-clamp-1">{photo.description || "-"}</p>
-                  <p className="text-[8px] text-muted-foreground mt-2">{new Date(photo.timestamp).toLocaleDateString()}</p>
-                </CardContent>
-              </Card>
+                <div className="mt-3 space-y-1">
+                  <h4 className="text-xs font-bold tracking-tight uppercase truncate">{photo.location}</h4>
+                  <p className="text-[10px] text-muted-foreground line-clamp-1">{photo.description || "No description"}</p>
+                  <p className="text-[9px] font-mono text-muted-foreground pt-1">{new Date(photo.timestamp).toLocaleDateString('en-GB')}</p>
+                </div>
+              </div>
             ))}
           </div>
         )}
       </main>
 
-      {/* Preview Modal */}
+      {/* Modern Preview Overlay */}
       {showPreview && selectedPhoto && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
-          <div className="max-w-4xl w-full flex flex-col gap-4" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center text-white">
-              <h3 className="font-bold">{selectedPhoto.location}</h3>
+        <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200" onClick={() => setShowPreview(false)}>
+          <div className="max-w-5xl w-full flex flex-col gap-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <div className="space-y-0.5">
+                <Badge variant="outline" className="font-mono text-[9px] px-1 h-4">{selectedPhoto.id}</Badge>
+                <h3 className="text-xl font-bold tracking-tight uppercase">{selectedPhoto.location}</h3>
+              </div>
               <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.url, selectedPhoto.id)} className="gap-2">
-                  <Download className="w-4 h-4" />
-                  UNDUH
+                <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.url, selectedPhoto.id)} className="h-9 px-4 border border-border">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)} className="text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)} className="rounded-full h-9 w-9">
                   <X className="w-6 h-6" />
                 </Button>
               </div>
             </div>
-            <div className="relative aspect-video sm:aspect-[4/3] w-full bg-black rounded-xl overflow-hidden">
+            
+            <div className="relative aspect-video sm:aspect-[16/10] w-full bg-secondary/20 rounded-2xl overflow-hidden border border-border shadow-2xl">
               <img 
                 src={selectedPhoto.url} 
                 alt={selectedPhoto.description} 
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl text-white">
-              <p className="text-sm">{selectedPhoto.description || "Tidak ada deskripsi"}</p>
-              <p className="text-xs text-white/60 mt-2">{new Date(selectedPhoto.timestamp).toLocaleString()}</p>
+            
+            <div className="max-w-2xl">
+              <p className="text-sm leading-relaxed text-foreground/80">{selectedPhoto.description || "No description available for this survey photo."}</p>
+              <p className="text-[10px] font-mono text-muted-foreground mt-4 uppercase tracking-widest">{new Date(selectedPhoto.timestamp).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -245,17 +258,9 @@ function FolderDetailPageContent() {
   )
 }
 
-function X({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  )
-}
-
 export default function FolderDetailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
       <FolderDetailPageContent />
     </Suspense>
   )
