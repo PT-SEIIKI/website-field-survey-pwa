@@ -1,0 +1,185 @@
+:\Users\Edu Juanda Pratama>ssh root@154.19.37.61 -p 2288
+root@154.19.37.61's password:
+
+ System information as of Tue Jan 20 21:33:23 WIB 2026
+
+  System load:  0.16               Processes:             134
+  Usage of /:   27.5% of 38.58GB   Users logged in:       1
+  Memory usage: 41%                IPv4 address for eth0: 154.19.37.61
+  Swap usage:   0%
+
+Expanded Security Maintenance for Applications is not enabled.
+
+31 updates can be applied immediately.
+28 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+2 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+New release '24.04.3 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+*** System restart required ***
+********************************************************************************
+
+Welcome to One-Click OpenLiteSpeed Node.js Server.
+To keep this Droplet secure, the firewalld is enabled.
+All ports are BLOCKED except 22 (SSH), 80 (HTTP) and 443 (HTTPS).
+
+The Node.js OLS One-Click Quickstart guide:
+* https://docs.litespeedtech.com/cloud/images/nodejs/
+
+In a web browser, you can view:
+* The sample node site: http://154.19.37.61/
+
+On the server:
+* You can get the Web Admin admin password with the following command:
+   sudo cat .litespeed_password
+
+System Status:
+  Load : 0.16, 0.05, 0.01
+  CPU  : 0.75286%
+  RAM  : 717/1912MB (37.50%)
+  Disk : 11/39GB (28%)
+
+********************************************************************************
+Last login: Tue Jan 20 18:59:21 2026 from 103.111.100.169
+sudo: unable to resolve host server.seyiki.com: Name or service not known
+sudo: unable to resolve host server.seyiki.com: Name or service not known
+To visit your apps by domain instead of IP, please enter a valid domain.
+If you don't have one yet, you may cancel this process by pressing CTRL+C and continuing to SSH.
+This prompt will open again the next time you log in, and will continue to do so until you finish the setup.
+Make sure the domain's DNS record has been properly pointed to this server.
+Enter the root domain only, then the system will add both the root domain and the www domain for you.
+Your domain:
+
+Please input a valid domain
+
+root@server:~# cd /var/www/survei.seyiki.com
+root@server:/var/www/survei.seyiki.com# git fetch origin
+git reset --hard origin/main
+npm install
+npm run db:push
+npm run db:seed
+npm run build
+pm2 restart all
+remote: Enumerating objects: 193, done.
+remote: Counting objects: 100% (193/193), done.
+remote: Compressing objects: 100% (55/55), done.
+remote: Total 169 (delta 64), reused 169 (delta 64), pack-reused 0 (from 0)
+Receiving objects: 100% (169/169), 1.42 MiB | 6.10 MiB/s, done.
+Resolving deltas: 100% (64/64), completed with 14 local objects.
+From https://github.com/PT-SEIIKI/website-field-survey-pwa
+   9fecfb8..d2a7903  main       -> origin/main
+HEAD is now at d2a7903 Initial commit from VSCode
+
+up to date, audited 297 packages in 1m
+
+50 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (4 moderate, 1 high)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> website-survey-pwa@0.1.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/var/www/survei.seyiki.com/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[i] No changes detected
+
+> website-survey-pwa@0.1.0 db:seed
+> npx tsx server/seed.ts
+
+/var/www/survei.seyiki.com/server/db.ts:8
+  throw new Error(
+        ^
+
+
+Error: DATABASE_URL must be set. Did you forget to provision a database?
+    at pg (/var/www/survei.seyiki.com/server/db.ts:8:9)
+    at Object.<anonymous> (/var/www/survei.seyiki.com/server/db.ts:24:43)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Object.transformer (/usr/lib/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at require (node:internal/modules/helpers:182:18)
+    at <anonymous> (/var/www/survei.seyiki.com/server/seed.ts:1:20)
+    at Object.<anonymous> (/var/www/survei.seyiki.com/server/seed.ts:50:6)
+
+Node.js v20.19.6
+
+> website-survey-pwa@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.7
+   - Environments: .env
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 20.9s
+   Skipping validation of types
+ ✓ Linting
+   Collecting page data  ...[DB] Connecting to database...
+ ✓ Collecting page data
+[DB] Connecting to database...
+ ✓ Generating static pages (20/20)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                               Size  First Load JS
+┌ ○ /                                    494 B         250 kB
+├ ○ /_not-found                          184 B         250 kB
+├ ○ /admin                             5.37 kB         255 kB
+├ ○ /admin/users                       5.01 kB         255 kB
+├ ƒ /api/entries                         155 B         250 kB
+├ ƒ /api/folders                         155 B         250 kB
+├ ƒ /api/folders/[id]                    155 B         250 kB
+├ ƒ /api/health                          155 B         250 kB
+├ ƒ /api/login                           155 B         250 kB
+├ ƒ /api/photos                          155 B         250 kB
+├ ƒ /api/photos/[id]                     155 B         250 kB
+├ ƒ /api/photos/list                     155 B         250 kB
+├ ƒ /api/stats                           155 B         250 kB
+├ ƒ /api/upload                          155 B         250 kB
+├ ƒ /api/users                           155 B         250 kB
+├ ƒ /api/users/[id]                      155 B         250 kB
+├ ○ /login                             4.65 kB         254 kB
+├ ○ /manifest.webmanifest                155 B         250 kB
+├ ○ /survey/dashboard                  9.02 kB         259 kB
+├ ƒ /survey/folder/[id]                3.49 kB         253 kB
+├ ○ /survey/gallery                    5.64 kB         255 kB
+└ ○ /survey/upload                     7.73 kB         257 kB
++ First Load JS shared by all           250 kB
+  └ chunks/vendor-626ca7bc68d7067c.js   248 kB
+  └ other shared chunks (total)        1.97 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0, 2, 12, 15 ])
+[PM2] [iot-backend](0) ✓
+[PM2] [seyiki-main](2) ✓
+[PM2] [seyiki-docs](12) ✓
+[PM2] [survei-seyiki](15) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ iot-backend        │ fork     │ 116  │ online    │ 0%       │ 48.2mb   │
+│ 12 │ seyiki-docs        │ fork     │ 37   │ online    │ 0%       │ 37.8mb   │
+│ 2  │ seyiki-main        │ fork     │ 38   │ online    │ 0%       │ 45.4mb   │
+│ 15 │ survei-seyiki      │ cluster  │ 464  │ online    │ 0%       │ 37.7mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@server:/var/www/survei.seyiki.com#
