@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search, X, ChevronRight } from "lucide-react"
+import { Calendar, MapPin, Trash2, Eye, Download, RefreshCw, Home, BarChart3, Search, X, ChevronRight, Camera, Upload, Plus } from "lucide-react"
 
 interface Photo {
   photoId: string
@@ -158,12 +158,44 @@ function AdminPageContent() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* Stats Section */}
+        {/* Welcome Section */}
         <div className="mb-12 border-b border-border pb-10">
           <div className="flex flex-col gap-2 mb-8">
-            <Badge variant="outline" className="w-fit font-mono text-[10px] uppercase px-1.5 py-0 h-4">SYSTEM STATISTICS</Badge>
-            <h2 className="text-4xl font-bold tracking-tighter">Data Overview</h2>
+            <Badge variant="outline" className="w-fit font-mono text-[10px] uppercase px-1.5 py-0 h-4">SYSTEM ACCESS GRANTED</Badge>
+            <h2 className="text-4xl font-bold tracking-tighter text-foreground">Admin Controls</h2>
+            <p className="text-muted-foreground text-sm max-w-2xl mt-2">
+              You have full administrative access. You can perform field surveys like a surveyor or manage all collected data from this unified interface.
+            </p>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <button
+              onClick={() => router.push("/survey/upload")}
+              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
+              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+                <Camera className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Field Survey</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Start a new field survey, take photos, and collect location data directly.</p>
+            </button>
+            <button
+              onClick={() => router.push("/survey/dashboard")}
+              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
+              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+                <Home className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Surveyor Dashboard</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Access the surveyor's simplified dashboard for folder management and quick status checks.</p>
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-4 mb-8">
+            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Data Insights</h3>
+            <div className="h-px bg-border flex-1" />
+          </div>
+
           {stats && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <AdminStatCard label="Total Photos" value={stats.totalPhotos} sub="Uploaded items" />

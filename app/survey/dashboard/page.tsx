@@ -92,11 +92,17 @@ export default function DashboardPage() {
                   : "Collect field data, manage survey folders, and sync your findings with the central database."}
               </p>
             </div>
-            <div className="flex gap-3">
-              <Button onClick={() => router.push("/survey/upload")} className="w-full sm:w-auto rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => router.push("/survey/upload")} className="flex-1 sm:flex-none rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
                 <Plus className="w-4 h-4 mr-2" />
                 New Survey
               </Button>
+              {user.role === "admin" && (
+                <Button onClick={() => router.push("/admin")} variant="outline" className="flex-1 sm:flex-none rounded-full px-6 font-bold uppercase text-[11px] tracking-widest border-border">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Admin Portal
+                </Button>
+              )}
             </div>
           </div>
         </div>
