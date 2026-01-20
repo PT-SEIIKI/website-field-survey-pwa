@@ -1,13 +1,13 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { initializeDefaultUsers, login } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    // Initialize default users
     initializeDefaultUsers()
   }, [])
 
@@ -28,7 +27,6 @@ export default function LoginPage() {
 
     try {
       const result = login({ username, password })
-
       if (result.success) {
         router.push("/survey/dashboard")
       } else {
@@ -40,91 +38,99 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-indigo-50 to-white dark:from-indigo-950 dark:via-background dark:to-background p-4 sm:p-6 lg:p-8">
-      <div className="absolute inset-0 bg-grid-slate-200 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-800/20 dark:[mask-image:linear-gradient(0deg,transparent,black)] -z-10" />
-      <Card className="w-full max-w-md border-0 bg-white/80 dark:bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500 mx-4 sm:mx-auto">
-        <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-        <CardHeader className="space-y-1 pt-6 sm:pt-8 px-4 sm:px-6">
-          <div className="flex items-center gap-3 mb-4 sm:mb-6 group justify-center">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg shadow-blue-500/30 transform transition-transform group-hover:rotate-12">
-              S
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-800 dark:from-blue-400 dark:to-indigo-300 tracking-tight">
-              Survey PWA
-            </h1>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl text-center font-bold">Welcome Back</CardTitle>
-          <CardDescription className="text-center text-sm sm:text-base">Akses portal survei lapangan profesional Anda</CardDescription>
-        </CardHeader>
-        <CardContent className="pb-6 sm:pb-8 px-4 sm:px-6">
-          <div className="mb-6 sm:mb-8 p-3 sm:p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-3">
-            <h3 className="font-bold text-sm flex items-center gap-2 text-primary">
-              <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs">?</span>
-              Quick Guide:
-            </h3>
-            <ul className="text-xs text-muted-foreground space-y-2 sm:space-y-2.5">
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">01.</span>
-                <span><strong>Roles:</strong> Surveyor untuk lapangan, Admin untuk rekap.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">02.</span>
-                <span><strong>Capture:</strong> Ambil foto langsung dari lokasi.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">03.</span>
-                <span><strong>Offline:</strong> Data aman tersimpan tanpa koneksi.</span>
-              </li>
-            </ul>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
+      <div className="w-full max-w-[400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-2 text-center">
+          <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 mb-4">
+            Survey PWA v1.0
+          </Badge>
+          <h1 className="text-3xl font-bold tracking-tighter">Login to Portal</h1>
+          <p className="text-sm text-muted-foreground">
+            Akses sistem survei lapangan profesional.
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Username</label>
-              <Input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+        <Card className="border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-black/5">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-lg font-semibold tracking-tight">Selamat Datang</CardTitle>
+            <CardDescription className="text-xs">
+              Gunakan kredensial demo untuk mencoba fitur sistem.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                  Username
+                </label>
+                <Input
+                  type="text"
+                  placeholder="surveyor1"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="username"
+                  className="h-10 bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                  Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                  className="h-10 bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-[11px] font-medium text-destructive animate-in fade-in zoom-in-95">
+                  {error}
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                className="w-full h-10 font-bold uppercase tracking-widest text-[11px]" 
                 disabled={isLoading}
-                autoComplete="username"
-                className="h-10 sm:h-11"
-              />
-              <p className="text-xs text-muted-foreground">Demo: surveyor1 atau admin</p>
+              >
+                {isLoading ? "Authenticating..." : "Login"}
+              </Button>
+            </form>
+
+            <div className="pt-6 border-t border-border space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-md bg-secondary/50 border border-border">
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Surveyor</p>
+                  <p className="text-[11px] font-mono truncate">surveyor1</p>
+                  <p className="text-[10px] text-muted-foreground font-mono">password123</p>
+                </div>
+                <div className="p-3 rounded-md bg-secondary/50 border border-border">
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Admin</p>
+                  <p className="text-[11px] font-mono truncate">admin</p>
+                  <p className="text-[10px] text-muted-foreground font-mono">admin123</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-center gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                <span className="flex items-center gap-1.5">• Offline Ready</span>
+                <span className="flex items-center gap-1.5">• Secure Sync</span>
+                <span className="flex items-center gap-1.5">• PWA</span>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                autoComplete="current-password"
-                className="h-10 sm:h-11"
-              />
-              <p className="text-xs text-muted-foreground">Demo: password123 atau admin123</p>
-            </div>
-
-            {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">{error}</div>}
-
-            <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base" disabled={isLoading}>
-              {isLoading ? "Memproses..." : "Login"}
-            </Button>
-          </form>
-
-          <div className="mt-4 sm:mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm space-y-1">
-            <p className="font-medium text-blue-900 text-sm">Demo Credentials:</p>
-            <p className="text-blue-800 text-xs sm:text-sm">
-              <strong>Surveyor:</strong> surveyor1 / password123
-            </p>
-            <p className="text-blue-800 text-xs sm:text-sm">
-              <strong>Admin:</strong> admin / admin123
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <p className="text-center text-[10px] text-muted-foreground font-mono">
+          &copy; 2026 FIELD SURVEY SYSTEM. ALL RIGHTS RESERVED.
+        </p>
+      </div>
     </div>
   )
 }
