@@ -18,7 +18,7 @@ export function LogoutButton() {
       variant="ghost" 
       size="sm" 
       onClick={handleLogout} 
-      className="h-8 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary/50 font-bold uppercase tracking-tighter text-[10px]"
+      className="h-9 px-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent hover:border-border font-bold uppercase tracking-widest text-[10px] transition-all"
     >
       <LogOut className="w-3.5 h-3.5 mr-2" />
       Sign Out
