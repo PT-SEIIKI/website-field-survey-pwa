@@ -84,23 +84,23 @@ export default function DashboardPage() {
         <div className="mb-8 sm:mb-12 border-b border-border pb-8 sm:pb-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-1">
-              <Badge variant="outline" className="font-mono text-[10px] uppercase px-1.5 py-0 h-4 mb-2">SYSTEM ACCESS GRANTED</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter">Welcome, {user.username}</h2>
+              <Badge variant="outline" className="font-mono text-[10px] uppercase px-1.5 py-0 h-4 mb-2">AKSES SISTEM DIBERIKAN</Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter">Selamat Datang, {user.username}</h2>
               <p className="text-muted-foreground max-w-lg text-xs sm:text-sm leading-relaxed">
                 {user.role === "admin" 
-                  ? "Manage all survey data, user activities, and system statistics from this central console." 
-                  : "Collect field data, manage survey folders, and sync your findings with the central database."}
+                  ? "Kelola semua data survey, aktivitas pengguna, dan statistik sistem dari konsol pusat ini." 
+                  : "Kumpulkan data lapangan, kelola folder survey, dan sinkronkan temuan Anda dengan database pusat."}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => router.push("/survey/upload")} className="flex-1 sm:flex-none rounded-full px-6 font-bold uppercase text-[11px] tracking-widest">
                 <Plus className="w-4 h-4 mr-2" />
-                New Survey
+                Survey Baru
               </Button>
               {user.role === "admin" && (
                 <Button onClick={() => router.push("/admin")} variant="outline" className="flex-1 sm:flex-none rounded-full px-6 font-bold uppercase text-[11px] tracking-widest border-border">
                   <BarChart3 className="w-4 h-4 mr-2" />
-                  Admin Portal
+                  Portal Admin
                 </Button>
               )}
             </div>
@@ -110,28 +110,28 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-16">
           <StatCard 
-            label="Pending Sync" 
+            label="Tertunda" 
             value={syncStatus.totalPending} 
-            description="Waiting Photos" 
+            description="Menunggu Sinkron" 
             icon={<Upload size={14} />}
             urgent={syncStatus.totalPending > 0}
           />
           <StatCard 
             label="Cloud" 
             value={stats ? stats.totalPhotos : "0"} 
-            description="Synced Photos" 
+            description="Foto Tersinkron" 
             icon={<BarChart3 size={14} />}
           />
           <StatCard 
-            label="Folders" 
+            label="Folder" 
             value={folderStats.total} 
-            description="Survey Containers" 
+            description="Kontainer Survey" 
             icon={<FolderIcon size={14} />}
           />
           <StatCard 
-            label="State" 
-            value={syncStatus.isSyncing ? "Syncing" : "Active"} 
-            description={syncStatus.isSyncing ? "Transferring..." : "System Idle"} 
+            label="Status" 
+            value={syncStatus.isSyncing ? "Sinkron" : "Aktif"} 
+            description={syncStatus.isSyncing ? "Mentransfer..." : "Sistem Siap"} 
             icon={<RefreshCw size={14} className={syncStatus.isSyncing ? "animate-spin" : ""} />}
             active={syncStatus.isSyncing}
           />
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         {/* Folder Management */}
         <div className="space-y-6 sm:space-y-10">
           <div className="flex items-center gap-4">
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">Survey Folders</h3>
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">Folder Survey</h3>
             <div className="h-px bg-border flex-1" />
           </div>
           <FolderManager />
@@ -149,7 +149,7 @@ export default function DashboardPage() {
         {/* Quick Actions (Admin) */}
         {user.role === "admin" && (
           <div className="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-border">
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-6">Administrative</h3>
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-6">Administratif</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <button
                 onClick={() => router.push("/admin")} 
@@ -158,8 +158,8 @@ export default function DashboardPage() {
                 <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
                   <BarChart3 className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
                 </div>
-                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">Open Admin Panel</h4>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Analyze all collected data, export reports, and manage high-level system configurations.</p>
+                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">Buka Portal Admin</h4>
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Analisis semua data yang dikumpulkan, ekspor laporan, dan kelola konfigurasi sistem tingkat tinggi.</p>
               </button>
               <button
                 onClick={() => router.push("/admin/users")} 
@@ -168,8 +168,8 @@ export default function DashboardPage() {
                 <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
                   <UserPlus className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
                 </div>
-                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">User Management</h4>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Manage system access, create new surveyor accounts, and monitor user roles.</p>
+                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">Manajemen User</h4>
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Kelola akses sistem, buat akun surveyor baru, dan pantau peran pengguna.</p>
               </button>
             </div>
           </div>

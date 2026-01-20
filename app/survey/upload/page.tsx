@@ -213,10 +213,10 @@ function UploadPageContent() {
               <div className="p-4">
                 <Tabs defaultValue="pending">
                   <TabsList className="grid grid-cols-4 w-full h-8 p-0 bg-secondary rounded-md overflow-hidden mb-4">
-                    <TabsTrigger value="pending" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Pending</TabsTrigger>
-                    <TabsTrigger value="syncing" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Syncing</TabsTrigger>
-                    <TabsTrigger value="synced" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Done</TabsTrigger>
-                    <TabsTrigger value="failed" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Fail</TabsTrigger>
+                    <TabsTrigger value="pending" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Tertunda</TabsTrigger>
+                    <TabsTrigger value="syncing" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Proses</TabsTrigger>
+                    <TabsTrigger value="synced" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Selesai</TabsTrigger>
+                    <TabsTrigger value="failed" className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background">Gagal</TabsTrigger>
                   </TabsList>
 
                   <div className="min-h-[200px] max-h-[400px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
@@ -242,7 +242,7 @@ function UploadPageContent() {
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-3 h-3 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                  Refresh List
+                  Segarkan List
                 </Button>
               </div>
             </div>

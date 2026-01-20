@@ -150,7 +150,7 @@ function AdminPageContent() {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="SEIIKI" className="h-6 w-auto" />
               <div className="h-4 w-px bg-border" />
-              <h1 className="text-sm font-bold uppercase tracking-widest">Admin Portal</h1>
+              <h1 className="text-sm font-bold uppercase tracking-widest">Portal Admin</h1>
             </div>
           </div>
           <LogoutButton />
@@ -161,10 +161,10 @@ function AdminPageContent() {
         {/* Welcome Section */}
         <div className="mb-12 border-b border-border pb-10">
           <div className="flex flex-col gap-2 mb-8">
-            <Badge variant="outline" className="w-fit font-mono text-[10px] uppercase px-1.5 py-0 h-4">SYSTEM ACCESS GRANTED</Badge>
-            <h2 className="text-4xl font-bold tracking-tighter text-foreground">Admin Controls</h2>
+            <Badge variant="outline" className="w-fit font-mono text-[10px] uppercase px-1.5 py-0 h-4">AKSES SISTEM DIBERIKAN</Badge>
+            <h2 className="text-4xl font-bold tracking-tighter text-foreground">Kontrol Admin</h2>
             <p className="text-muted-foreground text-sm max-w-2xl mt-2">
-              You have full administrative access. You can perform field surveys like a surveyor or manage all collected data from this unified interface.
+              Anda memiliki akses administratif penuh. Anda dapat melakukan survey lapangan seperti surveyor atau mengelola semua data yang terkumpul dari antarmuka terpadu ini.
             </p>
           </div>
 
@@ -176,8 +176,8 @@ function AdminPageContent() {
               <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
                 <Camera className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Field Survey</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Start a new field survey, take photos, and collect location data directly.</p>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Survey Lapangan</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Mulai survey lapangan baru, ambil foto, dan kumpulkan data lokasi secara langsung.</p>
             </button>
             <button
               onClick={() => router.push("/admin/users")}
@@ -186,8 +186,8 @@ function AdminPageContent() {
               <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
                 <UserPlus className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">User Management</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Create, update, and manage system users and their access levels.</p>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Manajemen User</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Buat, perbarui, dan kelola pengguna sistem serta tingkat akses mereka.</p>
             </button>
             <button
               onClick={() => router.push("/survey/dashboard")}
@@ -196,22 +196,22 @@ function AdminPageContent() {
               <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
                 <Home className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Surveyor Dashboard</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Access the surveyor's simplified dashboard for folder management and quick status checks.</p>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Dashboard Surveyor</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Akses dashboard sederhana surveyor untuk manajemen folder dan pengecekan status cepat.</p>
             </button>
           </div>
           
           <div className="flex items-center gap-4 mb-8">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Data Insights</h3>
+            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Wawasan Data</h3>
             <div className="h-px bg-border flex-1" />
           </div>
 
           {stats && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <AdminStatCard label="Total Photos" value={stats.totalPhotos} sub="Uploaded items" />
-              <AdminStatCard label="Storage Size" value={`${stats.totalSizeMB} MB`} sub="Total consumption" />
-              <AdminStatCard label="Unique Areas" value={stats.locations.length} sub="Surveyed points" />
-              <AdminStatCard label="Active Days" value={stats.uniqueDates} sub="Collection period" />
+              <AdminStatCard label="Total Foto" value={stats.totalPhotos} sub="Item diunggah" />
+              <AdminStatCard label="Ukuran Penyimpanan" value={`${stats.totalSizeMB} MB`} sub="Total konsumsi" />
+              <AdminStatCard label="Area Unik" value={stats.locations.length} sub="Titik tersurvey" />
+              <AdminStatCard label="Hari Aktif" value={stats.uniqueDates} sub="Periode pengumpulan" />
             </div>
           )}
         </div>
@@ -220,29 +220,29 @@ function AdminPageContent() {
         <div className="mb-10 p-6 border border-border rounded-xl bg-card/50">
           <div className="flex items-center gap-3 mb-6">
             <Search className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Search & Filters</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pencarian & Filter</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 items-end">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Location</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Lokasi</label>
               <Input
-                placeholder="Search location..."
+                placeholder="Cari lokasi..."
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
                 className="h-10 bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">From Date</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Dari Tanggal</label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-10 bg-background/50 border-border" />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">To Date</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Sampai Tanggal</label>
               <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-10 bg-background/50 border-border" />
             </div>
             <div className="flex gap-2">
               <Button onClick={handleSearch} className="flex-1 h-10 font-bold uppercase tracking-widest text-[11px]">
-                Apply
+                Terapkan
               </Button>
               <Button onClick={handleReset} variant="outline" className="h-10 px-4 border-border">
                 <RefreshCw className="w-4 h-4" />
@@ -255,7 +255,7 @@ function AdminPageContent() {
         <div className="border border-border rounded-xl bg-card/50 overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between bg-background/30">
             <div className="flex items-center gap-4">
-              <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Survey Entries</h3>
+              <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Entri Survey</h3>
               <Badge variant="outline" className="font-mono text-[10px] px-1.5 h-4">{photos.length}</Badge>
             </div>
           </div>
@@ -266,9 +266,9 @@ function AdminPageContent() {
                 <TableRow className="bg-secondary/20 border-none hover:bg-secondary/20">
                   <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">ID</TableHead>
                   <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">Folder</TableHead>
-                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">Location</TableHead>
-                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 hidden sm:table-cell">Date</TableHead>
-                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 text-right">Actions</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4">Lokasi</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 hidden sm:table-cell">Tanggal</TableHead>
+                  <TableHead className="text-[10px] uppercase font-bold tracking-widest py-4 text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -281,7 +281,7 @@ function AdminPageContent() {
                 ) : photos.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="py-20 text-center">
-                      <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground">No records found</p>
+                      <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground">Tidak ada data ditemukan</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -290,7 +290,7 @@ function AdminPageContent() {
                       <TableCell className="font-mono text-[9px] text-muted-foreground uppercase">{photo.photoId.substring(0, 8)}</TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-tight h-5 px-1.5">
-                          {photo.folderName || "UNFOLDERED"}
+                          {photo.folderName || "TANPA FOLDER"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -354,7 +354,7 @@ function AdminPageContent() {
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" onClick={() => handleDownload(selectedPhoto.filename)} className="h-9 px-4 border border-border uppercase text-[10px] font-bold tracking-widest">
                   <Download className="w-4 h-4 mr-2" />
-                  Download
+                  Unduh
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)} className="rounded-full h-9 w-9">
                   <X className="w-6 h-6" />
@@ -372,17 +372,17 @@ function AdminPageContent() {
                   if (!target.src.includes('/uploads/linked_uploads/')) {
                     target.src = `/uploads/linked_uploads/${selectedPhoto.filename}`;
                   } else {
-                    target.src = "https://placehold.co/800x600?text=Photo+Not+Found"
+                    target.src = "https://placehold.co/800x600?text=Foto+Tidak+Ditemukan"
                   }
                 }}
               />
             </div>
             
             <div className="max-w-2xl">
-              <p className="text-sm leading-relaxed text-foreground/80">{selectedPhoto.description || "No additional description available."}</p>
+              <p className="text-sm leading-relaxed text-foreground/80">{selectedPhoto.description || "Tidak ada deskripsi tambahan."}</p>
               <div className="flex items-center gap-4 mt-6">
                 <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Uploaded: {new Date(selectedPhoto.uploadedAt).toLocaleString()}
+                  Diunggah: {new Date(selectedPhoto.uploadedAt).toLocaleString("id-ID")}
                 </div>
                 <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                   Folder: {selectedPhoto.folderName}

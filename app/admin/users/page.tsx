@@ -94,7 +94,7 @@ export default function UserManagement() {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="SEIIKI" className="h-6 w-auto" />
               <div className="h-4 w-px bg-border" />
-              <h1 className="text-sm font-bold uppercase tracking-widest">User Management</h1>
+              <h1 className="text-sm font-bold uppercase tracking-widest">Manajemen User</h1>
             </div>
           </div>
           <LogoutButton />
@@ -104,7 +104,7 @@ export default function UserManagement() {
       <main className="p-8 max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">System Accounts</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Akun Sistem</h2>
             <p className="text-muted-foreground mt-1 text-sm">Kelola akun surveyor dan administrator sistem.</p>
           </div>
           

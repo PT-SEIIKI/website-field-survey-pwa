@@ -145,7 +145,7 @@ export function FolderManager() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Search folders, NIK, or names..." 
+            placeholder="Cari folder, NIK, atau nama..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 h-10 text-sm bg-background/50 border-border focus:ring-1 focus:ring-foreground transition-all"
@@ -156,32 +156,32 @@ export function FolderManager() {
           <DialogTrigger asChild>
             <Button onClick={() => handleOpenDialog()} variant="outline" className="h-10 rounded-full px-6 border-border font-bold uppercase tracking-widest text-[10px]">
               <Plus className="w-4 h-4 mr-2" />
-              Create Folder
+              Buat Folder
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[400px] bg-background border-border p-8 rounded-2xl shadow-2xl">
             <DialogHeader className="space-y-1">
-              <DialogTitle className="text-xl font-bold tracking-tight uppercase">{editingFolder ? "Edit Folder" : "New Folder"}</DialogTitle>
-              <CardDescription className="text-xs">Enter survey container details below.</CardDescription>
+              <DialogTitle className="text-xl font-bold tracking-tight uppercase">{editingFolder ? "Edit Folder" : "Folder Baru"}</DialogTitle>
+              <CardDescription className="text-xs">Masukkan detail kontainer survey di bawah ini.</CardDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6 pt-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Folder Name</Label>
+                  <Label htmlFor="name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Nama Folder</Label>
                   <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Contoh: Blok A - Sektor 1" className="h-10 bg-secondary/20" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="houseName" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">House Owner</Label>
-                  <Input id="houseName" value={houseName} onChange={(e) => setHouseName(e.target.value)} placeholder="Nama Pemilik" className="h-10 bg-secondary/20" />
+                  <Label htmlFor="houseName" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Nama Pemilik</Label>
+                  <Input id="houseName" value={houseName} onChange={(e) => setHouseName(e.target.value)} placeholder="Nama Pemilik Rumah" className="h-10 bg-secondary/20" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nik" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">NIK (16 Digits)</Label>
+                  <Label htmlFor="nik" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">NIK (16 Digit)</Label>
                   <Input id="nik" value={nik} onChange={(e) => setNik(e.target.value)} placeholder="16 Digit NIK" maxLength={16} className="h-10 bg-secondary/20" />
                 </div>
               </div>
               <DialogFooter>
                 <Button type="submit" className="w-full h-11 font-bold uppercase tracking-widest text-[11px]">
-                  {editingFolder ? "Save Changes" : "Create Folder"}
+                  {editingFolder ? "Simpan Perubahan" : "Buat Folder"}
                 </Button>
               </DialogFooter>
             </form>
@@ -196,7 +196,7 @@ export function FolderManager() {
       ) : folders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-xl bg-secondary/10">
           <FolderIcon className="w-10 h-10 text-muted-foreground/20 mb-4" />
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">No active folders found</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Tidak ada folder aktif ditemukan</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
