@@ -161,6 +161,16 @@ export default function DashboardPage() {
                 <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">Open Admin Panel</h4>
                 <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Analyze all collected data, export reports, and manage high-level system configurations.</p>
               </button>
+              <button
+                onClick={() => router.push("/admin/users")} 
+                className="group flex flex-col items-start p-6 sm:p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              >
+                <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                  <UserPlus className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                </div>
+                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">User Management</h4>
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">Manage system access, create new surveyor accounts, and monitor user roles.</p>
+              </button>
             </div>
           </div>
         )}

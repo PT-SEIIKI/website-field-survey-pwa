@@ -180,6 +180,16 @@ function AdminPageContent() {
               <p className="text-xs text-muted-foreground leading-relaxed">Start a new field survey, take photos, and collect location data directly.</p>
             </button>
             <button
+              onClick={() => router.push("/admin/users")}
+              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
+              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">User Management</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Create, update, and manage system users and their access levels.</p>
+            </button>
+            <button
               onClick={() => router.push("/survey/dashboard")}
               className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
             >
