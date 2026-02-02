@@ -40,6 +40,7 @@ export const surveyEntries = pgTable("survey_entries", {
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
   entryId: integer("entry_id").references(() => surveyEntries.id),
+  houseId: integer("house_id").references(() => houses.id),
   url: text("url").notNull(),
   offlineId: text("offline_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { getCurrentUser } from "@/lib/auth"
 import { Upload, BarChart3, Wifi, WifiOff, Camera, RefreshCw, Folder as FolderIcon, Plus, UserPlus } from "lucide-react"
 import { useEffect, useState } from "react"
+import { VillageHierarchy } from "@/components/village-hierarchy"
 import { FolderManager } from "@/components/folder-manager"
 import { getFolders } from "@/lib/indexeddb"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +19,12 @@ export default function DashboardPage() {
   const syncStatus = useSyncStatus()
   const [user, setUser] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
+  const [villages, setVillages] = useState<any[]>([])
   const [folderStats, setFolderStats] = useState({ total: 0, pending: 0 })
+
+  useEffect(() => {
+    fetch("/api/villages").then(res => res.json()).then(setVillages).catch(console.error)
+  }, [])
 
   useEffect(() => {
     const loadFolderStats = async () => {
@@ -123,9 +129,9 @@ export default function DashboardPage() {
             icon={<BarChart3 size={14} />}
           />
           <StatCard 
-            label="Folder" 
-            value={folderStats.total} 
-            description="Kontainer Survey" 
+            label="Wilayah" 
+            value={villages.length} 
+            description="Desa Terdata" 
             icon={<FolderIcon size={14} />}
           />
           <StatCard 
@@ -137,13 +143,13 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Folder Management */}
+        {/* Village Hierarchy View */}
         <div className="space-y-6 sm:space-y-10">
           <div className="flex items-center gap-4">
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">Folder Survey</h3>
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]">Wilayah Survey (Desa → Dusun → Rumah)</h3>
             <div className="h-px bg-border flex-1" />
           </div>
-          <FolderManager />
+          <VillageHierarchy />
         </div>
 
         {/* Quick Actions (Admin) */}

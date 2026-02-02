@@ -228,6 +228,9 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
       if (folder) serverFolderId = folder.id
     }
 
+    // New hierarchy support:
+    const serverHouseId = metadata?.houseId;
+    
     const response = await fetch("/api/entries", {
       method: "POST",
       headers: {
@@ -240,7 +243,10 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
           description: metadata?.description,
           location: metadata?.location,
           timestamp: photoData.timestamp,
-          folderId: metadata?.folderId // Keep offline folder ID in metadata for ref
+          folderId: metadata?.folderId,
+          villageId: metadata?.villageId,
+          subVillageId: metadata?.subVillageId,
+          houseId: metadata?.houseId
         }),
         offlineId: photoId,
         isSynced: true
@@ -253,7 +259,7 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
 
     const entryData = await response.json();
 
-    // Now upload photo linked to this entry
+    // Now upload photo linked to this entry AND the house directly
     const photoResponse = await fetch("/api/photos", {
       method: "POST",
       headers: {
@@ -261,6 +267,7 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
       },
       body: JSON.stringify({
         entryId: entryData.id,
+        houseId: serverHouseId,
         url: `/uploads/${photoId}.jpg`,
         offlineId: photoId
       }),

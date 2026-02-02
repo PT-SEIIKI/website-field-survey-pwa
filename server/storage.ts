@@ -33,6 +33,7 @@ export interface IStorage {
   getFolderByOfflineId(offlineId: string): Promise<Folder | undefined>;
   updateFolder(id: number, folder: Partial<InsertFolder>): Promise<Folder>;
   deleteFolder(id: number): Promise<void>;
+  getPhotosByHouseId(houseId: number): Promise<Photo[]>;
   getPhotosByEntryId(entryId: number): Promise<Photo[]>;
 
   // Village methods
@@ -169,6 +170,10 @@ export class DatabaseStorage implements IStorage {
 
   async getPhotosByEntryId(entryId: number): Promise<Photo[]> {
     return await db.select().from(photos).where(eq(photos.entryId, entryId));
+  }
+
+  async getPhotosByHouseId(houseId: number): Promise<Photo[]> {
+    return await db.select().from(photos).where(eq(photos.houseId, houseId));
   }
 
   async getVillages(): Promise<Village[]> {

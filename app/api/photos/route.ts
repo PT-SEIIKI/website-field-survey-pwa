@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     console.log("[API] Creating photo with body:", JSON.stringify(body));
 
     const entryId = body.entryId ? parseInt(body.entryId.toString(), 10) : null;
+    const houseId = body.houseId ? parseInt(body.houseId.toString(), 10) : null;
     const url = body.url || "";
     const offlineId = body.offlineId || null;
 
@@ -16,6 +17,7 @@ export async function POST(req: NextRequest) {
 
     const photo = await storage.createPhoto({
       entryId,
+      houseId,
       url,
       offlineId
     });
