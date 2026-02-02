@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
     const fs = await import("fs/promises")
 
     // Get query params for filtering
+    const houseId = request.nextUrl.searchParams.get("houseId")
+    const villageId = request.nextUrl.searchParams.get("villageId")
+    const subVillageId = request.nextUrl.searchParams.get("subVillageId")
     const location = request.nextUrl.searchParams.get("location")
     const startDate = request.nextUrl.searchParams.get("startDate")
     const endDate = request.nextUrl.searchParams.get("endDate")
@@ -35,6 +38,15 @@ export async function GET(request: NextRequest) {
     let filteredPhotos = photos.filter((p) => p !== null)
 
     // Apply filters
+    if (houseId) {
+      filteredPhotos = filteredPhotos.filter((p) => String(p.houseId) === houseId)
+    }
+    if (villageId) {
+      filteredPhotos = filteredPhotos.filter((p) => String(p.villageId) === villageId)
+    }
+    if (subVillageId) {
+      filteredPhotos = filteredPhotos.filter((p) => String(p.subVillageId) === subVillageId)
+    }
     if (location) {
       filteredPhotos = filteredPhotos.filter((p) => p.location?.toLowerCase().includes(location.toLowerCase()))
     }

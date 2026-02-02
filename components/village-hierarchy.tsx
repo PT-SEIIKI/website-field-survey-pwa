@@ -116,7 +116,7 @@ function HouseItem({ house }: any) {
   useEffect(() => {
     fetch(`/api/photos/list?houseId=${house.id}`)
       .then(res => res.json())
-      .then(data => setPhotoCount(data.length || 0))
+      .then(data => setPhotoCount(data.photos?.length || 0))
   }, [house.id])
 
   return (

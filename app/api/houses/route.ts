@@ -14,6 +14,13 @@ export async function GET(request: NextRequest) {
         .orderBy(houses.name)
       return NextResponse.json(filtered)
     }
+
+    const houseId = searchParams.get("id")
+    if (houseId) {
+      const [house] = await db.select().from(houses)
+        .where(eq(houses.id, parseInt(houseId)))
+      return NextResponse.json(house || { error: "Not found" })
+    }
     
     const all = await db.select().from(houses).orderBy(houses.name)
     return NextResponse.json(all)

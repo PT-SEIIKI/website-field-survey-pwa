@@ -30,11 +30,10 @@ function HouseDetailContent() {
 
   const fetchHouseDetails = async () => {
     try {
-      // Fetch house info (need to make sure this API exists or uses generic houses API)
-      const houseRes = await fetch(`/api/houses`)
+      // Fetch house info
+      const houseRes = await fetch(`/api/houses/${params.id}`)
       if (houseRes.ok) {
-        const allHouses = await houseRes.json()
-        const currentHouse = allHouses.find((h: any) => h.id.toString() === params.id)
+        const currentHouse = await houseRes.json()
         setHouse(currentHouse)
       }
 
@@ -42,7 +41,7 @@ function HouseDetailContent() {
       const photosRes = await fetch(`/api/photos/list?houseId=${params.id}`)
       if (photosRes.ok) {
         const data = await photosRes.json()
-        setPhotos(data || [])
+        setPhotos(data.photos || [])
       }
     } catch (e) {
       console.error(e)
