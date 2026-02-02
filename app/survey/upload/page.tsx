@@ -172,7 +172,6 @@ function UploadPageContent() {
     try {
       for (const file of files) {
         await addPhotoWithMetadata(file, {
-          location: houses.find(h => h.id === parseInt(selectedHouseId))?.name || undefined,
           villageId: selectedVillageId,
           subVillageId: selectedSubVillageId,
           houseId: selectedHouseId
@@ -446,7 +445,6 @@ function PhotoList({ status, photos }: { status: string, photos: any[] }) {
         <div key={photo.id} className="flex items-center justify-between p-2.5 rounded-md border border-border bg-secondary/30">
           <div className="flex flex-col gap-0.5 min-w-0">
             <span className="text-[10px] font-mono text-muted-foreground truncate">{photo.id.substring(0, 8)}</span>
-            <span className="text-[11px] font-medium truncate">{photo.location || "Tanpa Lokasi"}</span>
           </div>
           <div className={`h-1.5 w-1.5 rounded-full ${
             photo.syncStatus === 'synced' ? 'bg-emerald-500' :
