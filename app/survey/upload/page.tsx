@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useLocalPhotos } from "@/hooks/use-local-photos"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useSyncStatus } from "@/hooks/use-sync-status"
@@ -9,14 +9,10 @@ import { initConnectivityListener } from "@/lib/connectivity"
 import { initSyncManager, startSync } from "@/lib/sync-manager"
 import { UploadArea } from "@/components/upload-area"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, ArrowLeft, RefreshCw, Wifi, WifiOff, Folder as FolderIcon } from "lucide-react"
+import { AlertCircle, ArrowLeft, RefreshCw, Wifi, WifiOff } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Suspense, useEffect, useState } from "react"
-import { getFolders } from "@/lib/indexeddb"
 
 export default function UploadPage() {
   return (
@@ -28,17 +24,12 @@ export default function UploadPage() {
 
 function UploadPageContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { photos, isLoading, refreshPhotos } = useLocalPhotos()
   const isOnline = useOnlineStatus()
   const syncStatus = useSyncStatus()
 
   const [isUploading, setIsUploading] = useState(false)
-  const [location, setLocation] = useState("")
-  const [description, setDescription] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
-  const [folders, setFolders] = useState<any[]>([])
-  const [selectedFolderId, setSelectedFolderId] = useState<string>("")
   
   const [villages, setVillages] = useState<any[]>([])
   const [subVillages, setSubVillages] = useState<any[]>([])
@@ -83,23 +74,6 @@ function UploadPageContent() {
   }, [selectedSubVillageId])
 
   useEffect(() => {
-    const loadFolders = async () => {
-      try {
-        const data = await getFolders()
-        setFolders(data)
-        
-        const folderId = searchParams.get("folderId")
-        if (folderId) {
-          setSelectedFolderId(folderId)
-        }
-      } catch (error) {
-        console.error("Error loading folders:", error)
-      }
-    }
-    loadFolders()
-  }, [searchParams])
-
-  useEffect(() => {
     initConnectivityListener()
     initSyncManager()
     if (isOnline) {
@@ -112,9 +86,7 @@ function UploadPageContent() {
     try {
       for (const file of files) {
         await addPhotoWithMetadata(file, {
-          location: houses.find(h => h.id === parseInt(selectedHouseId))?.name || location || undefined,
-          description: description || undefined,
-          folderId: selectedFolderId || undefined,
+          location: houses.find(h => h.id === parseInt(selectedHouseId))?.name || undefined,
           villageId: selectedVillageId,
           subVillageId: selectedSubVillageId,
           houseId: selectedHouseId
@@ -135,12 +107,6 @@ function UploadPageContent() {
 
   const handleSync = async () => {
     await startSync()
-    try {
-      const data = await getFolders()
-      setFolders(data)
-    } catch (error) {
-      console.error("Error refreshing folders:", error)
-    }
   }
 
   return (
@@ -207,31 +173,6 @@ function UploadPageContent() {
             <div className="space-y-6">
               <div className="space-y-4 p-6 border border-border rounded-xl bg-card/50">
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Folder</label>
-                  <select 
-                    value={selectedFolderId}
-                    onChange={(e) => setSelectedFolderId(e.target.value)}
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
-                  >
-                    <option value="">Tanpa Folder</option>
-                    {folders.map(f => (
-                      <option key={f.id} value={f.id}>{f.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Lokasi</label>
-                  <Input
-                    placeholder="Contoh: Lantai 2, Area Parkir"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    disabled={isUploading}
-                    className="bg-background border-border focus:ring-1 focus:ring-foreground"
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Desa</label>
                   <select 
                     value={selectedVillageId}
@@ -273,17 +214,6 @@ function UploadPageContent() {
                       <option key={h.id} value={h.id}>{h.name}</option>
                     ))}
                   </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Keterangan</label>
-                  <Textarea
-                    placeholder="Catatan tambahan..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={isUploading}
-                    className="bg-background border-border focus:ring-1 focus:ring-foreground min-h-[100px] resize-none"
-                  />
                 </div>
               </div>
 
