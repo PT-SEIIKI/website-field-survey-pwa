@@ -10,7 +10,7 @@ import { initSyncManager, startSync } from "@/lib/sync-manager"
 import { UploadArea } from "@/components/upload-area"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, ArrowLeft, RefreshCw, Wifi, WifiOff } from "lucide-react"
+import { AlertCircle, ArrowLeft, RefreshCw, Wifi, WifiOff, Plus, Trash2, X } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Suspense, useEffect, useState } from "react"
 
@@ -38,6 +38,92 @@ function UploadPageContent() {
   const [selectedVillageId, setSelectedVillageId] = useState<string>("")
   const [selectedSubVillageId, setSelectedSubVillageId] = useState<string>("")
   const [selectedHouseId, setSelectedHouseId] = useState<string>("")
+
+  const [newVillageName, setNewVillageName] = useState("")
+  const [newSubVillageName, setNewSubVillageName] = useState("")
+  const [newHouseName, setNewHouseName] = useState("")
+  const [showAddVillage, setShowAddVillage] = useState(false)
+  const [showAddSubVillage, setShowAddSubVillage] = useState(false)
+  const [showAddHouse, setShowAddHouse] = useState(false)
+
+  const createVillage = async () => {
+    if (!newVillageName.trim()) return
+    const res = await fetch("/api/villages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newVillageName.trim() })
+    })
+    if (res.ok) {
+      const created = await res.json()
+      setVillages(prev => [...prev, created])
+      setSelectedVillageId(String(created.id))
+      setNewVillageName("")
+      setShowAddVillage(false)
+    }
+  }
+
+  const createSubVillage = async () => {
+    if (!newSubVillageName.trim() || !selectedVillageId) return
+    const res = await fetch("/api/sub-villages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newSubVillageName.trim(), villageId: selectedVillageId })
+    })
+    if (res.ok) {
+      const created = await res.json()
+      setSubVillages(prev => [...prev, created])
+      setSelectedSubVillageId(String(created.id))
+      setNewSubVillageName("")
+      setShowAddSubVillage(false)
+    }
+  }
+
+  const createHouse = async () => {
+    if (!newHouseName.trim() || !selectedSubVillageId) return
+    const res = await fetch("/api/houses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newHouseName.trim(), subVillageId: selectedSubVillageId })
+    })
+    if (res.ok) {
+      const created = await res.json()
+      setHouses(prev => [...prev, created])
+      setSelectedHouseId(String(created.id))
+      setNewHouseName("")
+      setShowAddHouse(false)
+    }
+  }
+
+  const deleteVillage = async (id: string) => {
+    const res = await fetch(`/api/villages/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      setVillages(prev => prev.filter(v => String(v.id) !== id))
+      if (selectedVillageId === id) {
+        setSelectedVillageId("")
+        setSubVillages([])
+        setHouses([])
+      }
+    }
+  }
+
+  const deleteSubVillage = async (id: string) => {
+    const res = await fetch(`/api/sub-villages/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      setSubVillages(prev => prev.filter(sv => String(sv.id) !== id))
+      if (selectedSubVillageId === id) {
+        setSelectedSubVillageId("")
+        setHouses([])
+      }
+    }
+  }
+
+  const deleteHouse = async (id: string) => {
+    const res = await fetch(`/api/houses/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      setHouses(prev => prev.filter(h => String(h.id) !== id))
+      if (selectedHouseId === id) setSelectedHouseId("")
+    }
+  }
 
   useEffect(() => {
     const fetchVillages = async () => {
@@ -173,47 +259,119 @@ function UploadPageContent() {
             <div className="space-y-6">
               <div className="space-y-4 p-6 border border-border rounded-xl bg-card/50">
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Desa</label>
-                  <select 
-                    value={selectedVillageId}
-                    onChange={(e) => setSelectedVillageId(e.target.value)}
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
-                  >
-                    <option value="">Pilih Desa</option>
-                    {villages.map(v => (
-                      <option key={v.id} value={v.id}>{v.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Desa</label>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddVillage(!showAddVillage)}>
+                      {showAddVillage ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                  {showAddVillage && (
+                    <div className="flex gap-2 mb-2">
+                      <input 
+                        type="text" 
+                        value={newVillageName} 
+                        onChange={(e) => setNewVillageName(e.target.value)}
+                        placeholder="Nama desa baru..."
+                        className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      />
+                      <Button size="sm" className="h-9" onClick={createVillage}>Tambah</Button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <select 
+                      value={selectedVillageId}
+                      onChange={(e) => setSelectedVillageId(e.target.value)}
+                      className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
+                    >
+                      <option value="">Pilih Desa</option>
+                      {villages.map(v => (
+                        <option key={v.id} value={v.id}>{v.name}</option>
+                      ))}
+                    </select>
+                    {selectedVillageId && (
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive" onClick={() => deleteVillage(selectedVillageId)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dusun</label>
-                  <select 
-                    value={selectedSubVillageId}
-                    onChange={(e) => setSelectedSubVillageId(e.target.value)}
-                    disabled={!selectedVillageId}
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
-                  >
-                    <option value="">Pilih Dusun</option>
-                    {subVillages.map(sv => (
-                      <option key={sv.id} value={sv.id}>{sv.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dusun</label>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddSubVillage(!showAddSubVillage)} disabled={!selectedVillageId}>
+                      {showAddSubVillage ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                  {showAddSubVillage && selectedVillageId && (
+                    <div className="flex gap-2 mb-2">
+                      <input 
+                        type="text" 
+                        value={newSubVillageName} 
+                        onChange={(e) => setNewSubVillageName(e.target.value)}
+                        placeholder="Nama dusun baru..."
+                        className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      />
+                      <Button size="sm" className="h-9" onClick={createSubVillage}>Tambah</Button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <select 
+                      value={selectedSubVillageId}
+                      onChange={(e) => setSelectedSubVillageId(e.target.value)}
+                      disabled={!selectedVillageId}
+                      className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
+                    >
+                      <option value="">Pilih Dusun</option>
+                      {subVillages.map(sv => (
+                        <option key={sv.id} value={sv.id}>{sv.name}</option>
+                      ))}
+                    </select>
+                    {selectedSubVillageId && (
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive" onClick={() => deleteSubVillage(selectedSubVillageId)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Rumah</label>
-                  <select 
-                    value={selectedHouseId}
-                    onChange={(e) => setSelectedHouseId(e.target.value)}
-                    disabled={!selectedSubVillageId}
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
-                  >
-                    <option value="">Pilih Rumah</option>
-                    {houses.map(h => (
-                      <option key={h.id} value={h.id}>{h.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Rumah</label>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddHouse(!showAddHouse)} disabled={!selectedSubVillageId}>
+                      {showAddHouse ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                  {showAddHouse && selectedSubVillageId && (
+                    <div className="flex gap-2 mb-2">
+                      <input 
+                        type="text" 
+                        value={newHouseName} 
+                        onChange={(e) => setNewHouseName(e.target.value)}
+                        placeholder="Nama rumah baru..."
+                        className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      />
+                      <Button size="sm" className="h-9" onClick={createHouse}>Tambah</Button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <select 
+                      value={selectedHouseId}
+                      onChange={(e) => setSelectedHouseId(e.target.value)}
+                      disabled={!selectedSubVillageId}
+                      className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
+                    >
+                      <option value="">Pilih Rumah</option>
+                      {houses.map(h => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
+                      ))}
+                    </select>
+                    {selectedHouseId && (
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive" onClick={() => deleteHouse(selectedHouseId)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -92,3 +92,6 @@
 [x] 93. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
 [x] 94. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
 [x] 95. Fixed login 500 error - pushed database schema and seeded admin user (admin/admin123) - Feb 02, 2026
+[x] 96. Removed "Wawasan Data" section from admin page - Feb 02, 2026
+[x] 97. Fixed build error by changing @/lib/db to @/server/db in API routes - Feb 02, 2026
+[x] 98. Added CRUD functionality for Desa/Dusun/Rumah on upload page - Feb 02, 2026

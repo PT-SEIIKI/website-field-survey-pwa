@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { db } from "@/server/db"
 import { villages } from "@/shared/schema"
 
 export async function GET() {

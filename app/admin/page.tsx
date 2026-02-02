@@ -112,19 +112,6 @@ function AdminPageContent() {
             </button>
           </div>
           
-          <div className="flex items-center gap-4 mb-8">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em]">Wawasan Data</h3>
-            <div className="h-px bg-border flex-1" />
-          </div>
-
-          {stats && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <AdminStatCard label="Total Foto" value={stats.totalPhotos} sub="Item diunggah" />
-              <AdminStatCard label="Ukuran Penyimpanan" value={`${stats.totalSizeMB} MB`} sub="Total konsumsi" />
-              <AdminStatCard label="Area Unik" value={stats.locations.length} sub="Titik tersurvey" />
-              <AdminStatCard label="Hari Aktif" value={stats.uniqueDates} sub="Periode pengumpulan" />
-            </div>
-          )}
         </div>
       </main>
     </div>
