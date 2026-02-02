@@ -160,6 +160,127 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  // Village Routes
+  app.get("/api/villages", async (_req, res) => {
+    try {
+      const data = await storage.getVillages();
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch villages" });
+    }
+  });
+
+  app.get("/api/sub-villages", async (req, res) => {
+    try {
+      const villageId = req.query.villageId ? parseInt(req.query.villageId as string) : undefined;
+      const data = await storage.getSubVillages(villageId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sub-villages" });
+    }
+  });
+
+  app.get("/api/houses", async (req, res) => {
+    try {
+      const subVillageId = req.query.subVillageId ? parseInt(req.query.subVillageId as string) : undefined;
+      const data = await storage.getHouses(subVillageId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch houses" });
+    }
+  });
+
+  // Admin Village CRUD
+  app.post("/api/admin/villages", async (req, res) => {
+    try {
+      const { name } = req.body;
+      const data = await storage.createVillage({ name });
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create village" });
+    }
+  });
+
+  app.patch("/api/admin/villages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await storage.updateVillage(id, req.body);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update village" });
+    }
+  });
+
+  app.delete("/api/admin/villages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVillage(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete village" });
+    }
+  });
+
+  // Admin Sub-Village CRUD
+  app.post("/api/admin/sub-villages", async (req, res) => {
+    try {
+      const data = await storage.createSubVillage(req.body);
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create sub-village" });
+    }
+  });
+
+  app.patch("/api/admin/sub-villages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await storage.updateSubVillage(id, req.body);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update sub-village" });
+    }
+  });
+
+  app.delete("/api/admin/sub-villages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSubVillage(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete sub-village" });
+    }
+  });
+
+  // Admin House CRUD
+  app.post("/api/admin/houses", async (req, res) => {
+    try {
+      const data = await storage.createHouse(req.body);
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create house" });
+    }
+  });
+
+  app.patch("/api/admin/houses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await storage.updateHouse(id, req.body);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update house" });
+    }
+  });
+
+  app.delete("/api/admin/houses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteHouse(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete house" });
+    }
+  });
+
   // Health check
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok" });

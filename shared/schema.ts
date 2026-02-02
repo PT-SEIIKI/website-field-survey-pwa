@@ -45,6 +45,40 @@ export const photos = pgTable("photos", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const villages = pgTable("villages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const subVillages = pgTable("sub_villages", {
+  id: serial("id").primaryKey(),
+  villageId: integer("village_id").references(() => villages.id).notNull(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const houses = pgTable("houses", {
+  id: serial("id").primaryKey(),
+  subVillageId: integer("sub_village_id").references(() => subVillages.id).notNull(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertVillageSchema = createInsertSchema(villages);
+export const selectVillageSchema = createSelectSchema(villages);
+export const insertSubVillageSchema = createInsertSchema(subVillages);
+export const selectSubVillageSchema = createSelectSchema(subVillages);
+export const insertHouseSchema = createInsertSchema(houses);
+export const selectHouseSchema = createSelectSchema(houses);
+
+export type Village = typeof villages.$inferSelect;
+export type InsertVillage = typeof villages.$inferInsert;
+export type SubVillage = typeof subVillages.$inferSelect;
+export type InsertSubVillage = typeof subVillages.$inferInsert;
+export type House = typeof houses.$inferSelect;
+export type InsertHouse = typeof houses.$inferInsert;
+
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
 export const insertSurveySchema = createInsertSchema(surveys);

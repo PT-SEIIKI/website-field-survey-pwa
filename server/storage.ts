@@ -1,10 +1,14 @@
 import { 
-  users, surveys, surveyEntries, photos, folders, 
-  type User, type InsertUser, 
-  type Survey, type InsertSurvey, 
-  type Entry, type InsertEntry, 
-  type Photo, type InsertPhoto, 
-  type Folder, type InsertFolder 
+  users, surveys, surveyEntries, photos, folders,
+  villages, subVillages, houses,
+  type User, type InsertUser,
+  type Survey, type InsertSurvey,
+  type Entry, type InsertEntry,
+  type Photo, type InsertPhoto,
+  type Folder, type InsertFolder,
+  type Village, type InsertVillage,
+  type SubVillage, type InsertSubVillage,
+  type House, type InsertHouse
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -30,6 +34,26 @@ export interface IStorage {
   updateFolder(id: number, folder: Partial<InsertFolder>): Promise<Folder>;
   deleteFolder(id: number): Promise<void>;
   getPhotosByEntryId(entryId: number): Promise<Photo[]>;
+
+  // Village methods
+  getVillages(): Promise<Village[]>;
+  getSubVillages(villageId?: number): Promise<SubVillage[]>;
+  getHouses(subVillageId?: number): Promise<House[]>;
+
+  // Village Admin methods
+  createVillage(village: InsertVillage): Promise<Village>;
+  updateVillage(id: number, village: Partial<InsertVillage>): Promise<Village>;
+  deleteVillage(id: number): Promise<void>;
+
+  // Sub-Village Admin methods
+  createSubVillage(subVillage: InsertSubVillage): Promise<SubVillage>;
+  updateSubVillage(id: number, subVillage: Partial<InsertSubVillage>): Promise<SubVillage>;
+  deleteSubVillage(id: number): Promise<void>;
+
+  // House Admin methods
+  createHouse(house: InsertHouse): Promise<House>;
+  updateHouse(id: number, house: Partial<InsertHouse>): Promise<House>;
+  deleteHouse(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -145,6 +169,63 @@ export class DatabaseStorage implements IStorage {
 
   async getPhotosByEntryId(entryId: number): Promise<Photo[]> {
     return await db.select().from(photos).where(eq(photos.entryId, entryId));
+  }
+
+  async getVillages(): Promise<Village[]> {
+    return await db.select().from(villages);
+  }
+
+  async getSubVillages(villageId?: number): Promise<SubVillage[]> {
+    if (villageId) {
+      return await db.select().from(subVillages).where(eq(subVillages.villageId, villageId));
+    }
+    return await db.select().from(subVillages);
+  }
+
+  async getHouses(subVillageId?: number): Promise<House[]> {
+    if (subVillageId) {
+      return await db.select().from(houses).where(eq(houses.subVillageId, subVillageId));
+    }
+    return await db.select().from(houses);
+  }
+
+  // Village Admin
+  async createVillage(village: InsertVillage): Promise<Village> {
+    const [data] = await db.insert(villages).values(village).returning();
+    return data;
+  }
+  async updateVillage(id: number, updateData: Partial<InsertVillage>): Promise<Village> {
+    const [data] = await db.update(villages).set(updateData).where(eq(villages.id, id)).returning();
+    return data;
+  }
+  async deleteVillage(id: number): Promise<void> {
+    await db.delete(villages).where(eq(villages.id, id));
+  }
+
+  // Sub-Village Admin
+  async createSubVillage(subVillage: InsertSubVillage): Promise<SubVillage> {
+    const [data] = await db.insert(subVillages).values(subVillage).returning();
+    return data;
+  }
+  async updateSubVillage(id: number, updateData: Partial<InsertSubVillage>): Promise<SubVillage> {
+    const [data] = await db.update(subVillages).set(updateData).where(eq(subVillages.id, id)).returning();
+    return data;
+  }
+  async deleteSubVillage(id: number): Promise<void> {
+    await db.delete(subVillages).where(eq(subVillages.id, id));
+  }
+
+  // House Admin
+  async createHouse(house: InsertHouse): Promise<House> {
+    const [data] = await db.insert(houses).values(house).returning();
+    return data;
+  }
+  async updateHouse(id: number, updateData: Partial<InsertHouse>): Promise<House> {
+    const [data] = await db.update(houses).set(updateData).where(eq(houses.id, id)).returning();
+    return data;
+  }
+  async deleteHouse(id: number): Promise<void> {
+    await db.delete(houses).where(eq(houses.id, id));
   }
 }
 

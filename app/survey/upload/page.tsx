@@ -39,6 +39,48 @@ function UploadPageContent() {
   const [successMessage, setSuccessMessage] = useState("")
   const [folders, setFolders] = useState<any[]>([])
   const [selectedFolderId, setSelectedFolderId] = useState<string>("")
+  
+  const [villages, setVillages] = useState<any[]>([])
+  const [subVillages, setSubVillages] = useState<any[]>([])
+  const [houses, setHouses] = useState<any[]>([])
+  
+  const [selectedVillageId, setSelectedVillageId] = useState<string>("")
+  const [selectedSubVillageId, setSelectedSubVillageId] = useState<string>("")
+  const [selectedHouseId, setSelectedHouseId] = useState<string>("")
+
+  useEffect(() => {
+    const fetchVillages = async () => {
+      const res = await fetch("/api/villages")
+      if (res.ok) setVillages(await res.json())
+    }
+    fetchVillages()
+  }, [])
+
+  useEffect(() => {
+    if (!selectedVillageId) {
+      setSubVillages([])
+      setSelectedSubVillageId("")
+      return
+    }
+    const fetchSubVillages = async () => {
+      const res = await fetch(`/api/sub-villages?villageId=${selectedVillageId}`)
+      if (res.ok) setSubVillages(await res.json())
+    }
+    fetchSubVillages()
+  }, [selectedVillageId])
+
+  useEffect(() => {
+    if (!selectedSubVillageId) {
+      setHouses([])
+      setSelectedHouseId("")
+      return
+    }
+    const fetchHouses = async () => {
+      const res = await fetch(`/api/houses?subVillageId=${selectedSubVillageId}`)
+      if (res.ok) setHouses(await res.json())
+    }
+    fetchHouses()
+  }, [selectedSubVillageId])
 
   useEffect(() => {
     const loadFolders = async () => {
@@ -70,9 +112,12 @@ function UploadPageContent() {
     try {
       for (const file of files) {
         await addPhotoWithMetadata(file, {
-          location: location || undefined,
+          location: houses.find(h => h.id === parseInt(selectedHouseId))?.name || location || undefined,
           description: description || undefined,
-          folderId: selectedFolderId || undefined
+          folderId: selectedFolderId || undefined,
+          villageId: selectedVillageId,
+          subVillageId: selectedSubVillageId,
+          houseId: selectedHouseId
         })
       }
       setSuccessMessage(`${files.length} foto berhasil ditambahkan`)
@@ -184,6 +229,50 @@ function UploadPageContent() {
                     disabled={isUploading}
                     className="bg-background border-border focus:ring-1 focus:ring-foreground"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Desa</label>
+                  <select 
+                    value={selectedVillageId}
+                    onChange={(e) => setSelectedVillageId(e.target.value)}
+                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
+                  >
+                    <option value="">Pilih Desa</option>
+                    {villages.map(v => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Dusun</label>
+                  <select 
+                    value={selectedSubVillageId}
+                    onChange={(e) => setSelectedSubVillageId(e.target.value)}
+                    disabled={!selectedVillageId}
+                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
+                  >
+                    <option value="">Pilih Dusun</option>
+                    {subVillages.map(sv => (
+                      <option key={sv.id} value={sv.id}>{sv.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Rumah</label>
+                  <select 
+                    value={selectedHouseId}
+                    onChange={(e) => setSelectedHouseId(e.target.value)}
+                    disabled={!selectedSubVillageId}
+                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
+                  >
+                    <option value="">Pilih Rumah</option>
+                    {houses.map(h => (
+                      <option key={h.id} value={h.id}>{h.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
