@@ -89,3 +89,4 @@
 [x] 90. Removed Folder, Lokasi, Keterangan fields from upload page - Feb 02, 2026
 [x] 91. Created API routes for villages (/api/villages), sub-villages (/api/sub-villages), houses (/api/houses) - Feb 02, 2026
 [x] 92. Implemented hierarchical Desa→Dusun→Rumah dropdown system on upload page - Feb 02, 2026
+[x] 93. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
