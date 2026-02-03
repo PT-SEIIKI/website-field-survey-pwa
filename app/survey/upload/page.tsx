@@ -178,7 +178,7 @@ function UploadPageContent() {
           selectedVillageId,
           selectedSubVillageId,
           selectedHouseId,
-          surveyId: 1, // Ensure surveyId is set
+          surveyId: 1,
           timestamp: Date.now()
         })
       }

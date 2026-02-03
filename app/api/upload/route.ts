@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       villageId: formData.get("villageId"),
       subVillageId: formData.get("subVillageId"),
       houseId: formData.get("houseId"),
+      surveyId: formData.get("surveyId") || "1",
     }
     await writeFile(metadataPath, JSON.stringify(metadata, null, 2))
 
