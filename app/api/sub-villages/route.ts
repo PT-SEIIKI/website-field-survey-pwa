@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, villageId, offlineId } = body
     
+    console.log("[API] Creating sub-village with body:", JSON.stringify(body))
+    
     if (!name || !villageId) {
       return NextResponse.json({ error: "Name and villageId are required" }, { status: 400 })
     }
@@ -46,12 +48,23 @@ export async function POST(request: NextRequest) {
       actualVillageId = parseInt(villageId)
     }
     
+    // Check if sub-village with this offlineId already exists
+    if (offlineId) {
+      const existing = await db.select().from(subVillages).where(eq(subVillages.offlineId, offlineId)).limit(1)
+      if (existing.length > 0) {
+        console.log("[API] Sub-village with offlineId already exists:", offlineId)
+        return NextResponse.json(existing[0], { status: 200 })
+      }
+    }
+    
     // Create sub-village
     const [newSubVillage] = await db.insert(subVillages).values({ 
       name, 
       villageId: actualVillageId,
       offlineId: offlineId || `sv_${Date.now()}`
     }).returning()
+    
+    console.log("[API] Sub-village created:", newSubVillage)
     
     // Get village name for folder
     const [village] = await db.select().from(villages).where(eq(villages.id, actualVillageId))
@@ -66,15 +79,15 @@ export async function POST(request: NextRequest) {
         isSynced: true
       }).returning()
       
-      console.log(`Auto-created folder ${newFolder.name} for sub-village ${newSubVillage.name}`)
+      console.log(`[API] Auto-created folder ${newFolder.name} for sub-village ${newSubVillage.name}`)
     } catch (folderError) {
-      console.error("Error auto-creating folder:", folderError)
+      console.error("[API] Error auto-creating folder:", folderError)
       // Continue even if folder creation fails
     }
     
     return NextResponse.json(newSubVillage, { status: 201 })
   } catch (error) {
-    console.error("Error creating sub-village:", error)
-    return NextResponse.json({ error: "Failed to create sub-village" }, { status: 500 })
+    console.error("[API] Error creating sub-village:", error)
+    return NextResponse.json({ error: "Failed to create sub-village", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
