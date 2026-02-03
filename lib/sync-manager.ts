@@ -442,26 +442,32 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
         serverHouseId = isNaN(parsed) ? null : parsed;
       }
       
+      const requestBody: any = {
+        surveyId: metadata?.surveyId || 1,
+        data: JSON.stringify({
+          description: metadata?.description,
+          location: metadata?.location,
+          timestamp: photoData.timestamp,
+          folderId: metadata?.folderId,
+          villageId: metadata?.villageId || metadata?.selectedVillageId,
+          subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
+          houseId: metadata?.houseId || metadata?.selectedHouseId
+        }),
+        offlineId: photoId,
+        isSynced: true
+      };
+      
+      // Only add folderId if it exists and is valid
+      if (serverFolderId) {
+        requestBody.folderId = serverFolderId;
+      }
+      
       const response = await fetch("/api/entries", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          surveyId: metadata?.surveyId || 1,
-          ...(serverFolderId && { folderId: serverFolderId }),
-          data: JSON.stringify({
-            description: metadata?.description,
-            location: metadata?.location,
-            timestamp: photoData.timestamp,
-            folderId: metadata?.folderId,
-            villageId: metadata?.villageId || metadata?.selectedVillageId,
-            subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
-            houseId: metadata?.houseId || metadata?.selectedHouseId
-          }),
-          offlineId: photoId,
-          isSynced: true
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
