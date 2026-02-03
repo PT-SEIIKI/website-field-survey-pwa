@@ -55,6 +55,7 @@ export interface IStorage {
   createHouse(house: InsertHouse): Promise<House>;
   updateHouse(id: number, house: Partial<InsertHouse>): Promise<House>;
   deleteHouse(id: number): Promise<void>;
+  deletePhoto(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -231,6 +232,10 @@ export class DatabaseStorage implements IStorage {
   }
   async deleteHouse(id: number): Promise<void> {
     await db.delete(houses).where(eq(houses.id, id));
+  }
+
+  async deletePhoto(id: number): Promise<void> {
+    await db.delete(photos).where(eq(photos.id, id));
   }
 }
 

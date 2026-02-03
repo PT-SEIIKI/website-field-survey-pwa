@@ -160,6 +160,16 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  app.delete("/api/photos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePhoto(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete photo" });
+    }
+  });
+
   // Village Routes
   app.get("/api/villages", async (_req, res) => {
     try {

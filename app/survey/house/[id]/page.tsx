@@ -2,9 +2,10 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Home, Image as ImageIcon, Loader2, Wifi, WifiOff } from "lucide-react"
+import { ArrowLeft, Home, Image as ImageIcon, Loader2, Wifi, WifiOff, Download, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useOnlineStatus } from "@/hooks/use-online-status"
+import { toast } from "@/hooks/use-toast"
 
 export default function HouseDetailPage() {
   return (
@@ -69,6 +70,55 @@ function HouseDetailContent() {
     }
   }
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename || 'survey-photo.jpg'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(downloadUrl)
+    } catch (error) {
+      console.error('Download failed:', error)
+      toast({
+        title: "Error",
+        description: "Gagal mendownload foto",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDelete = async (photoId: number) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus foto ini?')) return
+
+    try {
+      const res = await fetch(`/api/photos/${photoId}`, {
+        method: 'DELETE'
+      })
+
+      if (res.ok) {
+        setPhotos(photos.filter(p => p.id !== photoId))
+        toast({
+          title: "Berhasil",
+          description: "Foto berhasil dihapus"
+        })
+      } else {
+        throw new Error('Failed to delete')
+      }
+    } catch (error) {
+      console.error('Delete failed:', error)
+      toast({
+        title: "Error",
+        description: "Gagal menghapus foto",
+        variant: "destructive"
+      })
+    }
+  }
+
   if (loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>
   if (!house) return <div className="p-8 text-center uppercase font-bold tracking-widest">Rumah tidak ditemukan</div>
 
@@ -109,10 +159,28 @@ function HouseDetailContent() {
                 alt={`Survey ${i}`} 
                 className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button variant="secondary" size="sm" onClick={() => window.open(photo.url, '_blank')} className="text-[10px] font-bold uppercase tracking-widest">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                <Button variant="secondary" size="sm" onClick={() => window.open(photo.url, '_blank')} className="text-[10px] font-bold uppercase tracking-widest w-24">
                   View Full
                 </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    onClick={() => handleDownload(photo.url, `photo-${photo.id}.jpg`)}
+                    className="h-8 w-8 rounded-full"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    onClick={() => handleDelete(photo.id)}
+                    className="h-8 w-8 rounded-full"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
