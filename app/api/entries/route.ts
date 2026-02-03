@@ -53,6 +53,11 @@ export async function POST(req: NextRequest) {
       folderId = null; // Fallback for invalid folderId
     }
     
+    // Handle empty string folderId
+    if (body.folderId === "" || body.folderId === undefined) {
+      folderId = null;
+    }
+    
     // Additional validation: if folderId is provided, check if folder exists
     if (folderId) {
       try {

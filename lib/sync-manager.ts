@@ -288,7 +288,11 @@ async function syncFolder(folder: any) {
             houseName: folder.houseName,
             nik: folder.nik,
             offlineId: folder.id,
-            isSynced: true
+            isSynced: true,
+            // Always include hierarchy IDs as null if not valid
+            villageId: null,
+            subVillageId: null,
+            houseId: null
           }
           
           // Only add hierarchy IDs if they exist and are valid numbers (not offline IDs)
@@ -445,7 +449,7 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
         },
         body: JSON.stringify({
           surveyId: metadata?.surveyId || 1,
-          folderId: serverFolderId,
+          ...(serverFolderId && { folderId: serverFolderId }),
           data: JSON.stringify({
             description: metadata?.description,
             location: metadata?.location,
