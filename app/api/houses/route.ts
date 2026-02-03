@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, subVillageId } = body
+    const { name, subVillageId, offlineId } = body
     
     if (!name || !subVillageId) {
       return NextResponse.json({ error: "Name and subVillageId are required" }, { status: 400 })

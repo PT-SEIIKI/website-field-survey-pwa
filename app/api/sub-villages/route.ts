@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, villageId } = body
+    const { name, villageId, offlineId } = body
     
     if (!name || !villageId) {
       return NextResponse.json({ error: "Name and villageId are required" }, { status: 400 })

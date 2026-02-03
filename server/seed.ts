@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db } from "./db";
-import { users } from "@shared/schema";
+import { users, surveys } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 async function seed() {
@@ -38,6 +38,17 @@ async function seed() {
         .set({ password: "password123" })
         .where(eq(users.username, "surveyor1"));
       console.log("[DB] Surveyor user updated.");
+    }
+
+    // Seed Default Survey
+    const existingSurvey = await db.select().from(surveys).where(eq(surveys.id, 1)).limit(1);
+    if (existingSurvey.length === 0) {
+      await db.insert(surveys).values({
+        id: 1,
+        title: "Survey Utama",
+        description: "Survey default untuk aplikasi",
+      });
+      console.log("[DB] Default survey created.");
     }
 
     console.log("[DB] Seeding completed successfully.");

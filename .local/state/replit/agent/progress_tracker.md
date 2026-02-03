@@ -105,5 +105,7 @@
 [x] 105. Fixed 500 error when deleting villages, sub-villages, or houses by implementing manual cascading deletion for dependent records (photos, houses, sub-villages). Feb 03, 2026
 [x] 106. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
 [x] 107. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
-[x] 108. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026 - Project verified working
+[x] 109. Pushed database schema to PostgreSQL and seeded admin/surveyor users and default survey. Feb 03, 2026
+[x] 110. Updated hierarchical APIs (Villages, Sub-Villages, Houses) to handle offlineId for robust sync. Feb 03, 2026
+[x] 111. Verified project is running successfully with all features operational in offline/online mode. Feb 03, 2026
 [x] 109. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026 - Project verified working
