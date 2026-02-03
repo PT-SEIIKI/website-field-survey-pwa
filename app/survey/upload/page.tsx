@@ -18,6 +18,7 @@ import {
   saveHouse,
   deleteHouse as dbDeleteHouse,
   getFolders,
+  saveFolder,
 } from "@/lib/indexeddb";
 import { UploadArea } from "@/components/upload-area";
 import { Button } from "@/components/ui/button";
@@ -79,18 +80,37 @@ function UploadPageContent() {
   const [showAddHouse, setShowAddHouse] = useState(false);
 
   const fetchFolders = async () => {
-    if (getOnlineStatus()) {
-      const res = await fetch("/api/folders");
-      if (res.ok) {
-        const remote = await res.json();
-        const mappedFolders = remote.map((f: any) => ({ ...f, id: String(f.id) }));
-        setFolders(mappedFolders);
-        return;
-      }
-    }
-
+    // First try to get from local IndexedDB
     const local = await getFolders();
     setFolders(local);
+
+    // If online, also fetch from server and merge
+    if (getOnlineStatus()) {
+      try {
+        const res = await fetch("/api/folders");
+        if (res.ok) {
+          const remote = await res.json();
+          const mappedFolders = remote.map((f: any) => ({ ...f, id: String(f.id) }));
+          
+          // Update local storage with server data
+          for (const folder of mappedFolders) {
+            await saveFolder(folder);
+          }
+          
+          // Update state with server data
+          setFolders(mappedFolders);
+          
+          // Wait a bit and refresh again to ensure we have the latest data
+          setTimeout(async () => {
+            const refreshed = await getFolders();
+            setFolders(refreshed);
+          }, 500);
+        }
+      } catch (error) {
+        console.error("Failed to fetch folders from server:", error);
+        // Keep using local data if server fails
+      }
+    }
   };
 
   const createVillage = async () => {
@@ -108,8 +128,10 @@ function UploadPageContent() {
       setSelectedVillageId(offlineId);
       setNewVillageName("");
       setShowAddVillage(false);
-      // Refresh folders to see if a folder was created for this village
-      await fetchFolders();
+      // Refresh folders with delay to ensure data is saved
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 200);
       return;
     }
 
@@ -130,8 +152,10 @@ function UploadPageContent() {
       setSelectedVillageId(String(created.id));
       setNewVillageName("");
       setShowAddVillage(false);
-      // Refresh folders to see if a folder was created for this village
-      await fetchFolders();
+      // Refresh folders with delay to ensure server has processed the data
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 500);
     }
   };
 
@@ -151,7 +175,9 @@ function UploadPageContent() {
       setSelectedSubVillageId(offlineId);
       setNewSubVillageName("");
       setShowAddSubVillage(false);
-      await fetchFolders();
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 200);
       return;
     }
 
@@ -179,7 +205,9 @@ function UploadPageContent() {
       setSelectedSubVillageId(String(created.id));
       setNewSubVillageName("");
       setShowAddSubVillage(false);
-      await fetchFolders();
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 500);
     }
   };
 
@@ -205,7 +233,9 @@ function UploadPageContent() {
       setNewNik("");
       setNewAddress("");
       setShowAddHouse(false);
-      await fetchFolders();
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 200);
       return;
     }
 
@@ -236,7 +266,9 @@ function UploadPageContent() {
       setNewNik("");
       setNewAddress("");
       setShowAddHouse(false);
-      await fetchFolders();
+      setTimeout(async () => {
+        await fetchFolders();
+      }, 500);
     }
   };
 
@@ -694,6 +726,38 @@ function UploadPageContent() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Folder Survey
+                    </label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => fetchFolders()}
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedFolderId}
+                      onChange={(e) => setSelectedFolderId(e.target.value)}
+                      className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
+                    >
+                      <option value="">Pilih Folder (Opsional)</option>
+                      {folders.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.name} {f.villageName && `(${f.villageName})`}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
