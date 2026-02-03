@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { houses } from "@/shared/schema"
+import { houses, folders, villages, subVillages } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and subVillageId are required" }, { status: 400 })
     }
     
+    // Create house
     const [newHouse] = await db.insert(houses).values({ 
       name, 
       subVillageId: parseInt(subVillageId),
@@ -46,6 +47,30 @@ export async function POST(request: NextRequest) {
       nik,
       address
     }).returning()
+    
+    // Get village and sub-village names for folder
+    const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.id, parseInt(subVillageId)))
+    const [village] = await db.select().from(villages).where(eq(villages.id, subVillage.villageId))
+    
+    // Auto-create folder for the house
+    try {
+      const [newFolder] = await db.insert(folders).values({
+        name: name, // Use house name as folder name
+        houseName: name,
+        nik: nik || null,
+        villageId: subVillage.villageId,
+        subVillageId: parseInt(subVillageId),
+        houseId: newHouse.id,
+        offlineId: offlineId || `folder_${Date.now()}`,
+        isSynced: true
+      }).returning()
+      
+      console.log(`Auto-created folder ${newFolder.name} for house ${newHouse.name}`)
+    } catch (folderError) {
+      console.error("Error auto-creating folder:", folderError)
+      // Continue even if folder creation fails
+    }
+    
     return NextResponse.json(newHouse, { status: 201 })
   } catch (error) {
     console.error("Error creating house:", error)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { subVillages } from "@/shared/schema"
+import { subVillages, folders, villages } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
@@ -32,10 +32,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and villageId are required" }, { status: 400 })
     }
     
+    // Create sub-village
     const [newSubVillage] = await db.insert(subVillages).values({ 
       name, 
       villageId: parseInt(villageId) 
     }).returning()
+    
+    // Get village name for folder
+    const [village] = await db.select().from(villages).where(eq(villages.id, parseInt(villageId)))
+    
+    // Auto-create folder for the sub-village
+    try {
+      const [newFolder] = await db.insert(folders).values({
+        name: `${village.name} - ${name}`, // Combine village and sub-village name
+        villageId: parseInt(villageId),
+        subVillageId: newSubVillage.id,
+        offlineId: offlineId || `folder_${Date.now()}`,
+        isSynced: true
+      }).returning()
+      
+      console.log(`Auto-created folder ${newFolder.name} for sub-village ${newSubVillage.name}`)
+    } catch (folderError) {
+      console.error("Error auto-creating folder:", folderError)
+      // Continue even if folder creation fails
+    }
+    
     return NextResponse.json(newSubVillage, { status: 201 })
   } catch (error) {
     console.error("Error creating sub-village:", error)
