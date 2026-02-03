@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { houses } from "@/shared/schema"
+import { houses, photos } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function GET(
@@ -33,7 +33,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await db.delete(houses).where(eq(houses.id, parseInt(id)))
+    const houseId = parseInt(id)
+
+    // Cascade delete: photos -> houses
+    await db.delete(photos).where(eq(photos.houseId, houseId))
+    await db.delete(houses).where(eq(houses.id, houseId))
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting house:", error)

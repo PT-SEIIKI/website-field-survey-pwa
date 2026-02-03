@@ -102,3 +102,4 @@
 [x] 102. Fixed 'undefined' image URLs in House Detail page by providing more robust fallback logic for filename extraction from metadata (`photoId`, `filename`, `fileName`). Feb 03, 2026
 [x] 103. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
 [x] 104. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
+[x] 105. Fixed 500 error when deleting villages, sub-villages, or houses by implementing manual cascading deletion for dependent records (photos, houses, sub-villages). Feb 03, 2026
