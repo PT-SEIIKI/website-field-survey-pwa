@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import { login } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,49 @@ import { Badge } from "@/components/ui/badge"
 import { TutorialDialog } from "@/components/tutorial-dialog"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    // initializeDefaultUsers removed for RBAC
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const result = await login({ username, password });
+
+      if (result.success) {
+        const userData = result.user;
+        if (userData?.role === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/survey/dashboard")
+        }
+      } else {
+        setError(result.error || "Username atau password salah")
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan koneksi")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
