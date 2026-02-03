@@ -59,9 +59,33 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private async retryOperation<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    delay: number = 1000
+  ): Promise<T> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        console.error(`[Storage] Operation failed (attempt ${attempt}/${maxRetries}):`, error);
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Wait before retrying with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay * attempt));
+      }
+    }
+    throw new Error("Max retries exceeded");
+  }
+
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return this.retryOperation(async () => {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user || undefined;
+    });
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -120,37 +144,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEntry(insertEntry: InsertEntry): Promise<Entry> {
-    try {
-      console.log("[Storage] Inserting entry:", JSON.stringify(insertEntry));
-      
-      // Validate required fields
-      if (!insertEntry.surveyId) {
-        insertEntry.surveyId = 1; // Default survey ID
+    return this.retryOperation(async () => {
+      try {
+        console.log("[Storage] Inserting entry:", JSON.stringify(insertEntry));
+        
+        // Validate required fields
+        if (!insertEntry.surveyId) {
+          insertEntry.surveyId = 1; // Default survey ID
+        }
+        
+        const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
+        return entry;
+      } catch (error) {
+        console.error("[Storage] createEntry error:", error);
+        throw error;
       }
-      
-      const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
-      return entry;
-    } catch (error) {
-      console.error("[Storage] createEntry error:", error);
-      throw error;
-    }
+    });
   }
 
   async createPhoto(insertPhoto: InsertPhoto): Promise<Photo> {
-    try {
-      console.log("[Storage] Inserting photo:", JSON.stringify(insertPhoto));
-      
-      // Validate required fields
-      if (!insertPhoto.url) {
-        throw new Error("Photo URL is required");
+    return this.retryOperation(async () => {
+      try {
+        console.log("[Storage] Inserting photo:", JSON.stringify(insertPhoto));
+        
+        // Validate required fields
+        if (!insertPhoto.url) {
+          throw new Error("Photo URL is required");
+        }
+        
+        const [photo] = await db.insert(photos).values(insertPhoto).returning();
+        return photo;
+      } catch (error) {
+        console.error("[Storage] createPhoto error:", error);
+        throw error;
       }
-      
-      const [photo] = await db.insert(photos).values(insertPhoto).returning();
-      return photo;
-    } catch (error) {
-      console.error("[Storage] createPhoto error:", error);
-      throw error;
-    }
+    });
   }
 
   async getEntryByOfflineId(offlineId: string): Promise<Entry | undefined> {
@@ -182,14 +210,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFolder(insertFolder: InsertFolder): Promise<Folder> {
-    try {
-      console.log("[Storage] Inserting folder:", JSON.stringify(insertFolder));
-      const [folder] = await db.insert(folders).values(insertFolder).returning();
-      return folder;
-    } catch (error) {
-      console.error("[Storage] createFolder error:", error);
-      throw error;
-    }
+    return this.retryOperation(async () => {
+      try {
+        console.log("[Storage] Inserting folder:", JSON.stringify(insertFolder));
+        const [folder] = await db.insert(folders).values(insertFolder).returning();
+        return folder;
+      } catch (error) {
+        console.error("[Storage] createFolder error:", error);
+        throw error;
+      }
+    });
   }
 
   async getFolderByOfflineId(offlineId: string): Promise<Folder | undefined> {
