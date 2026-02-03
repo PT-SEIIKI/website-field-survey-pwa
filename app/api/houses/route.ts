@@ -31,6 +31,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    // Preprocess: Convert subVillageId to number if it's a string
+    if (body.subVillageId && typeof body.subVillageId === 'string') {
+      body.subVillageId = parseInt(body.subVillageId, 10)
+    }
+    
     const data = insertHouseSchema.parse(body)
     
     console.log("[API] Creating house with body:", JSON.stringify(body))

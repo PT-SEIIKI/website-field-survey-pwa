@@ -24,6 +24,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    
+    // Preprocess: Convert villageId to number if it's a string
+    if (body.villageId && typeof body.villageId === 'string') {
+      body.villageId = parseInt(body.villageId, 10)
+    }
+    
     const data = insertSubVillageSchema.parse(body)
     
     console.log("[API] Creating sub-village with body:", JSON.stringify(body))
