@@ -21,6 +21,7 @@ export interface PhotoMetadata {
   selectedVillageId?: string
   selectedSubVillageId?: string
   selectedHouseId?: string
+  selectedFolderId?: string
   surveyId?: number
 }
 

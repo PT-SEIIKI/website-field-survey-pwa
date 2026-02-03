@@ -17,6 +17,7 @@ import {
   getHouses,
   saveHouse,
   deleteHouse as dbDeleteHouse,
+  getFolders,
 } from "@/lib/indexeddb";
 import { UploadArea } from "@/components/upload-area";
 import { Button } from "@/components/ui/button";
@@ -60,10 +61,12 @@ function UploadPageContent() {
   const [villages, setVillages] = useState<any[]>([]);
   const [subVillages, setSubVillages] = useState<any[]>([]);
   const [houses, setHouses] = useState<any[]>([]);
+  const [folders, setFolders] = useState<any[]>([]);
 
   const [selectedVillageId, setSelectedVillageId] = useState<string>("");
   const [selectedSubVillageId, setSelectedSubVillageId] = useState<string>("");
   const [selectedHouseId, setSelectedHouseId] = useState<string>("");
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("");
 
   const [newVillageName, setNewVillageName] = useState("");
   const [newSubVillageName, setNewSubVillageName] = useState("");
@@ -74,6 +77,21 @@ function UploadPageContent() {
   const [showAddVillage, setShowAddVillage] = useState(false);
   const [showAddSubVillage, setShowAddSubVillage] = useState(false);
   const [showAddHouse, setShowAddHouse] = useState(false);
+
+  const fetchFolders = async () => {
+    const local = await getFolders();
+    if (local.length > 0) {
+      setFolders(local);
+    }
+
+    if (getOnlineStatus()) {
+      const res = await fetch("/api/folders");
+      if (res.ok) {
+        const remote = await res.json();
+        setFolders(remote.map((f: any) => ({ ...f, id: String(f.id) })));
+      }
+    }
+  };
 
   const createVillage = async () => {
     if (!newVillageName.trim()) return;
@@ -286,7 +304,7 @@ function UploadPageContent() {
       const res = await fetch("/api/villages");
       if (res.ok) {
         const remote = await res.json();
-        setVillages(remote.map((v) => ({ ...v, id: String(v.id) })));
+        setVillages(remote.map((v: any) => ({ ...v, id: String(v.id) })));
         for (const v of remote)
           await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" });
       }
@@ -295,6 +313,7 @@ function UploadPageContent() {
 
   useEffect(() => {
     fetchVillages();
+    fetchFolders();
   }, []);
 
   const fetchSubVillages = async (villageId: string) => {
@@ -305,7 +324,7 @@ function UploadPageContent() {
       const res = await fetch(`/api/sub-villages?villageId=${villageId}`);
       if (res.ok) {
         const remote = await res.json();
-        setSubVillages(remote.map((sv) => ({ ...sv, id: String(sv.id) })));
+        setSubVillages(remote.map((sv: any) => ({ ...sv, id: String(sv.id) })));
         for (const sv of remote)
           await saveSubVillage({
             ...sv,
@@ -324,7 +343,7 @@ function UploadPageContent() {
       const res = await fetch(`/api/houses?subVillageId=${subVillageId}`);
       if (res.ok) {
         const remote = await res.json();
-        setHouses(remote.map((h) => ({ ...h, id: String(h.id) })));
+        setHouses(remote.map((h: any) => ({ ...h, id: String(h.id) })));
         for (const h of remote)
           await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" });
       }
@@ -365,9 +384,11 @@ function UploadPageContent() {
           villageId: selectedVillageId,
           subVillageId: selectedSubVillageId,
           houseId: selectedHouseId,
+          folderId: selectedFolderId,
           selectedVillageId,
           selectedSubVillageId,
           selectedHouseId,
+          selectedFolderId,
           surveyId: 1,
           timestamp: Date.now(),
         });
@@ -466,6 +487,29 @@ function UploadPageContent() {
 
             <div className="space-y-6">
               <div className="space-y-4 p-6 border border-border rounded-xl bg-card/50">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Folder Survey (Dari Dashboard)
+                  </label>
+                  <select
+                    value={selectedFolderId}
+                    onChange={(e) => setSelectedFolderId(e.target.value)}
+                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
+                  >
+                    <option value="">Pilih Folder (Opsional)</option>
+                    {folders.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name} {f.houseName ? `- ${f.houseName}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-muted-foreground italic">
+                    * Pilih folder jika Anda ingin mengelompokkan foto ini ke dalam folder tertentu.
+                  </p>
+                </div>
+
+                <div className="h-px bg-border/50 my-4" />
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
