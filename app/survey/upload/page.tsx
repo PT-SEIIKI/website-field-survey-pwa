@@ -20,6 +20,7 @@ import {
   getFolders,
   saveFolder,
 } from "@/lib/indexeddb";
+import { offlineSyncQueue } from "@/lib/offline-sync-queue";
 import { UploadArea } from "@/components/upload-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +79,12 @@ function UploadPageContent() {
   const [showAddVillage, setShowAddVillage] = useState(false);
   const [showAddSubVillage, setShowAddSubVillage] = useState(false);
   const [showAddHouse, setShowAddHouse] = useState(false);
+  const [syncQueueStatus, setSyncQueueStatus] = useState({
+    pending: 0,
+    syncing: 0,
+    completed: 0,
+    failed: 0
+  });
 
   const fetchFolders = async () => {
     // First try to get from local IndexedDB
@@ -126,9 +133,29 @@ function UploadPageContent() {
       await saveVillage(newV);
       setVillages((prev) => [...prev, newV]);
       setSelectedVillageId(offlineId);
+      
+      // Create folder untuk village
+      const newFolder = {
+        id: `folder_${offlineId}`,
+        name: newVillageName.trim(),
+        villageId: offlineId,
+        offlineId: `folder_${Date.now()}`,
+        createdAt: Date.now(),
+        syncStatus: "pending" as const,
+      };
+      await saveFolder(newFolder);
+      
+      // Add to sync queue
+      await offlineSyncQueue.addToQueue({
+        type: 'create',
+        entity: 'village',
+        data: { name: newVillageName.trim(), offlineId },
+        entityId: offlineId
+      });
+      
       setNewVillageName("");
       setShowAddVillage(false);
-      // Refresh folders with delay to ensure data is saved
+      // Refresh folders dengan delay
       setTimeout(async () => {
         await fetchFolders();
       }, 200);
@@ -152,7 +179,7 @@ function UploadPageContent() {
       setSelectedVillageId(String(created.id));
       setNewVillageName("");
       setShowAddVillage(false);
-      // Refresh folders with delay to ensure server has processed the data
+      // Refresh folders dengan delay
       setTimeout(async () => {
         await fetchFolders();
       }, 500);
@@ -173,6 +200,27 @@ function UploadPageContent() {
       await saveSubVillage(newSV);
       setSubVillages((prev) => [...prev, newSV]);
       setSelectedSubVillageId(offlineId);
+      
+      // Create folder untuk sub-village
+      const newFolder = {
+        id: `folder_${offlineId}`,
+        name: newSubVillageName.trim(),
+        villageId: selectedVillageId,
+        subVillageId: offlineId,
+        offlineId: `folder_${Date.now()}`,
+        createdAt: Date.now(),
+        syncStatus: "pending" as const,
+      };
+      await saveFolder(newFolder);
+      
+      // Add to sync queue
+      await offlineSyncQueue.addToQueue({
+        type: 'create',
+        entity: 'subVillage',
+        data: { name: newSubVillageName.trim(), villageId: selectedVillageId, offlineId },
+        entityId: offlineId
+      });
+      
       setNewSubVillageName("");
       setShowAddSubVillage(false);
       setTimeout(async () => {
@@ -228,6 +276,37 @@ function UploadPageContent() {
       await saveHouse(newH);
       setHouses((prev) => [...prev, newH]);
       setSelectedHouseId(offlineId);
+      
+      // Create folder untuk house
+      const newFolder = {
+        id: `folder_${offlineId}`,
+        name: newHouseName.trim(),
+        houseName: newHouseName.trim(),
+        nik: newNik.trim() || undefined,
+        villageId: selectedVillageId,
+        subVillageId: selectedSubVillageId,
+        houseId: offlineId,
+        offlineId: `folder_${Date.now()}`,
+        createdAt: Date.now(),
+        syncStatus: "pending" as const,
+      };
+      await saveFolder(newFolder);
+      
+      // Add to sync queue
+      await offlineSyncQueue.addToQueue({
+        type: 'create',
+        entity: 'house',
+        data: { 
+          name: newHouseName.trim(), 
+          subVillageId: selectedSubVillageId, 
+          ownerName: newOwnerName.trim(),
+          nik: newNik.trim(),
+          address: newAddress.trim(),
+          offlineId 
+        },
+        entityId: offlineId
+      });
+      
       setNewHouseName("");
       setNewOwnerName("");
       setNewNik("");

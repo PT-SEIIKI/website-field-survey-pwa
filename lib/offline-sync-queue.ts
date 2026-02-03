@@ -62,7 +62,7 @@ class OfflineSyncQueue {
 
   private async openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('SurveyOfflineDB', 2)
+      const request = indexedDB.open('SurveyOfflineDB', 3) // Update to version 3
       
       request.onerror = () => reject(request.error)
       request.onsuccess = () => resolve(request.result)
