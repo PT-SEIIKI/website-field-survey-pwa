@@ -121,9 +121,18 @@ export async function startSync() {
         // Convert villageId from string to number if needed
         let villageId = sv.villageId
         if (typeof villageId === 'string') {
+          // Skip if villageId looks like an offline ID (starts with v_)
+          if (villageId.startsWith('v_')) {
+            console.error("[v0] Skipping sub-village with offline villageId:", sv.id, villageId)
+            // Mark as synced to prevent retry, but don't upload
+            await saveSubVillage({ ...sv, syncStatus: "synced" })
+            continue
+          }
           const parsed = parseInt(villageId, 10)
           if (isNaN(parsed)) {
             console.error("[v0] Invalid villageId for sub-village:", sv.id, villageId)
+            // Mark as synced to prevent retry
+            await saveSubVillage({ ...sv, syncStatus: "synced" })
             continue
           }
           villageId = parsed
@@ -158,9 +167,18 @@ export async function startSync() {
         // Convert subVillageId from string to number if needed
         let subVillageId = h.subVillageId
         if (typeof subVillageId === 'string') {
+          // Skip if subVillageId looks like an offline ID (starts with sv_)
+          if (subVillageId.startsWith('sv_')) {
+            console.error("[v0] Skipping house with offline subVillageId:", h.id, subVillageId)
+            // Mark as synced to prevent retry, but don't upload
+            await saveHouse({ ...h, syncStatus: "synced" })
+            continue
+          }
           const parsed = parseInt(subVillageId, 10)
           if (isNaN(parsed)) {
             console.error("[v0] Invalid subVillageId for house:", h.id, subVillageId)
+            // Mark as synced to prevent retry
+            await saveHouse({ ...h, syncStatus: "synced" })
             continue
           }
           subVillageId = parsed
@@ -265,16 +283,29 @@ async function syncFolder(folder: any) {
           if (!updateRes.ok) throw new Error("Update failed")
         } else {
           // If not exists, create new
+          const folderData: any = {
+            name: folder.name,
+            houseName: folder.houseName,
+            nik: folder.nik,
+            offlineId: folder.id,
+            isSynced: true
+          }
+          
+          // Add hierarchy IDs if they exist and are valid numbers
+          if (folder.villageId && typeof folder.villageId === 'number') {
+            folderData.villageId = folder.villageId
+          }
+          if (folder.subVillageId && typeof folder.subVillageId === 'number') {
+            folderData.subVillageId = folder.subVillageId
+          }
+          if (folder.houseId && typeof folder.houseId === 'number') {
+            folderData.houseId = folder.houseId
+          }
+          
           const response = await fetch("/api/folders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: folder.name,
-              houseName: folder.houseName,
-              nik: folder.nik,
-              offlineId: folder.id,
-              isSynced: true
-            })
+            body: JSON.stringify(folderData)
           })
           if (!response.ok) throw new Error("Folder creation failed")
         }
@@ -358,7 +389,18 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
     }
 
     // New hierarchy support:
-    const serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
+    let serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
+    
+    // Convert houseId to number if it's a string and doesn't look like an offline ID
+    if (typeof serverHouseId === 'string') {
+      if (serverHouseId.startsWith('h_')) {
+        // This is an offline ID, set to null for now
+        serverHouseId = null;
+      } else {
+        const parsed = parseInt(serverHouseId, 10);
+        serverHouseId = isNaN(parsed) ? null : parsed;
+      }
+    }
     
     const response = await fetch("/api/entries", {
       method: "POST",
