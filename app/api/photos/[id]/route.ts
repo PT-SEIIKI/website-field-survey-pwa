@@ -34,14 +34,26 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const uploadsDir = "/var/www/survei.seyiki.com/uploads"
     const fs = await import("fs/promises")
 
-    // If ID is numeric, it might be a direct entry ID deletion
+    console.log(`[API] Deleting photo with ID: ${id}`);
+
+    // If ID is numeric, it's a database ID for the photos table
     if (!isNaN(Number(id))) {
-      await storage.deleteEntry(Number(id));
+      await storage.deletePhoto(Number(id));
+    } else {
+      // If it's a string, it might be a fileName/photoId (legacy or offline)
+      // We try to find and delete the entry if it matches an offlineId
+      const entry = await storage.getEntryByOfflineId(id);
+      if (entry) {
+        await storage.deleteEntry(entry.id);
+      }
     }
 
-    // Delete photo file
+    // Delete photo file from filesystem
     const photoPath = join(uploadsDir, `${id}.jpg`)
+    const photoPathOriginal = join(uploadsDir, id) // maybe it's the full filename
+    
     await fs.unlink(photoPath).catch(() => null)
+    await fs.unlink(photoPathOriginal).catch(() => null)
 
     // Delete metadata
     const metadataPath = join(uploadsDir, `${id}.json`)

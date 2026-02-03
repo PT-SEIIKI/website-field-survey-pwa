@@ -92,16 +92,28 @@ function HouseDetailContent() {
     }
   }
 
-  const handleDelete = async (photoId: number) => {
+  const handleDelete = async (photo: any) => {
     if (!confirm('Apakah Anda yakin ingin menghapus foto ini?')) return
 
     try {
-      const res = await fetch(`/api/photos/${photoId}`, {
+      // Use photo.id for database deletion if available, otherwise fallback to fileName/photoId
+      const identifier = photo.id || photo.photoId || photo.fileName || photo.filename;
+      
+      if (!identifier) {
+        toast({
+          title: "Error",
+          description: "ID Foto tidak ditemukan",
+          variant: "destructive"
+        })
+        return;
+      }
+
+      const res = await fetch(`/api/photos/${identifier}`, {
         method: 'DELETE'
       })
 
       if (res.ok) {
-        setPhotos(photos.filter(p => p.id !== photoId))
+        setPhotos(photos.filter(p => (p.id !== photo.id && p.photoId !== photo.photoId)))
         toast({
           title: "Berhasil",
           description: "Foto berhasil dihapus"
@@ -175,7 +187,7 @@ function HouseDetailContent() {
                   <Button 
                     variant="destructive" 
                     size="icon" 
-                    onClick={() => handleDelete(photo.id)}
+                    onClick={() => handleDelete(photo)}
                     className="h-8 w-8 rounded-full"
                   >
                     <Trash2 className="h-4 w-4" />
