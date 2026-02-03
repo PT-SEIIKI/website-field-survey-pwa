@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useEffect } from "react"
 import { registerServiceWorker } from "@/lib/service-worker-register"
-import "@/lib/offline-sync-queue"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {

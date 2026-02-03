@@ -271,7 +271,45 @@ GRANT ALL PRIVILEGES ON DATABASE pwa_survey TO survey_user;
 
 ## 🚀 Deployment
 
-### **Vercel (Recommended)**
+### **Production Server (Linux)**
+Untuk deployment di production server, gunakan script deployment otomatis:
+
+```bash
+# Make script executable
+chmod +x deploy.sh
+
+# Run deployment
+./deploy.sh
+```
+
+**Script akan melakukan:**
+1. Git reset dan pull latest changes
+2. Install dependencies (`npm i`)
+3. Database migration (`npm run db:push`)
+4. Build application (`npm run build`)
+5. Restart PM2 processes (`pm2 restart all`)
+6. Health check
+
+### **Manual Deployment Steps**
+```bash
+# 1. Update code
+git reset --hard HEAD
+git pull origin main
+
+# 2. Install dependencies
+npm i
+
+# 3. Database migration
+npm run db:push
+
+# 4. Build application
+npm run build
+
+# 5. Restart PM2
+pm2 restart all
+```
+
+### **Vercel (Recommended for Staging)**
 1. Push ke GitHub repository
 2. Connect ke Vercel
 3. Set environment variables di Vercel dashboard
@@ -299,6 +337,27 @@ npm start
 
 # Atau menggunakan PM2
 pm2 start npm --name "survey-pwa" -- start
+```
+
+### **Environment Variables for Production**
+```env
+# Database
+DATABASE_URL=postgresql://survey_user:Survey123!Secure@localhost:5432/pwa_survey
+
+# Security
+JWT_SECRET="your-production-jwt-secret"
+JWT_EXPIRES_IN="7d"
+NEXTAUTH_SECRET="your-production-nextauth-secret"
+NEXTAUTH_URL="https://survei.seyiki.com"
+
+# File Upload Settings
+UPLOAD_DIR="./uploads"
+MAX_FILE_SIZE="10485760"
+ALLOWED_FILE_TYPES="image/jpeg,image/png,image/jpg,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+# Production Settings
+NODE_ENV=production
+ALLOW_DEV_USER_SEED=false
 ```
 
 ## 🔒 Keamanan

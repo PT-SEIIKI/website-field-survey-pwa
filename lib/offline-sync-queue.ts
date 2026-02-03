@@ -260,9 +260,13 @@ class OfflineSyncQueue {
 export const offlineSyncQueue = new OfflineSyncQueue()
 
 // Auto-sync saat online
-window.addEventListener('online', () => {
-  offlineSyncQueue.processQueue()
-})
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    offlineSyncQueue.processQueue()
+  })
+}
 
 // Load queue saat aplikasi dimulai
-offlineSyncQueue.loadFromIndexedDB()
+if (typeof window !== 'undefined') {
+  offlineSyncQueue.loadFromIndexedDB()
+}

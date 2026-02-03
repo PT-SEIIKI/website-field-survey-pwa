@@ -48,8 +48,17 @@ const nextConfig = {
         },
       }
     }
+    
+    // Fix for window is not defined during build
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    }
+    
     return config
   },
+  // Disable static generation to prevent window errors
+  output: 'standalone',
 }
 
 export default nextConfig
