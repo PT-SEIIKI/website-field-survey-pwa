@@ -35,7 +35,10 @@ export function VillageHierarchy() {
   const fetchVillages = async () => {
     try {
       const res = await fetch("/api/villages");
-      if (res.ok) setVillages(await res.json());
+      if (res.ok)
+        setVillages(
+          (await res.json()).map((v) => ({ ...v, id: String(v.id) })),
+        );
     } catch (e) {
       console.error(e);
     } finally {

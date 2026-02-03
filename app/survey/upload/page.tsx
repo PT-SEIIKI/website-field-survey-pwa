@@ -277,7 +277,7 @@ function UploadPageContent() {
       const res = await fetch("/api/villages");
       if (res.ok) {
         const remote = await res.json();
-        setVillages(remote);
+        setVillages(remote.map((v) => ({ ...v, id: String(v.id) })));
         for (const v of remote)
           await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" });
       }
@@ -296,7 +296,7 @@ function UploadPageContent() {
       const res = await fetch(`/api/sub-villages?villageId=${villageId}`);
       if (res.ok) {
         const remote = await res.json();
-        setSubVillages(remote);
+        setSubVillages(remote.map((sv) => ({ ...sv, id: String(sv.id) })));
         for (const sv of remote)
           await saveSubVillage({
             ...sv,
@@ -315,7 +315,7 @@ function UploadPageContent() {
       const res = await fetch(`/api/houses?subVillageId=${subVillageId}`);
       if (res.ok) {
         const remote = await res.json();
-        setHouses(remote);
+        setHouses(remote.map((h) => ({ ...h, id: String(h.id) })));
         for (const h of remote)
           await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" });
       }
