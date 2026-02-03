@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
+// Analytics import removed to prevent 404 errors
 import "./globals.css"
 import { Providers } from "@/app/providers"
 import { initConnectivityListener } from "@/lib/connectivity"
@@ -77,7 +77,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`font-sans antialiased`}>
         <Providers>{children}</Providers>
-        <Analytics />
+        {/* Analytics component removed to prevent 404 errors */}
       </body>
     </html>
   )

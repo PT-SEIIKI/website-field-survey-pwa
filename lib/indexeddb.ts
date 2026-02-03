@@ -1,6 +1,6 @@
 // IndexedDB utilities untuk offline storage
 const DB_NAME = "SurveyOfflineDB"
-const DB_VERSION = 3 // Incrementing version to trigger onupgradeneeded for folder fix
+const DB_VERSION = 4 // Incrementing version to fix object store issues
 const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
@@ -35,28 +35,12 @@ export async function initDB(): Promise<IDBDatabase> {
       if (event.oldVersion > 0 && event.oldVersion < DB_VERSION) {
         console.log(`[IndexedDB] Upgrading from version ${event.oldVersion} to ${DB_VERSION}`)
         
-        // Delete existing object stores if they exist
-        if (database.objectStoreNames.contains(STORES.PHOTOS)) {
-          database.deleteObjectStore(STORES.PHOTOS)
-        }
-        if (database.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
-          database.deleteObjectStore(STORES.SYNC_QUEUE)
-        }
-        if (database.objectStoreNames.contains(STORES.METADATA)) {
-          database.deleteObjectStore(STORES.METADATA)
-        }
-        if (database.objectStoreNames.contains(STORES.FOLDERS)) {
-          database.deleteObjectStore(STORES.FOLDERS)
-        }
-        if (database.objectStoreNames.contains(STORES.VILLAGES)) {
-          database.deleteObjectStore(STORES.VILLAGES)
-        }
-        if (database.objectStoreNames.contains(STORES.SUB_VILLAGES)) {
-          database.deleteObjectStore(STORES.SUB_VILLAGES)
-        }
-        if (database.objectStoreNames.contains(STORES.HOUSES)) {
-          database.deleteObjectStore(STORES.HOUSES)
-        }
+        // Delete ALL existing object stores to ensure clean state
+        const storeNames = Array.from(database.objectStoreNames)
+        storeNames.forEach(storeName => {
+          console.log(`[IndexedDB] Deleting store: ${storeName}`)
+          database.deleteObjectStore(storeName)
+        })
       }
 
       // Store untuk menyimpan photo blobs
