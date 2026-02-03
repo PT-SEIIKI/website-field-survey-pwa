@@ -300,17 +300,19 @@ export class DatabaseStorage implements IStorage {
 
   // Sub-Village Admin
   async createSubVillage(subVillage: InsertSubVillage): Promise<SubVillage> {
-    try {
-      if (subVillage.offlineId) {
-        const [existing] = await db.select().from(subVillages).where(eq(subVillages.offlineId, subVillage.offlineId));
-        if (existing) return existing;
+    return this.retryOperation(async () => {
+      try {
+        if (subVillage.offlineId) {
+          const [existing] = await db.select().from(subVillages).where(eq(subVillages.offlineId, subVillage.offlineId));
+          if (existing) return existing;
+        }
+        const [data] = await db.insert(subVillages).values(subVillage).returning();
+        return data;
+      } catch (error) {
+        console.error("[Storage] createSubVillage error:", error);
+        throw error;
       }
-      const [data] = await db.insert(subVillages).values(subVillage).returning();
-      return data;
-    } catch (error) {
-      console.error("[Storage] createSubVillage error:", error);
-      throw error;
-    }
+    });
   }
 
   async updateSubVillage(id: number, updateData: Partial<InsertSubVillage>): Promise<SubVillage> {
@@ -328,17 +330,19 @@ export class DatabaseStorage implements IStorage {
 
   // House Admin
   async createHouse(house: InsertHouse): Promise<House> {
-    try {
-      if (house.offlineId) {
-        const [existing] = await db.select().from(houses).where(eq(houses.offlineId, house.offlineId));
-        if (existing) return existing;
+    return this.retryOperation(async () => {
+      try {
+        if (house.offlineId) {
+          const [existing] = await db.select().from(houses).where(eq(houses.offlineId, house.offlineId));
+          if (existing) return existing;
+        }
+        const [data] = await db.insert(houses).values(house).returning();
+        return data;
+      } catch (error) {
+        console.error("[Storage] createHouse error:", error);
+        throw error;
       }
-      const [data] = await db.insert(houses).values(house).returning();
-      return data;
-    } catch (error) {
-      console.error("[Storage] createHouse error:", error);
-      throw error;
-    }
+    });
   }
   async updateHouse(id: number, updateData: Partial<InsertHouse>): Promise<House> {
     const [data] = await db.update(houses).set(updateData).where(eq(houses.id, id)).returning();

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/server/db"
-import { subVillages, folders, villages } from "@/shared/schema"
-import { eq } from "drizzle-orm"
+import { storage } from "@/server/storage"
+import { insertSubVillageSchema } from "@/shared/schema"
+import { z } from "zod"
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,13 +9,11 @@ export async function GET(request: NextRequest) {
     const villageId = searchParams.get("villageId")
     
     if (villageId) {
-      const filtered = await db.select().from(subVillages)
-        .where(eq(subVillages.villageId, parseInt(villageId)))
-        .orderBy(subVillages.name)
+      const filtered = await storage.getSubVillages(parseInt(villageId))
       return NextResponse.json(filtered)
     }
     
-    const all = await db.select().from(subVillages).orderBy(subVillages.name)
+    const all = await storage.getSubVillages()
     return NextResponse.json(all)
   } catch (error) {
     console.error("Error fetching sub-villages:", error)
@@ -26,75 +24,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, villageId, offlineId } = body
+    const data = insertSubVillageSchema.parse(body)
     
     console.log("[API] Creating sub-village with body:", JSON.stringify(body))
     
-    if (!name || !villageId) {
-      return NextResponse.json({ error: "Name and villageId are required" }, { status: 400 })
-    }
-    
-    // Handle both numeric IDs and offline IDs
-    let actualVillageId: number
-    if (typeof villageId === 'string' && villageId.startsWith('v_')) {
-      // This is an offline ID, find the actual village by offlineId
-      const [village] = await db.select().from(villages).where(eq(villages.offlineId, villageId))
-      if (!village) {
-        console.log("[API] Village not found with offline ID:", villageId)
-        return NextResponse.json({ error: "Village not found with offline ID" }, { status: 404 })
-      }
-      actualVillageId = village.id
-    } else if (typeof villageId === 'string') {
-      // This might be a string representation of a numeric ID
-      actualVillageId = parseInt(villageId)
-      if (isNaN(actualVillageId)) {
-        console.log("[API] Invalid villageId format:", villageId)
-        return NextResponse.json({ error: "Invalid villageId format" }, { status: 400 })
-      }
-    } else {
-      // This is a numeric ID
-      actualVillageId = villageId
-    }
-    
-    // Check if sub-village with this offlineId already exists
-    if (offlineId) {
-      const existing = await db.select().from(subVillages).where(eq(subVillages.offlineId, offlineId)).limit(1)
-      if (existing.length > 0) {
-        console.log("[API] Sub-village with offlineId already exists:", offlineId)
-        return NextResponse.json(existing[0], { status: 200 })
-      }
-    }
-    
-    // Create sub-village
-    const [newSubVillage] = await db.insert(subVillages).values({ 
-      name, 
-      villageId: actualVillageId,
-      offlineId: offlineId || `sv_${Date.now()}`
-    }).returning()
-    
-    console.log("[API] Sub-village created:", newSubVillage)
-    
-    // Get village name for folder
-    const [village] = await db.select().from(villages).where(eq(villages.id, actualVillageId))
-    
-    // Auto-create folder for the sub-village
-    try {
-      const [newFolder] = await db.insert(folders).values({
-        name: `${village.name} - ${name}`, // Combine village and sub-village name
-        villageId: actualVillageId,
-        subVillageId: newSubVillage.id,
-        offlineId: offlineId ? `folder_${offlineId}` : `folder_${Date.now()}`,
-        isSynced: true
-      }).returning()
-      
-      console.log(`[API] Auto-created folder ${newFolder.name} for sub-village ${newSubVillage.name}`)
-    } catch (folderError) {
-      console.error("[API] Error auto-creating folder:", folderError)
-      // Continue even if folder creation fails
-    }
-    
-    return NextResponse.json(newSubVillage, { status: 201 })
+    const subVillage = await storage.createSubVillage(data)
+    return NextResponse.json(subVillage, { status: 201 })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ message: "Invalid sub-village data", errors: error.errors }, { status: 400 })
+    }
     console.error("[API] Error creating sub-village:", error)
     return NextResponse.json({ error: "Failed to create sub-village", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }

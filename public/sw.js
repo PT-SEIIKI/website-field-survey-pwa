@@ -28,9 +28,25 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[SW] Pre-caching assets...");
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        console.error("[SW] Pre-cache error:", err);
-      });
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map(url => {
+          // Validate URL before caching
+          try {
+            new URL(url, self.location.origin);
+            return cache.add(url).catch(err => {
+              console.warn(`[SW] Failed to cache ${url}:`, err);
+              return Promise.resolve(); // Continue with other assets
+            });
+          } catch (e) {
+            console.warn(`[SW] Invalid URL ${url}:`, e);
+            return Promise.resolve();
+          }
+        })
+      );
+    }).then(() => {
+      console.log("[SW] Pre-caching completed");
+    }).catch((err) => {
+      console.error("[SW] Pre-cache error:", err);
     })
   );
 })
@@ -61,7 +77,11 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) {
     // Exception for fonts or common CDNs if needed
     if (url.hostname.includes("fonts.googleapis.com") || url.hostname.includes("fonts.gstatic.com")) {
-      event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
+      try {
+        event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
+      } catch (e) {
+        console.warn("[SW] Font fetch error:", e);
+      }
     }
     return;
   }
@@ -69,36 +89,52 @@ self.addEventListener("fetch", (event) => {
   // API calls: Network First
   if (url.pathname.startsWith("/api/")) {
     if (event.request.method === "GET") {
-      event.respondWith(networkFirst(event.request, API_CACHE));
+      try {
+        event.respondWith(networkFirst(event.request, API_CACHE));
+      } catch (e) {
+        console.warn("[SW] API fetch error:", e);
+      }
     }
     return;
   }
 
   // Navigation (HTML): Network First with robust fallback
   if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-            return response;
-          }
-          return cacheFallback(event.request);
-        })
-        .catch(() => cacheFallback(event.request))
-    );
+    try {
+      event.respondWith(
+        fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const copy = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+              return response;
+            }
+            return cacheFallback(event.request);
+          })
+          .catch(() => cacheFallback(event.request))
+      );
+    } catch (e) {
+      console.warn("[SW] Navigation fetch error:", e);
+    }
     return;
   }
 
   // Handle Dynamic Image Loading (Uploads)
   if (url.pathname.startsWith("/uploads/")) {
-    event.respondWith(staleWhileRevalidate(event.request, API_CACHE));
+    try {
+      event.respondWith(staleWhileRevalidate(event.request, API_CACHE));
+    } catch (e) {
+      console.warn("[SW] Upload fetch error:", e);
+    }
     return;
   }
 
   // Static Assets & Others: Stale While Revalidate
-  event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
+  try {
+    event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
+  } catch (e) {
+    console.warn("[SW] Static asset fetch error:", e);
+  }
 });
 
 async function cacheFallback(request) {
