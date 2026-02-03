@@ -26,8 +26,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Preprocess: Convert villageId to number if it's a string
-    if (body.villageId && typeof body.villageId === 'string') {
-      body.villageId = parseInt(body.villageId, 10)
+    if (body.villageId !== undefined && body.villageId !== null) {
+      const parsedId = parseInt(body.villageId.toString(), 10)
+      if (isNaN(parsedId)) {
+        return NextResponse.json({ 
+          message: "Invalid villageId: must be a valid number", 
+          received: body.villageId 
+        }, { status: 400 })
+      }
+      body.villageId = parsedId
     }
     
     const data = insertSubVillageSchema.parse(body)

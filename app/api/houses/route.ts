@@ -33,8 +33,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Preprocess: Convert subVillageId to number if it's a string
-    if (body.subVillageId && typeof body.subVillageId === 'string') {
-      body.subVillageId = parseInt(body.subVillageId, 10)
+    if (body.subVillageId !== undefined && body.subVillageId !== null) {
+      const parsedId = parseInt(body.subVillageId.toString(), 10)
+      if (isNaN(parsedId)) {
+        return NextResponse.json({ 
+          message: "Invalid subVillageId: must be a valid number", 
+          received: body.subVillageId 
+        }, { status: 400 })
+      }
+      body.subVillageId = parsedId
     }
     
     const data = insertHouseSchema.parse(body)

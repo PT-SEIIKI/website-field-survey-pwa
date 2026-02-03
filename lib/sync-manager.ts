@@ -117,10 +117,26 @@ export async function startSync() {
     for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
       try {
         console.log("[v0] Syncing sub-village:", sv.id, sv.name)
+        
+        // Convert villageId from string to number if needed
+        let villageId = sv.villageId
+        if (typeof villageId === 'string') {
+          const parsed = parseInt(villageId, 10)
+          if (isNaN(parsed)) {
+            console.error("[v0] Invalid villageId for sub-village:", sv.id, villageId)
+            continue
+          }
+          villageId = parsed
+        }
+        
         const res = await fetch("/api/sub-villages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: sv.name, villageId: sv.villageId, offlineId: sv.id })
+          body: JSON.stringify({ 
+            name: sv.name, 
+            villageId: villageId, 
+            offlineId: sv.id 
+          })
         })
         if (res.ok) {
           console.log("[v0] Sub-village synced successfully:", sv.id)
@@ -138,12 +154,24 @@ export async function startSync() {
     for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
       try {
         console.log("[v0] Syncing house:", h.id, h.name)
+        
+        // Convert subVillageId from string to number if needed
+        let subVillageId = h.subVillageId
+        if (typeof subVillageId === 'string') {
+          const parsed = parseInt(subVillageId, 10)
+          if (isNaN(parsed)) {
+            console.error("[v0] Invalid subVillageId for house:", h.id, subVillageId)
+            continue
+          }
+          subVillageId = parsed
+        }
+        
         const res = await fetch("/api/houses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             name: h.name, 
-            subVillageId: h.subVillageId, 
+            subVillageId: subVillageId, 
             offlineId: h.id,
             ownerName: h.ownerName,
             nik: h.nik,

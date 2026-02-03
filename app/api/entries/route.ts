@@ -21,7 +21,10 @@ export async function POST(req: NextRequest) {
     console.log("[API] Raw POST body:", JSON.stringify(body));
     
     // Extract and normalize fields
-    const surveyId = body.surveyId ? parseInt(body.surveyId.toString(), 10) : 1;
+    let surveyId = body.surveyId ? parseInt(body.surveyId.toString(), 10) : 1;
+    if (isNaN(surveyId)) {
+      surveyId = 1; // Default fallback
+    }
     
     // The user's log shows: data: "{\"timestamp\":1768610296799}"
     // This is a stringified JSON. If we receive it as a string, we keep it. 
@@ -44,7 +47,11 @@ export async function POST(req: NextRequest) {
     
     const offlineId = body.offlineId || null;
     const isSynced = body.isSynced === true || body.isSynced === 'true';
-    const folderId = body.folderId ? parseInt(body.folderId.toString(), 10) : null;
+    
+    let folderId = body.folderId ? parseInt(body.folderId.toString(), 10) : null;
+    if (body.folderId && isNaN(folderId)) {
+      folderId = null; // Fallback for invalid folderId
+    }
 
     console.log("[API] Final normalized data:", { surveyId, folderId, data, offlineId, isSynced });
 
