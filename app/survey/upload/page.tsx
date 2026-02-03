@@ -79,18 +79,18 @@ function UploadPageContent() {
   const [showAddHouse, setShowAddHouse] = useState(false);
 
   const fetchFolders = async () => {
-    const local = await getFolders();
-    if (local.length > 0) {
-      setFolders(local);
-    }
-
     if (getOnlineStatus()) {
       const res = await fetch("/api/folders");
       if (res.ok) {
         const remote = await res.json();
-        setFolders(remote.map((f: any) => ({ ...f, id: String(f.id) })));
+        const mappedFolders = remote.map((f: any) => ({ ...f, id: String(f.id) }));
+        setFolders(mappedFolders);
+        return;
       }
     }
+
+    const local = await getFolders();
+    setFolders(local);
   };
 
   const createVillage = async () => {
@@ -108,6 +108,8 @@ function UploadPageContent() {
       setSelectedVillageId(offlineId);
       setNewVillageName("");
       setShowAddVillage(false);
+      // Refresh folders to see if a folder was created for this village
+      await fetchFolders();
       return;
     }
 
@@ -128,6 +130,8 @@ function UploadPageContent() {
       setSelectedVillageId(String(created.id));
       setNewVillageName("");
       setShowAddVillage(false);
+      // Refresh folders to see if a folder was created for this village
+      await fetchFolders();
     }
   };
 
@@ -147,6 +151,7 @@ function UploadPageContent() {
       setSelectedSubVillageId(offlineId);
       setNewSubVillageName("");
       setShowAddSubVillage(false);
+      await fetchFolders();
       return;
     }
 
@@ -174,6 +179,7 @@ function UploadPageContent() {
       setSelectedSubVillageId(String(created.id));
       setNewSubVillageName("");
       setShowAddSubVillage(false);
+      await fetchFolders();
     }
   };
 
@@ -199,6 +205,7 @@ function UploadPageContent() {
       setNewNik("");
       setNewAddress("");
       setShowAddHouse(false);
+      await fetchFolders();
       return;
     }
 
@@ -229,6 +236,7 @@ function UploadPageContent() {
       setNewNik("");
       setNewAddress("");
       setShowAddHouse(false);
+      await fetchFolders();
     }
   };
 
@@ -493,7 +501,20 @@ function UploadPageContent() {
                   </label>
                   <select
                     value={selectedFolderId}
-                    onChange={(e) => setSelectedFolderId(e.target.value)}
+                    onChange={(e) => {
+                      const folderId = e.target.value;
+                      setSelectedFolderId(folderId);
+                      
+                      // Auto-select hierarchy based on folder
+                      if (folderId) {
+                        const folder = folders.find(f => f.id === folderId);
+                        if (folder) {
+                          if (folder.villageId) setSelectedVillageId(String(folder.villageId));
+                          if (folder.subVillageId) setSelectedSubVillageId(String(folder.subVillageId));
+                          if (folder.houseId) setSelectedHouseId(String(folder.houseId));
+                        }
+                      }
+                    }}
                     className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
                   >
                     <option value="">Pilih Folder (Opsional)</option>
