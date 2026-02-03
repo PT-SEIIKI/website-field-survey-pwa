@@ -1,6 +1,6 @@
 // IndexedDB utilities untuk offline storage
 const DB_NAME = "SurveyOfflineDB"
-const DB_VERSION = 4 // Incrementing version to fix object store issues
+const DB_VERSION = 5 // Versi baru untuk reset total database
 const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
@@ -13,6 +13,24 @@ const STORES = {
 
 let db: IDBDatabase | null = null
 
+// Fungsi untuk menghapus seluruh database
+export async function deleteDatabase(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const deleteReq = indexedDB.deleteDatabase(DB_NAME)
+    
+    deleteReq.onerror = () => reject(deleteReq.error)
+    deleteReq.onsuccess = () => {
+      console.log(`[IndexedDB] Database ${DB_NAME} berhasil dihapus`)
+      db = null // Reset instance
+      resolve()
+    }
+    
+    deleteReq.blocked = () => {
+      console.log(`[IndexedDB] Database ${DB_NAME} diblokir, menunggu penutupan koneksi...`)
+    }
+  })
+}
+
 export async function initDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (db) {
@@ -22,76 +40,110 @@ export async function initDB(): Promise<IDBDatabase> {
 
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onerror = () => reject(request.error)
+    request.onerror = () => {
+      console.error(`[IndexedDB] Error membuka database:`, request.error)
+      reject(request.error)
+    }
+    
     request.onsuccess = () => {
       db = request.result
+      console.log(`[IndexedDB] Database berhasil dibuka dengan versi ${DB_VERSION}`)
       resolve(db)
     }
 
     request.onupgradeneeded = (event) => {
       const database = (event.target as IDBOpenDBRequest).result
+      console.log(`[IndexedDB] Upgrade dari versi ${event.oldVersion} ke ${DB_VERSION}`)
       
-      // Clear existing data for fresh start when upgrading
-      if (event.oldVersion > 0 && event.oldVersion < DB_VERSION) {
-        console.log(`[IndexedDB] Upgrading from version ${event.oldVersion} to ${DB_VERSION}`)
-        
-        // Delete ALL existing object stores to ensure clean state
+      // HAPUS SEMUA OBJECT STORE YANG ADA untuk reset total
+      if (event.oldVersion > 0) {
         const storeNames = Array.from(database.objectStoreNames)
+        console.log(`[IndexedDB] Menghapus ${storeNames.length} object store lama:`, storeNames)
+        
         storeNames.forEach(storeName => {
-          console.log(`[IndexedDB] Deleting store: ${storeName}`)
-          database.deleteObjectStore(storeName)
+          try {
+            database.deleteObjectStore(storeName)
+            console.log(`[IndexedDB] Store "${storeName}" dihapus`)
+          } catch (error) {
+            console.warn(`[IndexedDB] Gagal menghapus store "${storeName}":`, error)
+          }
         })
       }
 
-      // Store untuk menyimpan photo blobs
-      if (!database.objectStoreNames.contains(STORES.PHOTOS)) {
+      // BUAT SEMUA OBJECT STORE BARU dari awal
+      console.log(`[IndexedDB] Membuat ${Object.keys(STORES).length} object store baru...`)
+      
+      // Store untuk photos
+      try {
         const photoStore = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
         photoStore.createIndex("timestamp", "timestamp", { unique: false })
         photoStore.createIndex("syncStatus", "syncStatus", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.PHOTOS}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" sudah ada:`, error)
       }
 
       // Store untuk sync queue
-      if (!database.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
+      try {
         const queueStore = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
         queueStore.createIndex("photoId", "photoId", { unique: false })
         queueStore.createIndex("status", "status", { unique: false })
+        queueStore.createIndex("timestamp", "timestamp", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" sudah ada:`, error)
       }
 
-      // Store untuk metadata foto
-      if (!database.objectStoreNames.contains(STORES.METADATA)) {
+      // Store untuk metadata
+      try {
         const metaStore = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
         metaStore.createIndex("location", "location", { unique: false })
         metaStore.createIndex("timestamp", "timestamp", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.METADATA}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.METADATA}" sudah ada:`, error)
       }
 
-      // Store untuk Folders
-      if (!database.objectStoreNames.contains(STORES.FOLDERS)) {
+      // Store untuk folders
+      try {
         const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
         folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
         folderStore.createIndex("createdAt", "createdAt", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.FOLDERS}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.FOLDERS}" sudah ada:`, error)
       }
 
-      // Store untuk Villages
-      if (!database.objectStoreNames.contains(STORES.VILLAGES)) {
+      // Store untuk villages
+      try {
         const villageStore = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
         villageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.VILLAGES}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.VILLAGES}" sudah ada:`, error)
       }
 
-      // Store untuk Sub Villages
-      if (!database.objectStoreNames.contains(STORES.SUB_VILLAGES)) {
+      // Store untuk sub-villages
+      try {
         const subVillageStore = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
         subVillageStore.createIndex("villageId", "villageId", { unique: false })
         subVillageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" sudah ada:`, error)
       }
 
-      // Store untuk Houses
-      if (!database.objectStoreNames.contains(STORES.HOUSES)) {
+      // Store untuk houses
+      try {
         const houseStore = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
         houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
         houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
+        console.log(`[IndexedDB] Store "${STORES.HOUSES}" dibuat`)
+      } catch (error) {
+        console.warn(`[IndexedDB] Store "${STORES.HOUSES}" sudah ada:`, error)
       }
       
-      console.log(`[IndexedDB] Database version ${DB_VERSION} initialized successfully`)
+      console.log(`[IndexedDB] Semua object store berhasil dibuat untuk versi ${DB_VERSION}`)
     }
   })
 }
@@ -129,67 +181,95 @@ export async function getPhoto(id: string): Promise<any | null> {
 }
 
 export async function getPendingPhotos(): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.PHOTOS], "readonly")
-    const store = tx.objectStore(STORES.PHOTOS)
-    const index = store.index("syncStatus")
-    const request = index.getAll("pending")
+  try {
+    const database = await initDB()
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.PHOTOS], "readonly")
+      const store = tx.objectStore(STORES.PHOTOS)
+      const index = store.index("syncStatus")
+      const request = index.getAll("pending")
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+      request.onerror = () => {
+        console.error(`[IndexedDB] Error getting pending photos:`, request.error)
+        reject(request.error)
+      }
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get pending photos:`, error)
+    return []
+  }
 }
 
 export async function updatePhotoStatus(
   id: string,
   status: "pending" | "syncing" | "synced" | "failed",
 ): Promise<void> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.PHOTOS], "readwrite")
-    const store = tx.objectStore(STORES.PHOTOS)
+  try {
+    const database = await initDB()
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.PHOTOS], "readwrite")
+      const store = tx.objectStore(STORES.PHOTOS)
 
-    // Dapatkan photo terlebih dahulu
-    const getRequest = store.get(id)
+      // Dapatkan photo terlebih dahulu
+      const getRequest = store.get(id)
 
-    getRequest.onsuccess = () => {
-      const photo = getRequest.result
-      if (photo) {
-        photo.syncStatus = status
-        const updateRequest = store.put(photo)
+      getRequest.onsuccess = () => {
+        const photo = getRequest.result
+        if (photo) {
+          photo.syncStatus = status
+          const updateRequest = store.put(photo)
 
-        updateRequest.onerror = () => reject(updateRequest.error)
-        updateRequest.onsuccess = () => {
-          console.log("[v0] Photo status updated:", id, status)
-          resolve()
+          updateRequest.onerror = () => {
+            console.error(`[IndexedDB] Error updating photo status:`, updateRequest.error)
+            reject(updateRequest.error)
+          }
+          updateRequest.onsuccess = () => {
+            console.log("[v0] Photo status updated:", id, status)
+            resolve()
+          }
+        } else {
+          console.warn(`[IndexedDB] Photo with id ${id} not found for status update`)
+          resolve() // Resolve instead of reject to prevent app crash
         }
-      } else {
-        reject(new Error("Photo not found"))
       }
-    }
 
-    getRequest.onerror = () => reject(getRequest.error)
-  })
+      getRequest.onerror = () => {
+        console.error(`[IndexedDB] Error getting photo for status update:`, getRequest.error)
+        reject(getRequest.error)
+      }
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to update photo status:`, error)
+    // Don't throw error to prevent app crash
+  }
 }
 
 export async function addToSyncQueue(photoId: string): Promise<number> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.SYNC_QUEUE], "readwrite")
-    const store = tx.objectStore(STORES.SYNC_QUEUE)
-    const request = store.add({
-      photoId,
-      status: "pending",
-      createdAt: Date.now(),
-    })
+  try {
+    const database = await initDB()
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.SYNC_QUEUE], "readwrite")
+      const store = tx.objectStore(STORES.SYNC_QUEUE)
+      const request = store.add({
+        photoId,
+        status: "pending",
+        createdAt: Date.now(),
+      })
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => {
-      console.log("[v0] Added to sync queue:", photoId)
-      resolve(request.result as number)
-    }
-  })
+      request.onerror = () => {
+        console.error(`[IndexedDB] Error adding to sync queue:`, request.error)
+        reject(request.error)
+      }
+      request.onsuccess = () => {
+        console.log("[v0] Added to sync queue:", photoId)
+        resolve(request.result as number)
+      }
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to add to sync queue:`, error)
+    throw error
+  }
 }
 
 export async function getSyncQueue(): Promise<any[]> {
