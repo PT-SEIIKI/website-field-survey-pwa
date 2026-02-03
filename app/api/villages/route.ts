@@ -22,14 +22,17 @@ export async function POST(request: NextRequest) {
     }
     
     // Create village
-    const [newVillage] = await db.insert(villages).values({ name }).returning()
+    const [newVillage] = await db.insert(villages).values({ 
+      name,
+      offlineId: offlineId || `v_${Date.now()}`
+    }).returning()
     
     // Auto-create folder for the village
     try {
       const [newFolder] = await db.insert(folders).values({
         name: name, // Use village name as folder name
         villageId: newVillage.id,
-        offlineId: offlineId || `folder_${Date.now()}`,
+        offlineId: offlineId ? `folder_${offlineId}` : `folder_${Date.now()}`,
         isSynced: true
       }).returning()
       

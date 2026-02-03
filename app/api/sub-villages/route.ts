@@ -32,22 +32,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and villageId are required" }, { status: 400 })
     }
     
+    // Handle both numeric IDs and offline IDs
+    let actualVillageId: number
+    if (typeof villageId === 'string' && villageId.startsWith('v_')) {
+      // This is an offline ID, find the actual village by offlineId
+      const [village] = await db.select().from(villages).where(eq(villages.offlineId, villageId))
+      if (!village) {
+        return NextResponse.json({ error: "Village not found with offline ID" }, { status: 404 })
+      }
+      actualVillageId = village.id
+    } else {
+      // This is a numeric ID
+      actualVillageId = parseInt(villageId)
+    }
+    
     // Create sub-village
     const [newSubVillage] = await db.insert(subVillages).values({ 
       name, 
-      villageId: parseInt(villageId) 
+      villageId: actualVillageId,
+      offlineId: offlineId || `sv_${Date.now()}`
     }).returning()
     
     // Get village name for folder
-    const [village] = await db.select().from(villages).where(eq(villages.id, parseInt(villageId)))
+    const [village] = await db.select().from(villages).where(eq(villages.id, actualVillageId))
     
     // Auto-create folder for the sub-village
     try {
       const [newFolder] = await db.insert(folders).values({
         name: `${village.name} - ${name}`, // Combine village and sub-village name
-        villageId: parseInt(villageId),
+        villageId: actualVillageId,
         subVillageId: newSubVillage.id,
-        offlineId: offlineId || `folder_${Date.now()}`,
+        offlineId: offlineId ? `folder_${offlineId}` : `folder_${Date.now()}`,
         isSynced: true
       }).returning()
       

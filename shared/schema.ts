@@ -52,6 +52,7 @@ export const photos = pgTable("photos", {
 export const villages = pgTable("villages", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  offlineId: text("offline_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -59,6 +60,7 @@ export const subVillages = pgTable("sub_villages", {
   id: serial("id").primaryKey(),
   villageId: integer("village_id").references(() => villages.id).notNull(),
   name: text("name").notNull(),
+  offlineId: text("offline_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -69,6 +71,7 @@ export const houses = pgTable("houses", {
   ownerName: text("owner_name"),
   nik: text("nik"),
   address: text("address"),
+  offlineId: text("offline_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

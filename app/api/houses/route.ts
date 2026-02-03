@@ -39,17 +39,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and subVillageId are required" }, { status: 400 })
     }
     
+    // Handle both numeric IDs and offline IDs
+    let actualSubVillageId: number
+    if (typeof subVillageId === 'string' && subVillageId.startsWith('sv_')) {
+      // This is an offline ID, find the actual sub-village by offlineId
+      const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.offlineId, subVillageId))
+      if (!subVillage) {
+        return NextResponse.json({ error: "Sub-village not found with offline ID" }, { status: 404 })
+      }
+      actualSubVillageId = subVillage.id
+    } else {
+      // This is a numeric ID
+      actualSubVillageId = parseInt(subVillageId)
+    }
+    
     // Create house
     const [newHouse] = await db.insert(houses).values({ 
       name, 
-      subVillageId: parseInt(subVillageId),
+      subVillageId: actualSubVillageId,
       ownerName,
       nik,
-      address
+      address,
+      offlineId: offlineId || `h_${Date.now()}`
     }).returning()
     
     // Get village and sub-village names for folder
-    const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.id, parseInt(subVillageId)))
+    const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.id, actualSubVillageId))
     const [village] = await db.select().from(villages).where(eq(villages.id, subVillage.villageId))
     
     // Auto-create folder for the house
@@ -59,9 +74,9 @@ export async function POST(request: NextRequest) {
         houseName: name,
         nik: nik || null,
         villageId: subVillage.villageId,
-        subVillageId: parseInt(subVillageId),
+        subVillageId: actualSubVillageId,
         houseId: newHouse.id,
-        offlineId: offlineId || `folder_${Date.now()}`,
+        offlineId: offlineId ? `folder_${offlineId}` : `folder_${Date.now()}`,
         isSynced: true
       }).returning()
       
