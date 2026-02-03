@@ -177,7 +177,9 @@ function UploadPageContent() {
           houseId: selectedHouseId,
           selectedVillageId,
           selectedSubVillageId,
-          selectedHouseId
+          selectedHouseId,
+          surveyId: 1, // Ensure surveyId is set
+          timestamp: Date.now()
         })
       }
       setSuccessMessage(`${files.length} foto berhasil ditambahkan`)

@@ -205,6 +205,10 @@ export class DatabaseStorage implements IStorage {
     return data;
   }
   async deleteVillage(id: number): Promise<void> {
+    const subVills = await this.getSubVillages(id);
+    for (const sv of subVills) {
+      await this.deleteSubVillage(sv.id);
+    }
     await db.delete(villages).where(eq(villages.id, id));
   }
 
@@ -218,6 +222,10 @@ export class DatabaseStorage implements IStorage {
     return data;
   }
   async deleteSubVillage(id: number): Promise<void> {
+    const hses = await this.getHouses(id);
+    for (const h of hses) {
+      await this.deleteHouse(h.id);
+    }
     await db.delete(subVillages).where(eq(subVillages.id, id));
   }
 
@@ -231,6 +239,10 @@ export class DatabaseStorage implements IStorage {
     return data;
   }
   async deleteHouse(id: number): Promise<void> {
+    const phs = await this.getPhotosByHouseId(id);
+    for (const p of phs) {
+      await this.deletePhoto(p.id);
+    }
     await db.delete(houses).where(eq(houses.id, id));
   }
 
