@@ -87,7 +87,6 @@ function UploadPageContent() {
       setSelectedVillageId(offlineId);
       setNewVillageName("");
       setShowAddVillage(false);
-      await fetchVillages();
       return;
     }
 
@@ -108,7 +107,6 @@ function UploadPageContent() {
       setSelectedVillageId(String(created.id));
       setNewVillageName("");
       setShowAddVillage(false);
-      await fetchVillages();
     }
   };
 
@@ -128,7 +126,6 @@ function UploadPageContent() {
       setSelectedSubVillageId(offlineId);
       setNewSubVillageName("");
       setShowAddSubVillage(false);
-      await fetchSubVillages(selectedVillageId);
       return;
     }
 
@@ -156,7 +153,6 @@ function UploadPageContent() {
       setSelectedSubVillageId(String(created.id));
       setNewSubVillageName("");
       setShowAddSubVillage(false);
-      await fetchSubVillages(selectedVillageId);
     }
   };
 
@@ -176,7 +172,6 @@ function UploadPageContent() {
       setSelectedHouseId(offlineId);
       setNewHouseName("");
       setShowAddHouse(false);
-      await fetchHouses(selectedSubVillageId);
       return;
     }
 
@@ -201,7 +196,6 @@ function UploadPageContent() {
       setSelectedHouseId(String(created.id));
       setNewHouseName("");
       setShowAddHouse(false);
-      await fetchHouses(selectedSubVillageId);
     }
   };
 
