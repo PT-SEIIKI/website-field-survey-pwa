@@ -201,6 +201,17 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
     photoFormData.append("description", metadata?.description || "");
     photoFormData.append("timestamp", photoData.timestamp.toString());
     
+    // Add hierarchy info to upload
+    if (metadata?.villageId || metadata?.selectedVillageId) {
+      photoFormData.append("villageId", metadata.villageId || metadata.selectedVillageId);
+    }
+    if (metadata?.subVillageId || metadata?.selectedSubVillageId) {
+      photoFormData.append("subVillageId", metadata.subVillageId || metadata.selectedSubVillageId);
+    }
+    if (metadata?.houseId || metadata?.selectedHouseId) {
+      photoFormData.append("houseId", metadata.houseId || metadata.selectedHouseId);
+    }
+    
     // Add folder info to upload metadata if exists
     if (metadata?.folderId) {
       photoFormData.append("folderId", metadata.folderId);

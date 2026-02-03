@@ -64,6 +64,9 @@ export async function POST(request: NextRequest) {
       timestamp: Number.parseInt(timestamp) || Date.now(),
       uploadedAt: new Date().toISOString(),
       size: buffer.length,
+      villageId: formData.get("villageId"),
+      subVillageId: formData.get("subVillageId"),
+      houseId: formData.get("houseId"),
     }
     await writeFile(metadataPath, JSON.stringify(metadata, null, 2))
 
