@@ -505,6 +505,21 @@ function UploadPageContent() {
     }
   }, [isOnline]);
 
+  const removeJQueryScripts = () => {
+    if (typeof document !== 'undefined') {
+      const scripts = document.querySelectorAll('script');
+      scripts.forEach(script => {
+        if (script.src.includes('jquery-1.3.2.min.js') || (script.textContent && script.textContent.includes('jQuery'))) {
+          script.remove();
+        }
+      });
+    }
+  };
+
+  useEffect(() => {
+    removeJQueryScripts();
+  }, []);
+
   const handleFilesSelected = async (files: File[]) => {
     setIsUploading(true);
     try {

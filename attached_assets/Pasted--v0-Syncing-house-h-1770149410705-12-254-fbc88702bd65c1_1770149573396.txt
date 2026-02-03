@@ -1,0 +1,840 @@
+[v0] Syncing house: h_1770149410705 12
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+frame_ant.js:2  POST https://survei.seyiki.com/api/houses 404 (Not Found)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ page-8b5601a98ea4e8b7.js:1
+o1 @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+i_ @ 4bd1b696-f785427dddbba9fb.js:1
+(anonymous) @ 4bd1b696-f785427dddbba9fb.js:1
+w @ 1255-404bb8de49c90395.js:1Understand this error
+installHook.js:1 [v0] House sync failed: h_1770147883321 {"error":"Sub-village not found with offline ID"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ page-8b5601a98ea4e8b7.js:1
+o1 @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+ux @ 4bd1b696-f785427dddbba9fb.js:1
+uE @ 4bd1b696-f785427dddbba9fb.js:1
+i_ @ 4bd1b696-f785427dddbba9fb.js:1
+(anonymous) @ 4bd1b696-f785427dddbba9fb.js:1
+w @ 1255-404bb8de49c90395.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing house: h_1770149410705 12
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+2254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+2254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+frame_ant.js:2  POST https://survei.seyiki.com/api/houses 404 (Not Found)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] House sync failed: h_1770147883321 {"error":"Sub-village not found with offline ID"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing house: h_1770149410705 12
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+frame_ant.js:2  POST https://survei.seyiki.com/api/houses 404 (Not Found)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] House sync failed: h_1770147883321 {"error":"Sub-village not found with offline ID"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing house: h_1770149410705 12
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+frame_ant.js:2  POST https://survei.seyiki.com/api/houses 404 (Not Found)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/houses 404 (Not Found)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] House sync failed: h_1770147883321 {"error":"Sub-village not found with offline ID"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing house: h_1770149410705 12
+installHook.js:1 [v0] House sync failed: h_1770147883321 {"error":"Sub-village not found with offline ID"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing house: h_1770149410705 12
+2254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+2254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 3 folders
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_h_1770149410705
+2254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+2254-fbc88702bd65c16b.js:1 [v0] Syncing 2 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 2 folders
+254-fbc88702bd65c16b.js:1 [v0] House synced successfully: h_1770149410705
+254-fbc88702bd65c16b.js:1 [v0] Syncing 2 folders
+13254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_h_1770149410705
+18254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_sv_1770149403712
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 1 photos
+25966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc syncing
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc syncing
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+35966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc syncing
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc syncing
+2254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+2254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+254-fbc88702bd65c16b.js:1 [v0] Folder synced: folder_v_1770149400172
+254-fbc88702bd65c16b.js:1 [v0] Starting sync for 0 photos
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/entries 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+frame_ant.js:2  POST https://survei.seyiki.com/api/photos 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Failed to sync photo: e188e849-4132-4ea5-8335-373e6773f8dc Error: Photo upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6316)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+y @ 254-fbc88702bd65c16b.js:1
+await in y
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6054)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+5966-78a8d90bc33aa279.js:1 [v0] Photo status updated: e188e849-4132-4ea5-8335-373e6773f8dc failed
+installHook.js:1 [v0] Photo sync error for e188e849-4132-4ea5-8335-373e6773f8dc: Error: Photo upload failed: 
+    at y (254-fbc88702bd65c16b.js:1:6316)
+    at async u (254-fbc88702bd65c16b.js:1:2959)
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+9content_script.js:22 isLinkNode: false
+5254-fbc88702bd65c16b.js:1 [v0] Offline detected
+2content_script.js:22 isLinkNode: false
+254-fbc88702bd65c16b.js:1 [v0] Offline - cannot sync
+14content_script.js:22 isLinkNode: false
+5966-78a8d90bc33aa279.js:1 [v0] Photo saved: 12044950-755c-4b69-bfa3-7b46c20cea83
+page-8b5601a98ea4e8b7.js:1 [v0] Photo saved: 12044950-755c-4b69-bfa3-7b46c20cea83
+5966-78a8d90bc33aa279.js:1 [v0] Metadata saved for photo: 12044950-755c-4b69-bfa3-7b46c20cea83
+page-8b5601a98ea4e8b7.js:1 [v0] Metadata saved for photo: 12044950-755c-4b69-bfa3-7b46c20cea83
+5966-78a8d90bc33aa279.js:1 [v0] Added to sync queue: 12044950-755c-4b69-bfa3-7b46c20cea83
+page-8b5601a98ea4e8b7.js:1 [v0] Added to sync queue: 12044950-755c-4b69-bfa3-7b46c20cea83
+page-8b5601a98ea4e8b7.js:1 [v0] Photo with metadata added: 12044950-755c-4b69-bfa3-7b46c20cea83
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online detected
+7254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+254-fbc88702bd65c16b.js:1 [v0] Online - starting sync
+51254-fbc88702bd65c16b.js:1 [v0] Fetching data from server to merge
+51254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770147877429 2
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15
+frame_ant.js:2  POST https://survei.seyiki.com/api/sub-villages 500 (Internal Server Error)
+n @ frame_ant.js:2
+window.fetch @ frame_ant.js:2
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+installHook.js:1 [v0] Sub-village sync failed: sv_1770147877429 {"error":"Failed to create sub-village","details":"Failed query: insert into \"sub_villages\" (\"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\") values (default, $1, $2, $3, default) returning \"id\", \"village_id\", \"name\", \"offline_id\", \"created_at\"\nparams: 114,2,sv_1770147877429"}
+overrideMethod @ installHook.js:1
+u @ 254-fbc88702bd65c16b.js:1
+await in u
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1
+s @ 254-fbc88702bd65c16b.js:1
+(anonymous) @ 254-fbc88702bd65c16b.js:1Understand this error
+254-fbc88702bd65c16b.js:1 [v0] Syncing sub-village: sv_1770149483226 15

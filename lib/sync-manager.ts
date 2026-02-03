@@ -104,7 +104,7 @@ export async function startSync() {
     const allVillages = await getVillages()
     for (const v of allVillages.filter(i => i.syncStatus === "pending")) {
       try {
-        const res = await fetch("/api/villages", {
+        const res = await fetch("/api/admin/villages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: v.name, offlineId: v.id })
@@ -117,7 +117,7 @@ export async function startSync() {
     for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
       try {
         console.log("[v0] Syncing sub-village:", sv.id, sv.name)
-        const res = await fetch("/api/sub-villages", {
+        const res = await fetch("/api/admin/sub-villages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: sv.name, villageId: sv.villageId, offlineId: sv.id })
@@ -138,10 +138,17 @@ export async function startSync() {
     for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
       try {
         console.log("[v0] Syncing house:", h.id, h.name)
-        const res = await fetch("/api/houses", {
+        const res = await fetch("/api/admin/houses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: h.name, subVillageId: h.subVillageId, offlineId: h.id })
+          body: JSON.stringify({ 
+            name: h.name, 
+            subVillageId: h.subVillageId, 
+            offlineId: h.id,
+            ownerName: h.ownerName,
+            nik: h.nik,
+            address: h.address
+          })
         })
         if (res.ok) {
           console.log("[v0] House synced successfully:", h.id)
