@@ -74,12 +74,12 @@ function UploadPageContent() {
     const res = await fetch("/api/villages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newVillageName.trim() })
+      body: JSON.stringify({ name: newVillageName.trim(), offlineId })
     })
     if (res.ok) {
       const created = await res.json()
-      await saveVillage({ ...created, id: String(created.id), syncStatus: "synced" })
-      setVillages(prev => [...prev, created])
+      await saveVillage({ ...created, id: String(created.id), offlineId, syncStatus: "synced" })
+      setVillages(prev => [...prev, { ...created, id: String(created.id) }])
       setSelectedVillageId(String(created.id))
       setNewVillageName("")
       setShowAddVillage(false)
@@ -103,12 +103,12 @@ function UploadPageContent() {
     const res = await fetch("/api/sub-villages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newSubVillageName.trim(), villageId: selectedVillageId })
+      body: JSON.stringify({ name: newSubVillageName.trim(), villageId: selectedVillageId, offlineId })
     })
     if (res.ok) {
       const created = await res.json()
-      await saveSubVillage({ ...created, id: String(created.id), syncStatus: "synced" })
-      setSubVillages(prev => [...prev, created])
+      await saveSubVillage({ ...created, id: String(created.id), offlineId, syncStatus: "synced" })
+      setSubVillages(prev => [...prev, { ...created, id: String(created.id) }])
       setSelectedSubVillageId(String(created.id))
       setNewSubVillageName("")
       setShowAddSubVillage(false)
@@ -132,12 +132,12 @@ function UploadPageContent() {
     const res = await fetch("/api/houses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newHouseName.trim(), subVillageId: selectedSubVillageId })
+      body: JSON.stringify({ name: newHouseName.trim(), subVillageId: selectedSubVillageId, offlineId })
     })
     if (res.ok) {
       const created = await res.json()
-      await saveHouse({ ...created, id: String(created.id), syncStatus: "synced" })
-      setHouses(prev => [...prev, created])
+      await saveHouse({ ...created, id: String(created.id), offlineId, syncStatus: "synced" })
+      setHouses(prev => [...prev, { ...created, id: String(created.id) }])
       setSelectedHouseId(String(created.id))
       setNewHouseName("")
       setShowAddHouse(false)
