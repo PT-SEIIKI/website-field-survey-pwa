@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { subVillages, houses, photos } from "@/shared/schema"
+import { subVillages, houses, photos, folders } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function PUT(
@@ -41,12 +41,16 @@ export async function DELETE(
     const { id } = await params
     const subVillageId = parseInt(id)
 
-    // Cascade delete: photos -> houses -> sub_villages
+    // Cascade delete: photos -> houses -> sub_villages + folders
     const hses = await db.select().from(houses).where(eq(houses.subVillageId, subVillageId))
     for (const h of hses) {
       await db.delete(photos).where(eq(photos.houseId, h.id))
+      // Delete folders associated with this house
+      await db.delete(folders).where(eq(folders.houseId, h.id))
     }
     await db.delete(houses).where(eq(houses.subVillageId, subVillageId))
+    // Delete folders associated with this sub-village
+    await db.delete(folders).where(eq(folders.subVillageId, subVillageId))
     await db.delete(subVillages).where(eq(subVillages.id, subVillageId))
 
     return NextResponse.json({ success: true })

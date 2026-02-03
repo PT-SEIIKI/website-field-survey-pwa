@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { houses, photos } from "@/shared/schema"
+import { houses, photos, folders } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function GET(
@@ -35,8 +35,10 @@ export async function DELETE(
     const { id } = await params
     const houseId = parseInt(id)
 
-    // Cascade delete: photos -> houses
+    // Cascade delete: photos -> houses + folders
     await db.delete(photos).where(eq(photos.houseId, houseId))
+    // Delete folders associated with this house
+    await db.delete(folders).where(eq(folders.houseId, houseId))
     await db.delete(houses).where(eq(houses.id, houseId))
 
     return NextResponse.json({ success: true })
