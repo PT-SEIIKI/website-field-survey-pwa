@@ -63,6 +63,9 @@ export const houses = pgTable("houses", {
   id: serial("id").primaryKey(),
   subVillageId: integer("sub_village_id").references(() => subVillages.id).notNull(),
   name: text("name").notNull(),
+  ownerName: text("owner_name"),
+  nik: text("nik"),
+  address: text("address"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

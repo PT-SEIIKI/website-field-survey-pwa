@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, subVillageId, offlineId } = body
+    const { name, subVillageId, offlineId, ownerName, nik, address } = body
     
     if (!name || !subVillageId) {
       return NextResponse.json({ error: "Name and subVillageId are required" }, { status: 400 })
@@ -41,7 +41,10 @@ export async function POST(request: NextRequest) {
     
     const [newHouse] = await db.insert(houses).values({ 
       name, 
-      subVillageId: parseInt(subVillageId) 
+      subVillageId: parseInt(subVillageId),
+      ownerName,
+      nik,
+      address
     }).returning()
     return NextResponse.json(newHouse, { status: 201 })
   } catch (error) {
