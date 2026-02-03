@@ -1,6 +1,6 @@
 // IndexedDB utilities untuk offline storage
 const DB_NAME = "SurveyOfflineDB"
-const DB_VERSION = 2 // Incrementing version to trigger onupgradeneeded
+const DB_VERSION = 3 // Incrementing version to trigger onupgradeneeded for folder fix
 const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
@@ -30,6 +30,34 @@ export async function initDB(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = (event) => {
       const database = (event.target as IDBOpenDBRequest).result
+      
+      // Clear existing data for fresh start when upgrading
+      if (event.oldVersion > 0 && event.oldVersion < DB_VERSION) {
+        console.log(`[IndexedDB] Upgrading from version ${event.oldVersion} to ${DB_VERSION}`)
+        
+        // Delete existing object stores if they exist
+        if (database.objectStoreNames.contains(STORES.PHOTOS)) {
+          database.deleteObjectStore(STORES.PHOTOS)
+        }
+        if (database.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
+          database.deleteObjectStore(STORES.SYNC_QUEUE)
+        }
+        if (database.objectStoreNames.contains(STORES.METADATA)) {
+          database.deleteObjectStore(STORES.METADATA)
+        }
+        if (database.objectStoreNames.contains(STORES.FOLDERS)) {
+          database.deleteObjectStore(STORES.FOLDERS)
+        }
+        if (database.objectStoreNames.contains(STORES.VILLAGES)) {
+          database.deleteObjectStore(STORES.VILLAGES)
+        }
+        if (database.objectStoreNames.contains(STORES.SUB_VILLAGES)) {
+          database.deleteObjectStore(STORES.SUB_VILLAGES)
+        }
+        if (database.objectStoreNames.contains(STORES.HOUSES)) {
+          database.deleteObjectStore(STORES.HOUSES)
+        }
+      }
 
       // Store untuk menyimpan photo blobs
       if (!database.objectStoreNames.contains(STORES.PHOTOS)) {
@@ -78,6 +106,8 @@ export async function initDB(): Promise<IDBDatabase> {
         houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
         houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
       }
+      
+      console.log(`[IndexedDB] Database version ${DB_VERSION} initialized successfully`)
     }
   })
 }
