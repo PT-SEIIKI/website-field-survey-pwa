@@ -1,5 +1,19 @@
 // Sync manager untuk handle upload queue dan auto-sync
-import { getPendingPhotos, updatePhotoStatus, getMetadata, getPhoto, getFolders, saveFolder, saveMetadata } from "./indexeddb"
+import { 
+  getPendingPhotos, 
+  updatePhotoStatus, 
+  getMetadata, 
+  getPhoto, 
+  getFolders, 
+  saveFolder, 
+  saveMetadata,
+  getVillages,
+  saveVillage,
+  getSubVillages,
+  saveSubVillage,
+  getHouses,
+  saveHouse
+} from "./indexeddb"
 import { checkConnectivity, subscribeToConnectivity } from "./connectivity"
 
 export interface SyncStatus {
@@ -51,7 +65,17 @@ async function updateSyncStatus() {
   const folders = await getFolders()
   const pendingFolders = folders.filter(f => f.syncStatus === "pending")
   
-  currentSyncStatus.totalPending = pendingPhotos.length + pendingFolders.length
+  const v = await getVillages()
+  const sv = await getSubVillages()
+  const h = await getHouses()
+  
+  const pendingHierarchy = [
+    ...v.filter(i => i.syncStatus === "pending"),
+    ...sv.filter(i => i.syncStatus === "pending"),
+    ...h.filter(i => i.syncStatus === "pending")
+  ]
+  
+  currentSyncStatus.totalPending = pendingPhotos.length + pendingFolders.length + pendingHierarchy.length
   notifySyncListeners()
 }
 
@@ -76,7 +100,44 @@ export async function startSync() {
     console.log("[v0] Fetching data from server to merge")
     await fetchAndMergeFromServer()
 
-    // 1. Sync Folders first (because entries depend on folderId)
+    // 1. Sync Hierarchy (Villages, SubVillages, Houses)
+    const allVillages = await getVillages()
+    for (const v of allVillages.filter(i => i.syncStatus === "pending")) {
+      try {
+        const res = await fetch("/api/villages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: v.name, offlineId: v.id })
+        })
+        if (res.ok) await saveVillage({ ...v, syncStatus: "synced" })
+      } catch (e) {}
+    }
+
+    const allSubVillages = await getSubVillages()
+    for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
+      try {
+        const res = await fetch("/api/sub-villages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: sv.name, villageId: sv.villageId, offlineId: sv.id })
+        })
+        if (res.ok) await saveSubVillage({ ...sv, syncStatus: "synced" })
+      } catch (e) {}
+    }
+
+    const allHouses = await getHouses()
+    for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
+      try {
+        const res = await fetch("/api/houses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: h.name, subVillageId: h.subVillageId, offlineId: h.id })
+        })
+        if (res.ok) await saveHouse({ ...h, syncStatus: "synced" })
+      } catch (e) {}
+    }
+
+    // 2. Sync Folders
     const allFolders = await getFolders()
     const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
     
@@ -328,6 +389,23 @@ async function fetchAndMergeFromServer() {
           })
         }
       }
+    }
+
+    // Fetch Hierarchy
+    const vRes = await fetch("/api/villages")
+    if (vRes.ok) {
+      const serverV = await vRes.json()
+      for (const v of serverV) await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" })
+    }
+    const svRes = await fetch("/api/sub-villages")
+    if (svRes.ok) {
+      const serverSV = await svRes.json()
+      for (const sv of serverSV) await saveSubVillage({ ...sv, id: String(sv.id), syncStatus: "synced" })
+    }
+    const hRes = await fetch("/api/houses")
+    if (hRes.ok) {
+      const serverH = await hRes.json()
+      for (const h of serverH) await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" })
     }
 
     // Fetch Entries to get photo metadata

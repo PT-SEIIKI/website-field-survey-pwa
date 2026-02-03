@@ -5,8 +5,19 @@ import { useLocalPhotos } from "@/hooks/use-local-photos"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 import { useSyncStatus } from "@/hooks/use-sync-status"
 import { addPhotoWithMetadata } from "@/lib/photo-manager"
-import { initConnectivityListener } from "@/lib/connectivity"
+import { initConnectivityListener, getOnlineStatus } from "@/lib/connectivity"
 import { initSyncManager, startSync } from "@/lib/sync-manager"
+import { 
+  getVillages, 
+  saveVillage, 
+  deleteVillage as dbDeleteVillage,
+  getSubVillages,
+  saveSubVillage,
+  deleteSubVillage as dbDeleteSubVillage,
+  getHouses,
+  saveHouse,
+  deleteHouse as dbDeleteHouse
+} from "@/lib/indexeddb"
 import { UploadArea } from "@/components/upload-area"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -48,6 +59,18 @@ function UploadPageContent() {
 
   const createVillage = async () => {
     if (!newVillageName.trim()) return
+    const offlineId = `v_${Date.now()}`
+    
+    if (!getOnlineStatus()) {
+      const newV = { id: offlineId, name: newVillageName.trim(), syncStatus: "pending" }
+      await saveVillage(newV)
+      setVillages(prev => [...prev, newV])
+      setSelectedVillageId(offlineId)
+      setNewVillageName("")
+      setShowAddVillage(false)
+      return
+    }
+
     const res = await fetch("/api/villages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -55,6 +78,7 @@ function UploadPageContent() {
     })
     if (res.ok) {
       const created = await res.json()
+      await saveVillage({ ...created, id: String(created.id), syncStatus: "synced" })
       setVillages(prev => [...prev, created])
       setSelectedVillageId(String(created.id))
       setNewVillageName("")
@@ -64,6 +88,18 @@ function UploadPageContent() {
 
   const createSubVillage = async () => {
     if (!newSubVillageName.trim() || !selectedVillageId) return
+    const offlineId = `sv_${Date.now()}`
+
+    if (!getOnlineStatus()) {
+      const newSV = { id: offlineId, name: newSubVillageName.trim(), villageId: selectedVillageId, syncStatus: "pending" }
+      await saveSubVillage(newSV)
+      setSubVillages(prev => [...prev, newSV])
+      setSelectedSubVillageId(offlineId)
+      setNewSubVillageName("")
+      setShowAddSubVillage(false)
+      return
+    }
+
     const res = await fetch("/api/sub-villages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,6 +107,7 @@ function UploadPageContent() {
     })
     if (res.ok) {
       const created = await res.json()
+      await saveSubVillage({ ...created, id: String(created.id), syncStatus: "synced" })
       setSubVillages(prev => [...prev, created])
       setSelectedSubVillageId(String(created.id))
       setNewSubVillageName("")
@@ -80,6 +117,18 @@ function UploadPageContent() {
 
   const createHouse = async () => {
     if (!newHouseName.trim() || !selectedSubVillageId) return
+    const offlineId = `h_${Date.now()}`
+
+    if (!getOnlineStatus()) {
+      const newH = { id: offlineId, name: newHouseName.trim(), subVillageId: selectedSubVillageId, syncStatus: "pending" }
+      await saveHouse(newH)
+      setHouses(prev => [...prev, newH])
+      setSelectedHouseId(offlineId)
+      setNewHouseName("")
+      setShowAddHouse(false)
+      return
+    }
+
     const res = await fetch("/api/houses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -87,6 +136,7 @@ function UploadPageContent() {
     })
     if (res.ok) {
       const created = await res.json()
+      await saveHouse({ ...created, id: String(created.id), syncStatus: "synced" })
       setHouses(prev => [...prev, created])
       setSelectedHouseId(String(created.id))
       setNewHouseName("")
@@ -95,8 +145,20 @@ function UploadPageContent() {
   }
 
   const deleteVillage = async (id: string) => {
+    if (!getOnlineStatus()) {
+      await dbDeleteVillage(id)
+      setVillages(prev => prev.filter(v => String(v.id) !== id))
+      if (selectedVillageId === id) {
+        setSelectedVillageId("")
+        setSubVillages([])
+        setHouses([])
+      }
+      return
+    }
+
     const res = await fetch(`/api/villages/${id}`, { method: "DELETE" })
     if (res.ok) {
+      await dbDeleteVillage(id)
       setVillages(prev => prev.filter(v => String(v.id) !== id))
       if (selectedVillageId === id) {
         setSelectedVillageId("")
@@ -107,8 +169,19 @@ function UploadPageContent() {
   }
 
   const deleteSubVillage = async (id: string) => {
+    if (!getOnlineStatus()) {
+      await dbDeleteSubVillage(id)
+      setSubVillages(prev => prev.filter(sv => String(sv.id) !== id))
+      if (selectedSubVillageId === id) {
+        setSelectedSubVillageId("")
+        setHouses([])
+      }
+      return
+    }
+
     const res = await fetch(`/api/sub-villages/${id}`, { method: "DELETE" })
     if (res.ok) {
+      await dbDeleteSubVillage(id)
       setSubVillages(prev => prev.filter(sv => String(sv.id) !== id))
       if (selectedSubVillageId === id) {
         setSelectedSubVillageId("")
@@ -118,8 +191,16 @@ function UploadPageContent() {
   }
 
   const deleteHouse = async (id: string) => {
+    if (!getOnlineStatus()) {
+      await dbDeleteHouse(id)
+      setHouses(prev => prev.filter(h => String(h.id) !== id))
+      if (selectedHouseId === id) setSelectedHouseId("")
+      return
+    }
+
     const res = await fetch(`/api/houses/${id}`, { method: "DELETE" })
     if (res.ok) {
+      await dbDeleteHouse(id)
       setHouses(prev => prev.filter(h => String(h.id) !== id))
       if (selectedHouseId === id) setSelectedHouseId("")
     }
@@ -127,8 +208,19 @@ function UploadPageContent() {
 
   useEffect(() => {
     const fetchVillages = async () => {
-      const res = await fetch("/api/villages")
-      if (res.ok) setVillages(await res.json())
+      const local = await getVillages()
+      if (local.length > 0) {
+        setVillages(local)
+      }
+      
+      if (getOnlineStatus()) {
+        const res = await fetch("/api/villages")
+        if (res.ok) {
+          const remote = await res.json()
+          setVillages(remote)
+          for (const v of remote) await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" })
+        }
+      }
     }
     fetchVillages()
   }, [])
@@ -140,8 +232,17 @@ function UploadPageContent() {
       return
     }
     const fetchSubVillages = async () => {
-      const res = await fetch(`/api/sub-villages?villageId=${selectedVillageId}`)
-      if (res.ok) setSubVillages(await res.json())
+      const local = await getSubVillages(selectedVillageId)
+      setSubVillages(local)
+      
+      if (getOnlineStatus()) {
+        const res = await fetch(`/api/sub-villages?villageId=${selectedVillageId}`)
+        if (res.ok) {
+          const remote = await res.json()
+          setSubVillages(remote)
+          for (const sv of remote) await saveSubVillage({ ...sv, id: String(sv.id), syncStatus: "synced" })
+        }
+      }
     }
     fetchSubVillages()
   }, [selectedVillageId])
@@ -153,8 +254,17 @@ function UploadPageContent() {
       return
     }
     const fetchHouses = async () => {
-      const res = await fetch(`/api/houses?subVillageId=${selectedSubVillageId}`)
-      if (res.ok) setHouses(await res.json())
+      const local = await getHouses(selectedSubVillageId)
+      setHouses(local)
+      
+      if (getOnlineStatus()) {
+        const res = await fetch(`/api/houses?subVillageId=${selectedSubVillageId}`)
+        if (res.ok) {
+          const remote = await res.json()
+          setHouses(remote)
+          for (const h of remote) await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" })
+        }
+      }
     }
     fetchHouses()
   }, [selectedSubVillageId])

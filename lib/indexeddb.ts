@@ -6,6 +6,9 @@ const STORES = {
   SYNC_QUEUE: "syncQueue",
   METADATA: "metadata",
   FOLDERS: "folders",
+  VILLAGES: "villages",
+  SUB_VILLAGES: "subVillages",
+  HOUSES: "houses",
 } as const
 
 let db: IDBDatabase | null = null
@@ -54,6 +57,26 @@ export async function initDB(): Promise<IDBDatabase> {
         const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
         folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
         folderStore.createIndex("createdAt", "createdAt", { unique: false })
+      }
+
+      // Store untuk Villages
+      if (!database.objectStoreNames.contains(STORES.VILLAGES)) {
+        const villageStore = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
+        villageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+      }
+
+      // Store untuk Sub Villages
+      if (!database.objectStoreNames.contains(STORES.SUB_VILLAGES)) {
+        const subVillageStore = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
+        subVillageStore.createIndex("villageId", "villageId", { unique: false })
+        subVillageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+      }
+
+      // Store untuk Houses
+      if (!database.objectStoreNames.contains(STORES.HOUSES)) {
+        const houseStore = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
+        houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
+        houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
       }
     }
   })
@@ -348,6 +371,112 @@ export async function deleteFolder(id: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = database.transaction([STORES.FOLDERS], "readwrite")
     const store = tx.objectStore(STORES.FOLDERS)
+    const request = store.delete(id)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve()
+  })
+}
+
+// Village Operations
+export async function saveVillage(village: any): Promise<string> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.VILLAGES], "readwrite")
+    const store = tx.objectStore(STORES.VILLAGES)
+    const request = store.put(village)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(village.id)
+  })
+}
+
+export async function getVillages(): Promise<any[]> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.VILLAGES], "readonly")
+    const store = tx.objectStore(STORES.VILLAGES)
+    const request = store.getAll()
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result || [])
+  })
+}
+
+export async function deleteVillage(id: string): Promise<void> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.VILLAGES], "readwrite")
+    const store = tx.objectStore(STORES.VILLAGES)
+    const request = store.delete(id)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve()
+  })
+}
+
+// Sub Village Operations
+export async function saveSubVillage(subVillage: any): Promise<string> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.SUB_VILLAGES], "readwrite")
+    const store = tx.objectStore(STORES.SUB_VILLAGES)
+    const request = store.put(subVillage)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(subVillage.id)
+  })
+}
+
+export async function getSubVillages(villageId?: string): Promise<any[]> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.SUB_VILLAGES], "readonly")
+    const store = tx.objectStore(STORES.SUB_VILLAGES)
+    const request = villageId 
+      ? store.index("villageId").getAll(villageId)
+      : store.getAll()
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result || [])
+  })
+}
+
+export async function deleteSubVillage(id: string): Promise<void> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.SUB_VILLAGES], "readwrite")
+    const store = tx.objectStore(STORES.SUB_VILLAGES)
+    const request = store.delete(id)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve()
+  })
+}
+
+// House Operations
+export async function saveHouse(house: any): Promise<string> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.HOUSES], "readwrite")
+    const store = tx.objectStore(STORES.HOUSES)
+    const request = store.put(house)
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(house.id)
+  })
+}
+
+export async function getHouses(subVillageId?: string): Promise<any[]> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.HOUSES], "readonly")
+    const store = tx.objectStore(STORES.HOUSES)
+    const request = subVillageId
+      ? store.index("subVillageId").getAll(subVillageId)
+      : store.getAll()
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result || [])
+  })
+}
+
+export async function deleteHouse(id: string): Promise<void> {
+  const database = await initDB()
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction([STORES.HOUSES], "readwrite")
+    const store = tx.objectStore(STORES.HOUSES)
     const request = store.delete(id)
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve()
