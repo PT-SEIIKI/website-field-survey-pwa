@@ -505,19 +505,30 @@ export async function getSyncStatus(): Promise<SyncStatus> {
 }
 
 export async function retryFailedSync() {
-  const database = await (await import("./indexeddb")).initDB()
-  const failedPhotos: any[] = await new Promise((resolve, reject) => {
-    const tx = database.transaction(["photos"], "readonly")
-    const store = tx.objectStore("photos")
-    const index = store.index("syncStatus")
-    const request = index.getAll("failed")
+  try {
+    const database = await (await import("./indexeddb")).initDB()
+    
+    // Check if the photos store exists before trying to access it
+    if (!database.objectStoreNames.contains("photos")) {
+      console.warn("[IndexedDB] Store 'photos' not found, cannot retry failed sync")
+      return
+    }
+    
+    const failedPhotos: any[] = await new Promise((resolve, reject) => {
+      const tx = database.transaction(["photos"], "readonly")
+      const store = tx.objectStore("photos")
+      const index = store.index("syncStatus")
+      const request = index.getAll("failed")
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
 
-  if (failedPhotos.length > 0) {
-    console.log(`[v0] Retrying ${failedPhotos.length} failed photos`)
-    await startSync()
+    if (failedPhotos.length > 0) {
+      console.log(`[v0] Retrying ${failedPhotos.length} failed photos`)
+      await startSync()
+    }
+  } catch (error) {
+    console.error("[v0] Error in retryFailedSync:", error)
   }
 }

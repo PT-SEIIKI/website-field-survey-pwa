@@ -31,6 +31,14 @@ export async function deleteDatabase(): Promise<void> {
   })
 }
 
+// Fungsi untuk reset database jika terjadi error yang tidak dapat dipulihkan
+export async function resetDatabase(): Promise<void> {
+  console.log(`[IndexedDB] Resetting database due to corruption...`)
+  await deleteDatabase()
+  await initDB()
+  console.log(`[IndexedDB] Database reset complete`)
+}
+
 export async function initDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (db) {
@@ -48,7 +56,86 @@ export async function initDB(): Promise<IDBDatabase> {
     request.onsuccess = () => {
       db = request.result
       console.log(`[IndexedDB] Database berhasil dibuka dengan versi ${DB_VERSION}`)
-      resolve(db)
+      
+      // Verify all required stores exist
+      const requiredStores = Object.values(STORES)
+      const missingStores = requiredStores.filter(store => !db!.objectStoreNames.contains(store))
+      
+      if (missingStores.length > 0) {
+        console.warn(`[IndexedDB] Missing stores: ${missingStores.join(', ')}`)
+        console.log(`[IndexedDB] Attempting to recreate missing stores...`)
+        
+        // Increment version to trigger upgrade
+        const newVersion = DB_VERSION + 1
+        db.close()
+        db = null
+        
+        const recreateRequest = indexedDB.open(DB_NAME, newVersion)
+        recreateRequest.onupgradeneeded = (event) => {
+          const database = (event.target as IDBOpenDBRequest).result
+          console.log(`[IndexedDB] Recreating stores at version ${newVersion}`)
+          
+          // Create missing stores
+          missingStores.forEach(storeName => {
+            try {
+              let store
+              switch (storeName) {
+                case STORES.PHOTOS:
+                  store = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
+                  store.createIndex("timestamp", "timestamp", { unique: false })
+                  store.createIndex("syncStatus", "syncStatus", { unique: false })
+                  break
+                case STORES.SYNC_QUEUE:
+                  store = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
+                  store.createIndex("photoId", "photoId", { unique: false })
+                  store.createIndex("status", "status", { unique: false })
+                  store.createIndex("timestamp", "timestamp", { unique: false })
+                  break
+                case STORES.METADATA:
+                  store = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
+                  store.createIndex("location", "location", { unique: false })
+                  store.createIndex("timestamp", "timestamp", { unique: false })
+                  break
+                case STORES.FOLDERS:
+                  store = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
+                  store.createIndex("syncStatus", "syncStatus", { unique: false })
+                  store.createIndex("createdAt", "createdAt", { unique: false })
+                  break
+                case STORES.VILLAGES:
+                  store = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
+                  store.createIndex("syncStatus", "syncStatus", { unique: false })
+                  break
+                case STORES.SUB_VILLAGES:
+                  store = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
+                  store.createIndex("villageId", "villageId", { unique: false })
+                  store.createIndex("syncStatus", "syncStatus", { unique: false })
+                  break
+                case STORES.HOUSES:
+                  store = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
+                  store.createIndex("subVillageId", "subVillageId", { unique: false })
+                  store.createIndex("syncStatus", "syncStatus", { unique: false })
+                  break
+              }
+              console.log(`[IndexedDB] Store "${storeName}" recreated`)
+            } catch (error) {
+              console.warn(`[IndexedDB] Failed to recreate store "${storeName}":`, error)
+            }
+          })
+        }
+        
+        recreateRequest.onsuccess = () => {
+          db = recreateRequest.result
+          console.log(`[IndexedDB] Database recreated with version ${newVersion}`)
+          resolve(db)
+        }
+        
+        recreateRequest.onerror = () => {
+          console.error(`[IndexedDB] Failed to recreate database:`, recreateRequest.error)
+          reject(recreateRequest.error)
+        }
+      } else {
+        resolve(db)
+      }
     }
 
     request.onupgradeneeded = (event) => {
@@ -184,6 +271,13 @@ export async function getPendingPhotos(): Promise<any[]> {
   try {
     const database = await initDB()
     return new Promise((resolve, reject) => {
+      // Check if the store exists before trying to access it
+      if (!database.objectStoreNames.contains(STORES.PHOTOS)) {
+        console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" not found, returning empty array`)
+        resolve([])
+        return
+      }
+      
       const tx = database.transaction([STORES.PHOTOS], "readonly")
       const store = tx.objectStore(STORES.PHOTOS)
       const index = store.index("syncStatus")
@@ -349,15 +443,27 @@ export async function getMetadata(photoId: string): Promise<any | null> {
 }
 
 export async function getAllPhotos(): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.PHOTOS], "readonly")
-    const store = tx.objectStore(STORES.PHOTOS)
-    const request = store.getAll()
+  try {
+    const database = await initDB()
+    
+    // Check if the store exists before trying to access it
+    if (!database.objectStoreNames.contains(STORES.PHOTOS)) {
+      console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" not found, returning empty array`)
+      return []
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.PHOTOS], "readonly")
+      const store = tx.objectStore(STORES.PHOTOS)
+      const request = store.getAll()
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get all photos:`, error)
+    return []
+  }
 }
 
 export async function deletePhoto(id: string): Promise<void> {
@@ -398,36 +504,51 @@ export async function checkStorageQuota(): Promise<{
 }
 
 export async function cleanupSyncedPhotos(): Promise<number> {
-  const database = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.PHOTOS, STORES.METADATA, STORES.SYNC_QUEUE], "readwrite");
-    const photoStore = tx.objectStore(STORES.PHOTOS);
-    const metaStore = tx.objectStore(STORES.METADATA);
-    const queueStore = tx.objectStore(STORES.SYNC_QUEUE);
-    const index = photoStore.index("syncStatus");
-    const request = index.getAll("synced");
+  try {
+    const database = await initDB();
+    
+    // Check if all required stores exist before trying to access them
+    const requiredStores = [STORES.PHOTOS, STORES.METADATA, STORES.SYNC_QUEUE];
+    for (const store of requiredStores) {
+      if (!database.objectStoreNames.contains(store)) {
+        console.warn(`[IndexedDB] Store "${store}" not found, cannot cleanup synced photos`);
+        return 0;
+      }
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.PHOTOS, STORES.METADATA, STORES.SYNC_QUEUE], "readwrite");
+      const photoStore = tx.objectStore(STORES.PHOTOS);
+      const metaStore = tx.objectStore(STORES.METADATA);
+      const queueStore = tx.objectStore(STORES.SYNC_QUEUE);
+      const index = photoStore.index("syncStatus");
+      const request = index.getAll("synced");
 
-    let count = 0;
-    request.onsuccess = () => {
-      const syncedPhotos = request.result;
-      syncedPhotos.forEach(photo => {
-        photoStore.delete(photo.id);
-        metaStore.delete(photo.id);
-        // Hapus juga dari queue jika ada
-        const queueRequest = queueStore.index("photoId").getAllKeys(photo.id);
-        queueRequest.onsuccess = () => {
-          queueRequest.result.forEach(key => queueStore.delete(key));
-        };
-        count++;
-      });
-    };
+      let count = 0;
+      request.onsuccess = () => {
+        const syncedPhotos = request.result;
+        syncedPhotos.forEach(photo => {
+          photoStore.delete(photo.id);
+          metaStore.delete(photo.id);
+          // Hapus juga dari queue jika ada
+          const queueRequest = queueStore.index("photoId").getAllKeys(photo.id);
+          queueRequest.onsuccess = () => {
+            queueRequest.result.forEach(key => queueStore.delete(key));
+          };
+          count++;
+        });
+      };
 
-    tx.oncomplete = () => {
-      console.log(`[v0] Storage cleanup: Deleted ${count} synced photos`);
-      resolve(count);
-    };
-    tx.onerror = () => reject(tx.error);
-  });
+      tx.oncomplete = () => {
+        console.log(`[v0] Storage cleanup: Deleted ${count} synced photos`);
+        resolve(count);
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to cleanup synced photos:`, error);
+    return 0;
+  }
 }
 
 // Folder Operations
@@ -450,14 +571,26 @@ export async function saveFolder(folder: {
 }
 
 export async function getFolders(): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.FOLDERS], "readonly")
-    const store = tx.objectStore(STORES.FOLDERS)
-    const request = store.getAll()
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+  try {
+    const database = await initDB()
+    
+    // Check if the store exists before trying to access it
+    if (!database.objectStoreNames.contains(STORES.FOLDERS)) {
+      console.warn(`[IndexedDB] Store "${STORES.FOLDERS}" not found, returning empty array`)
+      return []
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.FOLDERS], "readonly")
+      const store = tx.objectStore(STORES.FOLDERS)
+      const request = store.getAll()
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get folders:`, error)
+    return []
+  }
 }
 
 export async function deleteFolder(id: string): Promise<void> {
@@ -484,14 +617,26 @@ export async function saveVillage(village: any): Promise<string> {
 }
 
 export async function getVillages(): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.VILLAGES], "readonly")
-    const store = tx.objectStore(STORES.VILLAGES)
-    const request = store.getAll()
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+  try {
+    const database = await initDB()
+    
+    // Check if the store exists before trying to access it
+    if (!database.objectStoreNames.contains(STORES.VILLAGES)) {
+      console.warn(`[IndexedDB] Store "${STORES.VILLAGES}" not found, returning empty array`)
+      return []
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.VILLAGES], "readonly")
+      const store = tx.objectStore(STORES.VILLAGES)
+      const request = store.getAll()
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get villages:`, error)
+    return []
+  }
 }
 
 export async function deleteVillage(id: string): Promise<void> {
@@ -518,16 +663,28 @@ export async function saveSubVillage(subVillage: any): Promise<string> {
 }
 
 export async function getSubVillages(villageId?: string): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.SUB_VILLAGES], "readonly")
-    const store = tx.objectStore(STORES.SUB_VILLAGES)
-    const request = villageId 
-      ? store.index("villageId").getAll(villageId)
-      : store.getAll()
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+  try {
+    const database = await initDB()
+    
+    // Check if the store exists before trying to access it
+    if (!database.objectStoreNames.contains(STORES.SUB_VILLAGES)) {
+      console.warn(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" not found, returning empty array`)
+      return []
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.SUB_VILLAGES], "readonly")
+      const store = tx.objectStore(STORES.SUB_VILLAGES)
+      const request = villageId 
+        ? store.index("villageId").getAll(villageId)
+        : store.getAll()
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get sub-villages:`, error)
+    return []
+  }
 }
 
 export async function deleteSubVillage(id: string): Promise<void> {
@@ -554,16 +711,28 @@ export async function saveHouse(house: any): Promise<string> {
 }
 
 export async function getHouses(subVillageId?: string): Promise<any[]> {
-  const database = await initDB()
-  return new Promise((resolve, reject) => {
-    const tx = database.transaction([STORES.HOUSES], "readonly")
-    const store = tx.objectStore(STORES.HOUSES)
-    const request = subVillageId
-      ? store.index("subVillageId").getAll(subVillageId)
-      : store.getAll()
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result || [])
-  })
+  try {
+    const database = await initDB()
+    
+    // Check if the store exists before trying to access it
+    if (!database.objectStoreNames.contains(STORES.HOUSES)) {
+      console.warn(`[IndexedDB] Store "${STORES.HOUSES}" not found, returning empty array`)
+      return []
+    }
+    
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction([STORES.HOUSES], "readonly")
+      const store = tx.objectStore(STORES.HOUSES)
+      const request = subVillageId
+        ? store.index("subVillageId").getAll(subVillageId)
+        : store.getAll()
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result || [])
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to get houses:`, error)
+    return []
+  }
 }
 
 export async function deleteHouse(id: string): Promise<void> {
