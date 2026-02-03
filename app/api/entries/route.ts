@@ -49,8 +49,23 @@ export async function POST(req: NextRequest) {
     const isSynced = body.isSynced === true || body.isSynced === 'true';
     
     let folderId = body.folderId ? parseInt(body.folderId.toString(), 10) : null;
-    if (body.folderId && isNaN(folderId)) {
+    if (body.folderId && isNaN(folderId!)) {
       folderId = null; // Fallback for invalid folderId
+    }
+    
+    // Additional validation: if folderId is provided, check if folder exists
+    if (folderId) {
+      try {
+        const folders = await storage.getFolders();
+        const folder = folders.find(f => f.id === folderId);
+        if (!folder) {
+          console.log("[API] Folder not found for ID:", folderId, "setting to null");
+          folderId = null;
+        }
+      } catch (error) {
+        console.log("[API] Error checking folder existence:", error, "setting folderId to null");
+        folderId = null;
+      }
     }
 
     console.log("[API] Final normalized data:", { surveyId, folderId, data, offlineId, isSynced });

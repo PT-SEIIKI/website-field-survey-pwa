@@ -291,23 +291,55 @@ async function syncFolder(folder: any) {
             isSynced: true
           }
           
-          // Add hierarchy IDs if they exist and are valid numbers
+          // Only add hierarchy IDs if they exist and are valid numbers (not offline IDs)
           if (folder.villageId && typeof folder.villageId === 'number') {
             folderData.villageId = folder.villageId
+          } else if (folder.villageId && typeof folder.villageId === 'string') {
+            // Skip offline IDs like v_123
+            if (!folder.villageId.startsWith('v_')) {
+              const parsed = parseInt(folder.villageId, 10)
+              if (!isNaN(parsed)) {
+                folderData.villageId = parsed
+              }
+            }
           }
+          
           if (folder.subVillageId && typeof folder.subVillageId === 'number') {
             folderData.subVillageId = folder.subVillageId
+          } else if (folder.subVillageId && typeof folder.subVillageId === 'string') {
+            // Skip offline IDs like sv_123
+            if (!folder.subVillageId.startsWith('sv_')) {
+              const parsed = parseInt(folder.subVillageId, 10)
+              if (!isNaN(parsed)) {
+                folderData.subVillageId = parsed
+              }
+            }
           }
+          
           if (folder.houseId && typeof folder.houseId === 'number') {
             folderData.houseId = folder.houseId
+          } else if (folder.houseId && typeof folder.houseId === 'string') {
+            // Skip offline IDs like h_123
+            if (!folder.houseId.startsWith('h_')) {
+              const parsed = parseInt(folder.houseId, 10)
+              if (!isNaN(parsed)) {
+                folderData.houseId = parsed
+              }
+            }
           }
+          
+          console.log("[v0] Creating folder with data:", JSON.stringify(folderData))
           
           const response = await fetch("/api/folders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(folderData)
           })
-          if (!response.ok) throw new Error("Folder creation failed")
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error("[v0] Folder creation failed:", response.status, errorText)
+            throw new Error(`Folder creation failed: ${response.status} ${errorText}`)
+          }
         }
       } else {
         throw new Error("Failed to fetch folders")
@@ -323,7 +355,14 @@ async function syncFolder(folder: any) {
     } catch (error) {
       retryCount++
       console.error(`[v0] Failed to sync folder (attempt ${retryCount}):`, folder.id, error)
-      if (retryCount >= maxRetries) throw error
+      if (retryCount >= maxRetries) {
+        // Mark as failed to prevent infinite retries
+        await saveFolder({
+          ...folder,
+          syncStatus: "failed"
+        })
+        throw error
+      }
       // Wait before retry
       await new Promise(resolve => setTimeout(resolve, 2000 * retryCount))
     }
