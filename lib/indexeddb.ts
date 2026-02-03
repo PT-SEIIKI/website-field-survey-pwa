@@ -1,6 +1,6 @@
 // IndexedDB utilities untuk offline storage
-const DB_NAME = "SurveyOfflineDB"
-const DB_VERSION = 5 // Versi baru untuk reset total database
+const DB_NAME = "seiiiki-survey-pwa"
+const DB_VERSION = 7 // Incremented to handle version conflict // Versi baru untuk reset total database
 const STORES = {
   PHOTOS: "photos",
   SYNC_QUEUE: "syncQueue",
@@ -46,191 +46,301 @@ export async function initDB(): Promise<IDBDatabase> {
       return
     }
 
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
-
-    request.onerror = () => {
-      console.error(`[IndexedDB] Error membuka database:`, request.error)
-      reject(request.error)
-    }
+    // First, check if database exists and get its version
+    const versionCheckRequest = indexedDB.open(DB_NAME)
     
-    request.onsuccess = () => {
-      db = request.result
-      console.log(`[IndexedDB] Database berhasil dibuka dengan versi ${DB_VERSION}`)
+    versionCheckRequest.onsuccess = () => {
+      const existingDb = versionCheckRequest.result
+      const existingVersion = existingDb.version
+      existingDb.close()
       
-      // Verify all required stores exist
-      const requiredStores = Object.values(STORES)
-      const missingStores = requiredStores.filter(store => !db!.objectStoreNames.contains(store))
+      // Use the higher version between our code and existing database
+      const targetVersion = Math.max(DB_VERSION, existingVersion)
       
-      if (missingStores.length > 0) {
-        console.warn(`[IndexedDB] Missing stores: ${missingStores.join(', ')}`)
-        console.log(`[IndexedDB] Attempting to recreate missing stores...`)
+      console.log(`[IndexedDB] Existing database version: ${existingVersion}, Target version: ${targetVersion}`)
+      
+      const request = indexedDB.open(DB_NAME, targetVersion)
+
+      request.onerror = () => {
+        console.error(`[IndexedDB] Error membuka database:`, request.error)
+        reject(request.error)
+      }
+      
+      request.onsuccess = () => {
+        db = request.result
+        console.log(`[IndexedDB] Database berhasil dibuka dengan versi ${targetVersion}`)
         
-        // Increment version to trigger upgrade
-        const newVersion = DB_VERSION + 1
-        db.close()
-        db = null
+        // Verify all required stores exist
+        const requiredStores = Object.values(STORES)
+        const missingStores = requiredStores.filter(store => !db!.objectStoreNames.contains(store))
         
-        const recreateRequest = indexedDB.open(DB_NAME, newVersion)
-        recreateRequest.onupgradeneeded = (event) => {
-          const database = (event.target as IDBOpenDBRequest).result
-          console.log(`[IndexedDB] Recreating stores at version ${newVersion}`)
+        if (missingStores.length > 0) {
+          console.warn(`[IndexedDB] Missing stores: ${missingStores.join(', ')}`)
+          console.log(`[IndexedDB] Attempting to recreate missing stores...`)
           
-          // Create missing stores
-          missingStores.forEach(storeName => {
-            try {
-              let store
-              switch (storeName) {
-                case STORES.PHOTOS:
-                  store = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
-                  store.createIndex("timestamp", "timestamp", { unique: false })
-                  store.createIndex("syncStatus", "syncStatus", { unique: false })
-                  break
-                case STORES.SYNC_QUEUE:
-                  store = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
-                  store.createIndex("photoId", "photoId", { unique: false })
-                  store.createIndex("status", "status", { unique: false })
-                  store.createIndex("timestamp", "timestamp", { unique: false })
-                  break
-                case STORES.METADATA:
-                  store = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
-                  store.createIndex("location", "location", { unique: false })
-                  store.createIndex("timestamp", "timestamp", { unique: false })
-                  break
-                case STORES.FOLDERS:
-                  store = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
-                  store.createIndex("syncStatus", "syncStatus", { unique: false })
-                  store.createIndex("createdAt", "createdAt", { unique: false })
-                  break
-                case STORES.VILLAGES:
-                  store = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
-                  store.createIndex("syncStatus", "syncStatus", { unique: false })
-                  break
-                case STORES.SUB_VILLAGES:
-                  store = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
-                  store.createIndex("villageId", "villageId", { unique: false })
-                  store.createIndex("syncStatus", "syncStatus", { unique: false })
-                  break
-                case STORES.HOUSES:
-                  store = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
-                  store.createIndex("subVillageId", "subVillageId", { unique: false })
-                  store.createIndex("syncStatus", "syncStatus", { unique: false })
-                  break
+          // Increment version to trigger upgrade
+          const newVersion = targetVersion + 1
+          db.close()
+          db = null
+          
+          const recreateRequest = indexedDB.open(DB_NAME, newVersion)
+          recreateRequest.onupgradeneeded = (event) => {
+            const database = (event.target as IDBOpenDBRequest).result
+            console.log(`[IndexedDB] Recreating stores at version ${newVersion}`)
+            
+            // Create missing stores
+            missingStores.forEach(storeName => {
+              try {
+                let store
+                switch (storeName) {
+                  case STORES.PHOTOS:
+                    store = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
+                    store.createIndex("timestamp", "timestamp", { unique: false })
+                    store.createIndex("syncStatus", "syncStatus", { unique: false })
+                    break
+                  case STORES.SYNC_QUEUE:
+                    store = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
+                    store.createIndex("photoId", "photoId", { unique: false })
+                    store.createIndex("status", "status", { unique: false })
+                    store.createIndex("timestamp", "timestamp", { unique: false })
+                    break
+                  case STORES.METADATA:
+                    store = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
+                    store.createIndex("location", "location", { unique: false })
+                    store.createIndex("timestamp", "timestamp", { unique: false })
+                    break
+                  case STORES.FOLDERS:
+                    store = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
+                    store.createIndex("syncStatus", "syncStatus", { unique: false })
+                    store.createIndex("createdAt", "createdAt", { unique: false })
+                    break
+                  case STORES.VILLAGES:
+                    store = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
+                    store.createIndex("syncStatus", "syncStatus", { unique: false })
+                    break
+                  case STORES.SUB_VILLAGES:
+                    store = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
+                    store.createIndex("villageId", "villageId", { unique: false })
+                    store.createIndex("syncStatus", "syncStatus", { unique: false })
+                    break
+                  case STORES.HOUSES:
+                    store = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
+                    store.createIndex("subVillageId", "subVillageId", { unique: false })
+                    store.createIndex("syncStatus", "syncStatus", { unique: false })
+                    break
+                }
+                console.log(`[IndexedDB] Store "${storeName}" recreated`)
+              } catch (error) {
+                console.warn(`[IndexedDB] Failed to recreate store "${storeName}":`, error)
               }
-              console.log(`[IndexedDB] Store "${storeName}" recreated`)
+            })
+          }
+          
+          recreateRequest.onsuccess = () => {
+            db = recreateRequest.result
+            console.log(`[IndexedDB] Database recreated with version ${newVersion}`)
+            resolve(db)
+          }
+          
+          recreateRequest.onerror = () => {
+            console.error(`[IndexedDB] Failed to recreate database:`, recreateRequest.error)
+            reject(recreateRequest.error)
+          }
+        } else {
+          resolve(db)
+        }
+      }
+
+      request.onupgradeneeded = (event) => {
+        const database = (event.target as IDBOpenDBRequest).result
+        console.log(`[IndexedDB] Upgrade dari versi ${event.oldVersion} ke ${targetVersion}`)
+        
+        // HAPUS SEMUA OBJECT STORE YANG ADA untuk reset total
+        if (event.oldVersion > 0) {
+          const storeNames = Array.from(database.objectStoreNames)
+          console.log(`[IndexedDB] Menghapus ${storeNames.length} object store lama:`, storeNames)
+          
+          storeNames.forEach(storeName => {
+            try {
+              database.deleteObjectStore(storeName)
+              console.log(`[IndexedDB] Store "${storeName}" dihapus`)
             } catch (error) {
-              console.warn(`[IndexedDB] Failed to recreate store "${storeName}":`, error)
+              console.warn(`[IndexedDB] Gagal menghapus store "${storeName}":`, error)
             }
           })
         }
+
+        // BUAT SEMUA OBJECT STORE BARU dari awal
+        console.log(`[IndexedDB] Membuat ${Object.keys(STORES).length} object store baru...`)
         
-        recreateRequest.onsuccess = () => {
-          db = recreateRequest.result
-          console.log(`[IndexedDB] Database recreated with version ${newVersion}`)
-          resolve(db)
+        // Store untuk photos
+        try {
+          const photoStore = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
+          photoStore.createIndex("timestamp", "timestamp", { unique: false })
+          photoStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.PHOTOS}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" sudah ada:`, error)
+        }
+
+        // Store untuk sync queue
+        try {
+          const queueStore = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
+          queueStore.createIndex("photoId", "photoId", { unique: false })
+          queueStore.createIndex("status", "status", { unique: false })
+          queueStore.createIndex("timestamp", "timestamp", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" sudah ada:`, error)
+        }
+
+        // Store untuk metadata
+        try {
+          const metaStore = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
+          metaStore.createIndex("location", "location", { unique: false })
+          metaStore.createIndex("timestamp", "timestamp", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.METADATA}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.METADATA}" sudah ada:`, error)
+        }
+
+        // Store untuk folders
+        try {
+          const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
+          folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          folderStore.createIndex("createdAt", "createdAt", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.FOLDERS}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.FOLDERS}" sudah ada:`, error)
+        }
+
+        // Store untuk villages
+        try {
+          const villageStore = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
+          villageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.VILLAGES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.VILLAGES}" sudah ada:`, error)
+        }
+
+        // Store untuk sub-villages
+        try {
+          const subVillageStore = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
+          subVillageStore.createIndex("villageId", "villageId", { unique: false })
+          subVillageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" sudah ada:`, error)
+        }
+
+        // Store untuk houses
+        try {
+          const houseStore = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
+          houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
+          houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.HOUSES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.HOUSES}" sudah ada:`, error)
         }
         
-        recreateRequest.onerror = () => {
-          console.error(`[IndexedDB] Failed to recreate database:`, recreateRequest.error)
-          reject(recreateRequest.error)
-        }
-      } else {
-        resolve(db)
+        console.log(`[IndexedDB] Semua object store berhasil dibuat untuk versi ${targetVersion}`)
       }
     }
-
-    request.onupgradeneeded = (event) => {
-      const database = (event.target as IDBOpenDBRequest).result
-      console.log(`[IndexedDB] Upgrade dari versi ${event.oldVersion} ke ${DB_VERSION}`)
+    
+    versionCheckRequest.onerror = () => {
+      // If database doesn't exist, create it with our version
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
       
-      // HAPUS SEMUA OBJECT STORE YANG ADA untuk reset total
-      if (event.oldVersion > 0) {
-        const storeNames = Array.from(database.objectStoreNames)
-        console.log(`[IndexedDB] Menghapus ${storeNames.length} object store lama:`, storeNames)
+      request.onerror = () => {
+        console.error(`[IndexedDB] Error membuka database:`, request.error)
+        reject(request.error)
+      }
+      
+      request.onsuccess = () => {
+        db = request.result
+        console.log(`[IndexedDB] Database baru berhasil dibuka dengan versi ${DB_VERSION}`)
+        resolve(db)
+      }
+
+      request.onupgradeneeded = (event) => {
+        const database = (event.target as IDBOpenDBRequest).result
+        console.log(`[IndexedDB] Membuat database baru dengan versi ${DB_VERSION}`)
         
-        storeNames.forEach(storeName => {
-          try {
-            database.deleteObjectStore(storeName)
-            console.log(`[IndexedDB] Store "${storeName}" dihapus`)
-          } catch (error) {
-            console.warn(`[IndexedDB] Gagal menghapus store "${storeName}":`, error)
-          }
-        })
-      }
+        // BUAT SEMUA OBJECT STORE BARU dari awal
+        console.log(`[IndexedDB] Membuat ${Object.keys(STORES).length} object store baru...`)
+        
+        // Store untuk photos
+        try {
+          const photoStore = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
+          photoStore.createIndex("timestamp", "timestamp", { unique: false })
+          photoStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.PHOTOS}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" sudah ada:`, error)
+        }
 
-      // BUAT SEMUA OBJECT STORE BARU dari awal
-      console.log(`[IndexedDB] Membuat ${Object.keys(STORES).length} object store baru...`)
-      
-      // Store untuk photos
-      try {
-        const photoStore = database.createObjectStore(STORES.PHOTOS, { keyPath: "id" })
-        photoStore.createIndex("timestamp", "timestamp", { unique: false })
-        photoStore.createIndex("syncStatus", "syncStatus", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.PHOTOS}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.PHOTOS}" sudah ada:`, error)
-      }
+        // Store untuk sync queue
+        try {
+          const queueStore = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
+          queueStore.createIndex("photoId", "photoId", { unique: false })
+          queueStore.createIndex("status", "status", { unique: false })
+          queueStore.createIndex("timestamp", "timestamp", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" sudah ada:`, error)
+        }
 
-      // Store untuk sync queue
-      try {
-        const queueStore = database.createObjectStore(STORES.SYNC_QUEUE, { keyPath: "id", autoIncrement: true })
-        queueStore.createIndex("photoId", "photoId", { unique: false })
-        queueStore.createIndex("status", "status", { unique: false })
-        queueStore.createIndex("timestamp", "timestamp", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.SYNC_QUEUE}" sudah ada:`, error)
-      }
+        // Store untuk metadata
+        try {
+          const metaStore = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
+          metaStore.createIndex("location", "location", { unique: false })
+          metaStore.createIndex("timestamp", "timestamp", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.METADATA}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.METADATA}" sudah ada:`, error)
+        }
 
-      // Store untuk metadata
-      try {
-        const metaStore = database.createObjectStore(STORES.METADATA, { keyPath: "photoId" })
-        metaStore.createIndex("location", "location", { unique: false })
-        metaStore.createIndex("timestamp", "timestamp", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.METADATA}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.METADATA}" sudah ada:`, error)
-      }
+        // Store untuk folders
+        try {
+          const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
+          folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          folderStore.createIndex("createdAt", "createdAt", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.FOLDERS}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.FOLDERS}" sudah ada:`, error)
+        }
 
-      // Store untuk folders
-      try {
-        const folderStore = database.createObjectStore(STORES.FOLDERS, { keyPath: "id" })
-        folderStore.createIndex("syncStatus", "syncStatus", { unique: false })
-        folderStore.createIndex("createdAt", "createdAt", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.FOLDERS}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.FOLDERS}" sudah ada:`, error)
-      }
+        // Store untuk villages
+        try {
+          const villageStore = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
+          villageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.VILLAGES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.VILLAGES}" sudah ada:`, error)
+        }
 
-      // Store untuk villages
-      try {
-        const villageStore = database.createObjectStore(STORES.VILLAGES, { keyPath: "id" })
-        villageStore.createIndex("syncStatus", "syncStatus", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.VILLAGES}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.VILLAGES}" sudah ada:`, error)
-      }
+        // Store untuk sub-villages
+        try {
+          const subVillageStore = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
+          subVillageStore.createIndex("villageId", "villageId", { unique: false })
+          subVillageStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" sudah ada:`, error)
+        }
 
-      // Store untuk sub-villages
-      try {
-        const subVillageStore = database.createObjectStore(STORES.SUB_VILLAGES, { keyPath: "id" })
-        subVillageStore.createIndex("villageId", "villageId", { unique: false })
-        subVillageStore.createIndex("syncStatus", "syncStatus", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.SUB_VILLAGES}" sudah ada:`, error)
+        // Store untuk houses
+        try {
+          const houseStore = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
+          houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
+          houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
+          console.log(`[IndexedDB] Store "${STORES.HOUSES}" dibuat`)
+        } catch (error) {
+          console.warn(`[IndexedDB] Store "${STORES.HOUSES}" sudah ada:`, error)
+        }
+        
+        console.log(`[IndexedDB] Semua object store berhasil dibuat untuk versi ${DB_VERSION}`)
       }
-
-      // Store untuk houses
-      try {
-        const houseStore = database.createObjectStore(STORES.HOUSES, { keyPath: "id" })
-        houseStore.createIndex("subVillageId", "subVillageId", { unique: false })
-        houseStore.createIndex("syncStatus", "syncStatus", { unique: false })
-        console.log(`[IndexedDB] Store "${STORES.HOUSES}" dibuat`)
-      } catch (error) {
-        console.warn(`[IndexedDB] Store "${STORES.HOUSES}" sudah ada:`, error)
-      }
-      
-      console.log(`[IndexedDB] Semua object store berhasil dibuat untuk versi ${DB_VERSION}`)
     }
   })
 }
