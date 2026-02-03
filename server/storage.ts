@@ -242,13 +242,24 @@ export class DatabaseStorage implements IStorage {
 
   // Village Admin
   async createVillage(village: InsertVillage): Promise<Village> {
-    const [data] = await db.insert(villages).values(village).returning();
-    return data;
+    try {
+      if (village.offlineId) {
+        const [existing] = await db.select().from(villages).where(eq(villages.offlineId, village.offlineId));
+        if (existing) return existing;
+      }
+      const [data] = await db.insert(villages).values(village).returning();
+      return data;
+    } catch (error) {
+      console.error("[Storage] createVillage error:", error);
+      throw error;
+    }
   }
+
   async updateVillage(id: number, updateData: Partial<InsertVillage>): Promise<Village> {
     const [data] = await db.update(villages).set(updateData).where(eq(villages.id, id)).returning();
     return data;
   }
+
   async deleteVillage(id: number): Promise<void> {
     const subVills = await this.getSubVillages(id);
     for (const sv of subVills) {
@@ -259,13 +270,24 @@ export class DatabaseStorage implements IStorage {
 
   // Sub-Village Admin
   async createSubVillage(subVillage: InsertSubVillage): Promise<SubVillage> {
-    const [data] = await db.insert(subVillages).values(subVillage).returning();
-    return data;
+    try {
+      if (subVillage.offlineId) {
+        const [existing] = await db.select().from(subVillages).where(eq(subVillages.offlineId, subVillage.offlineId));
+        if (existing) return existing;
+      }
+      const [data] = await db.insert(subVillages).values(subVillage).returning();
+      return data;
+    } catch (error) {
+      console.error("[Storage] createSubVillage error:", error);
+      throw error;
+    }
   }
+
   async updateSubVillage(id: number, updateData: Partial<InsertSubVillage>): Promise<SubVillage> {
     const [data] = await db.update(subVillages).set(updateData).where(eq(subVillages.id, id)).returning();
     return data;
   }
+
   async deleteSubVillage(id: number): Promise<void> {
     const hses = await this.getHouses(id);
     for (const h of hses) {
@@ -276,8 +298,17 @@ export class DatabaseStorage implements IStorage {
 
   // House Admin
   async createHouse(house: InsertHouse): Promise<House> {
-    const [data] = await db.insert(houses).values(house).returning();
-    return data;
+    try {
+      if (house.offlineId) {
+        const [existing] = await db.select().from(houses).where(eq(houses.offlineId, house.offlineId));
+        if (existing) return existing;
+      }
+      const [data] = await db.insert(houses).values(house).returning();
+      return data;
+    } catch (error) {
+      console.error("[Storage] createHouse error:", error);
+      throw error;
+    }
   }
   async updateHouse(id: number, updateData: Partial<InsertHouse>): Promise<House> {
     const [data] = await db.update(houses).set(updateData).where(eq(houses.id, id)).returning();

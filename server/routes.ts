@@ -233,6 +233,7 @@ export function registerRoutes(app: express.Express) {
       });
       res.status(201).json(data);
     } catch (error) {
+      console.error("Error creating house:", error);
       res.status(500).json({ message: "Failed to create house" });
     }
   });

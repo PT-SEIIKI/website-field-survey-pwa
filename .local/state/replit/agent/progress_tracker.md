@@ -8,4 +8,5 @@
 [x] 121. Implemented hierarchical auto-selection for Desa, Dusun, and Rumah when a folder is selected. Feb 03, 2026
 [x] 122. Fixed offline photo saving issue by ensuring proper local folder creation and robust sync error handling. Feb 03, 2026
 [x] 123. Fixed API endpoint mismatch for sub-villages and houses sync. Feb 03, 2026
-[x] 124. Updated sync-manager.ts to use correct API paths (/api/ instead of /api/admin/). Feb 03, 2026[x] 123. Installed npm packages and restarted workflow after environment migration - Feb 03, 2026 - Project verified running successfully
+[x] 125. Fixed 500 Internal Server Error for Sub-Villages by adding idempotency check for offlineId. Feb 03, 2026
+[x] 126. Fixed potential House creation errors by adding idempotency check and logging. Feb 03, 2026
