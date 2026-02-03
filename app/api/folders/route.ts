@@ -50,6 +50,14 @@ export async function POST(req: Request) {
       body.houseId = parsedId
     }
     
+    // Ensure optional fields have default values if not provided
+    if (!body.houseName) {
+      body.houseName = null;
+    }
+    if (!body.nik) {
+      body.nik = null;
+    }
+    
     console.log("[API] Creating folder with body:", JSON.stringify(body))
     
     const data = insertFolderSchema.parse(body);

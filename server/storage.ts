@@ -153,10 +153,39 @@ export class DatabaseStorage implements IStorage {
           insertEntry.surveyId = 1; // Default survey ID
         }
         
+        // Validate folderId if provided (foreign key constraint)
+        if (insertEntry.folderId) {
+          try {
+            const folders = await this.getFolders();
+            const folderExists = folders.some(f => f.id === insertEntry.folderId);
+            if (!folderExists) {
+              console.log("[Storage] Folder not found for ID:", insertEntry.folderId, "setting to null");
+              insertEntry.folderId = null;
+            }
+          } catch (error) {
+            console.log("[Storage] Error validating folderId:", error, "setting to null");
+            insertEntry.folderId = null;
+          }
+        }
+        
         const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
         return entry;
       } catch (error) {
         console.error("[Storage] createEntry error:", error);
+        
+        // Handle foreign key constraint violations
+        if (error instanceof Error) {
+          const errorMessage = error.message.toLowerCase();
+          if (errorMessage.includes('foreign key constraint') || errorMessage.includes('violates foreign key')) {
+            console.log("[Storage] Foreign key constraint violation, retrying with null folderId");
+            
+            // Retry with null folderId
+            const retryEntry = { ...insertEntry, folderId: null };
+            const [entry] = await db.insert(surveyEntries).values(retryEntry).returning();
+            return entry;
+          }
+        }
+        
         throw error;
       }
     });

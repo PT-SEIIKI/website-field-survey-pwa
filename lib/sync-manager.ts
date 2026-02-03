@@ -371,128 +371,134 @@ async function syncFolder(folder: any) {
 
 async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
   const photoId = photo.id;
-  try {
-    await updatePhotoStatus(photoId, "syncing")
-    notifySyncListeners()
+  let retryCount = 0;
+  const maxRetries = 3;
 
-    const metadata = await getMetadata(photoId)
-    const photoData = await getPhoto(photoId);
-    if (!photoData) {
-      throw new Error("Photo not found in IndexedDB");
-    }
+  while (retryCount < maxRetries) {
+    try {
+      await updatePhotoStatus(photoId, "syncing")
+      notifySyncListeners()
 
-    // First upload the photo file to /api/upload
-    const photoFormData = new FormData();
-    photoFormData.append("file", photoData.blob, `${photoId}.jpg`);
-    photoFormData.append("photoId", photoId);
-    photoFormData.append("location", metadata?.location || "");
-    photoFormData.append("description", metadata?.description || "");
-    photoFormData.append("timestamp", photoData.timestamp.toString());
-    
-    // Add hierarchy info to upload
-    if (metadata?.villageId || metadata?.selectedVillageId) {
-      photoFormData.append("villageId", String(metadata.villageId || metadata.selectedVillageId));
-    }
-    if (metadata?.subVillageId || metadata?.selectedSubVillageId) {
-      photoFormData.append("subVillageId", String(metadata.subVillageId || metadata.selectedSubVillageId));
-    }
-    if (metadata?.houseId || metadata?.selectedHouseId) {
-      photoFormData.append("houseId", String(metadata.houseId || metadata.selectedHouseId));
-    }
-    
-    // Add folder info to upload metadata if exists
-    if (metadata?.folderId) {
-      photoFormData.append("folderId", metadata.folderId);
-    }
+      const metadata = await getMetadata(photoId)
+      const photoData = await getPhoto(photoId);
+      if (!photoData) {
+        throw new Error("Photo not found in IndexedDB");
+      }
 
-    const uploadResponse = await fetch("/api/upload", {
-      method: "POST",
-      body: photoFormData,
-    });
-
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      throw new Error(`File upload failed: ${errorText}`);
-    }
-
-    // Find server-side folder ID if it exists
-    let serverFolderId = null
-    if (metadata?.folderId) {
-      const folders = foldersCache || await (async () => {
-        const res = await fetch("/api/folders")
-        return res.ok ? await res.json() : []
-      })()
+      // First upload the photo file to /api/upload
+      const photoFormData = new FormData();
+      photoFormData.append("file", photoData.blob, `${photoId}.jpg`);
+      photoFormData.append("photoId", photoId);
+      photoFormData.append("location", metadata?.location || "");
+      photoFormData.append("description", metadata?.description || "");
+      photoFormData.append("timestamp", photoData.timestamp.toString());
       
-      const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
-      if (folder) serverFolderId = folder.id
-    }
+      // Add hierarchy info to upload
+      if (metadata?.villageId || metadata?.selectedVillageId) {
+        photoFormData.append("villageId", String(metadata.villageId || metadata.selectedVillageId));
+      }
+      if (metadata?.subVillageId || metadata?.selectedSubVillageId) {
+        photoFormData.append("subVillageId", String(metadata.subVillageId || metadata.selectedSubVillageId));
+      }
+      if (metadata?.houseId || metadata?.selectedHouseId) {
+        photoFormData.append("houseId", String(metadata.houseId || metadata.selectedHouseId));
+      }
+      
+      // Add folder info to upload metadata if exists
+      if (metadata?.folderId) {
+        photoFormData.append("folderId", metadata.folderId);
+      }
 
-    // New hierarchy support:
-    let serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
-    
-    // Convert houseId to number if it's a string and doesn't look like an offline ID
-    if (typeof serverHouseId === 'string') {
-      if (serverHouseId.startsWith('h_')) {
-        // This is an offline ID, set to null for now
-        serverHouseId = null;
-      } else {
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: photoFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        throw new Error(`File upload failed: ${errorText}`);
+      }
+
+      // Find server-side folder ID if it exists
+      let serverFolderId = null
+      if (metadata?.folderId) {
+        const folders = foldersCache || await (async () => {
+          const res = await fetch("/api/folders")
+          return res.ok ? await res.json() : []
+        })()
+        
+        const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
+        if (folder) serverFolderId = folder.id
+      }
+
+      // New hierarchy support:
+      let serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
+      if (serverHouseId && typeof serverHouseId === 'string') {
         const parsed = parseInt(serverHouseId, 10);
         serverHouseId = isNaN(parsed) ? null : parsed;
       }
-    }
-    
-    const response = await fetch("/api/entries", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        surveyId: metadata?.surveyId || 1,
-        folderId: serverFolderId,
-        data: JSON.stringify({
-          description: metadata?.description,
-          location: metadata?.location,
-          timestamp: photoData.timestamp,
-          folderId: metadata?.folderId,
-          villageId: metadata?.villageId || metadata?.selectedVillageId,
-          subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
-          houseId: metadata?.houseId || metadata?.selectedHouseId
+      
+      const response = await fetch("/api/entries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          surveyId: metadata?.surveyId || 1,
+          folderId: serverFolderId,
+          data: JSON.stringify({
+            description: metadata?.description,
+            location: metadata?.location,
+            timestamp: photoData.timestamp,
+            folderId: metadata?.folderId,
+            villageId: metadata?.villageId || metadata?.selectedVillageId,
+            subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
+            houseId: metadata?.houseId || metadata?.selectedHouseId
+          }),
+          offlineId: photoId,
+          isSynced: true
         }),
-        offlineId: photoId,
-        isSynced: true
-      }),
-    })
+      })
 
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`)
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.statusText} - ${errorText}`)
+      }
+
+      const entryData = await response.json();
+
+      // Now upload photo linked to this entry AND the house directly
+      const photoResponse = await fetch("/api/photos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          entryId: entryData.id,
+          houseId: serverHouseId,
+          url: `/uploads/${photoId}.jpg`,
+          offlineId: photoId
+        }),
+      });
+
+      if (!photoResponse.ok) {
+        const errorText = await photoResponse.text();
+        throw new Error(`Photo upload failed: ${photoResponse.statusText} - ${errorText}`)
+      }
+
+      await updatePhotoStatus(photoId, "synced")
+      console.log("[v0] Photo synced:", photoId)
+      return // Success
+    } catch (error) {
+      retryCount++
+      console.error(`[v0] Failed to sync photo (attempt ${retryCount}):`, photoId, error)
+      if (retryCount >= maxRetries) {
+        await updatePhotoStatus(photoId, "failed")
+        throw error
+      }
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000 * retryCount))
     }
-
-    const entryData = await response.json();
-
-    // Now upload photo linked to this entry AND the house directly
-    const photoResponse = await fetch("/api/photos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        entryId: entryData.id,
-        houseId: serverHouseId,
-        url: `/uploads/${photoId}.jpg`,
-        offlineId: photoId
-      }),
-    });
-
-    if (!photoResponse.ok) {
-      throw new Error(`Photo upload failed: ${photoResponse.statusText}`)
-    }
-
-    await updatePhotoStatus(photoId, "synced")
-    console.log("[v0] Photo synced:", photoId)
-  } catch (error) {
-    console.error("[v0] Failed to sync photo:", photoId, error)
-    await updatePhotoStatus(photoId, "failed")
-    throw error
   }
 }
 
