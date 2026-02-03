@@ -395,17 +395,23 @@ async function fetchAndMergeFromServer() {
     const vRes = await fetch("/api/villages")
     if (vRes.ok) {
       const serverV = await vRes.json()
-      for (const v of serverV) await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" })
+      if (Array.isArray(serverV)) {
+        for (const v of serverV) await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" })
+      }
     }
     const svRes = await fetch("/api/sub-villages")
     if (svRes.ok) {
       const serverSV = await svRes.json()
-      for (const sv of serverSV) await saveSubVillage({ ...sv, id: String(sv.id), syncStatus: "synced" })
+      if (Array.isArray(serverSV)) {
+        for (const sv of serverSV) await saveSubVillage({ ...sv, id: String(sv.id), syncStatus: "synced" })
+      }
     }
     const hRes = await fetch("/api/houses")
     if (hRes.ok) {
       const serverH = await hRes.json()
-      for (const h of serverH) await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" })
+      if (Array.isArray(serverH)) {
+        for (const h of serverH) await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" })
+      }
     }
 
     // Fetch Entries to get photo metadata
@@ -414,41 +420,45 @@ async function fetchAndMergeFromServer() {
       const data = await entriesRes.json()
       const serverEntries = data.entries || []
       
-      for (const entry of serverEntries) {
-        // Check if we have photos for this entry
-        const photosRes = await fetch(`/api/photos/list?entryId=${entry.id}`)
-        if (photosRes.ok) {
-          const photos = await photosRes.json()
-          for (const photo of photos) {
-            // Check if photo exists in local metadata
-            const localMeta = await getMetadata(photo.offlineId || photo.id.toString())
-            if (!localMeta) {
-              // Parse entry data for location/description
-              let entryData: any = {}
-              try {
-                entryData = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data
-              } catch (e) {}
+      if (Array.isArray(serverEntries)) {
+        for (const entry of serverEntries) {
+          // Check if we have photos for this entry
+          const photosRes = await fetch(`/api/photos/list?entryId=${entry.id}`)
+          if (photosRes.ok) {
+            const photos = await photosRes.json()
+            if (Array.isArray(photos)) {
+              for (const photo of photos) {
+                // Check if photo exists in local metadata
+                const localMeta = await getMetadata(photo.offlineId || photo.id.toString())
+                if (!localMeta) {
+                  // Parse entry data for location/description
+                  let entryData: any = {}
+                  try {
+                    entryData = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data
+                  } catch (e) {}
 
-              const photoId = photo.offlineId || photo.id.toString()
-              
-              // Save metadata so it appears in UI
-              await saveMetadata(photoId, {
-                location: entryData?.location || "",
-                description: entryData?.description || "",
-                timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
-              })
+                  const photoId = photo.offlineId || photo.id.toString()
+                  
+                  // Save metadata so it appears in UI
+                  await saveMetadata(photoId, {
+                    location: entryData?.location || "",
+                    description: entryData?.description || "",
+                    timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
+                  })
 
-              // Mark photo as synced in local DB if not present
-              const localPhoto = await getPhoto(photoId)
-              if (!localPhoto) {
-                // We don't have the blob, but we mark it synced so we don't try to upload it
-                // The UI will use the server URL if the blob is missing
-                await (await import("./indexeddb")).savePhoto({
-                  id: photoId,
-                  blob: new Blob(), // Empty blob as placeholder
-                  timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
-                  syncStatus: "synced"
-                })
+                  // Mark photo as synced in local DB if not present
+                  const localPhoto = await getPhoto(photoId)
+                  if (!localPhoto) {
+                    // We don't have the blob, but we mark it synced so we don't try to upload it
+                    // The UI will use the server URL if the blob is missing
+                    await (await import("./indexeddb")).savePhoto({
+                      id: photoId,
+                      blob: new Blob(), // Empty blob as placeholder
+                      timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
+                      syncStatus: "synced"
+                    })
+                  }
+                }
               }
             }
           }

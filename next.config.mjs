@@ -26,39 +26,27 @@ const nextConfig = {
     '*.spock.replit.dev',
     '*.worf.replit.dev',
   ],
-  turbopack: {
-    root: process.cwd(),
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            vendor: {
-              name: "vendor",
-              chunks: "all",
-              test: /node_modules/,
-              priority: 20,
-            },
-          },
-        },
-      }
-    }
-    
-    // Fix for window is not defined during build
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-    }
-    
-    return config
-  },
   // Disable static generation to prevent window errors
   output: 'standalone',
+  
+  // Add headers for service worker
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/javascript',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
