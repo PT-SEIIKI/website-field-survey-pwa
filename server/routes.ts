@@ -180,6 +180,16 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  app.post("/api/villages", async (req, res) => {
+    try {
+      const { name, offlineId } = req.body;
+      const data = await storage.createVillage({ name, offlineId });
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create village" });
+    }
+  });
+
   app.get("/api/sub-villages", async (req, res) => {
     try {
       const villageId = req.query.villageId ? parseInt(req.query.villageId as string) : undefined;
@@ -190,6 +200,16 @@ export function registerRoutes(app: express.Express) {
     }
   });
 
+  app.post("/api/sub-villages", async (req, res) => {
+    try {
+      const { name, villageId, offlineId } = req.body;
+      const data = await storage.createSubVillage({ name, villageId: parseInt(villageId), offlineId });
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create sub-village" });
+    }
+  });
+
   app.get("/api/houses", async (req, res) => {
     try {
       const subVillageId = req.query.subVillageId ? parseInt(req.query.subVillageId as string) : undefined;
@@ -197,6 +217,23 @@ export function registerRoutes(app: express.Express) {
       res.json(data);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch houses" });
+    }
+  });
+
+  app.post("/api/houses", async (req, res) => {
+    try {
+      const { name, subVillageId, offlineId, ownerName, nik, address } = req.body;
+      const data = await storage.createHouse({ 
+        name, 
+        subVillageId: parseInt(subVillageId), 
+        offlineId,
+        ownerName,
+        nik,
+        address
+      });
+      res.status(201).json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create house" });
     }
   });
 
