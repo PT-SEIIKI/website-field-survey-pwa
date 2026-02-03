@@ -7,7 +7,9 @@ export const maxDuration = 30
 
 export async function GET(request: NextRequest) {
   try {
-    const uploadsDir = join(process.cwd(), "public", "uploads")
+    const uploadsDir = process.env.NODE_ENV === "production" 
+      ? join("/var/www/survei.seyiki.com", "uploads")
+      : join(process.cwd(), "public", "uploads")
     const fs = await import("fs/promises")
 
     // Get query params for filtering
