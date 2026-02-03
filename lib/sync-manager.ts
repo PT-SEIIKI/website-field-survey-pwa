@@ -229,7 +229,7 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
     }
 
     // New hierarchy support:
-    const serverHouseId = metadata?.houseId;
+    const serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
     
     const response = await fetch("/api/entries", {
       method: "POST",
@@ -244,9 +244,9 @@ async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
           location: metadata?.location,
           timestamp: photoData.timestamp,
           folderId: metadata?.folderId,
-          villageId: metadata?.villageId,
-          subVillageId: metadata?.subVillageId,
-          houseId: metadata?.houseId
+          villageId: metadata?.villageId || metadata?.selectedVillageId,
+          subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
+          houseId: metadata?.houseId || metadata?.selectedHouseId
         }),
         offlineId: photoId,
         isSynced: true

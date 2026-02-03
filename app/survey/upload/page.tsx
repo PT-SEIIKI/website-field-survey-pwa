@@ -174,7 +174,10 @@ function UploadPageContent() {
         await addPhotoWithMetadata(file, {
           villageId: selectedVillageId,
           subVillageId: selectedSubVillageId,
-          houseId: selectedHouseId
+          houseId: selectedHouseId,
+          selectedVillageId,
+          selectedSubVillageId,
+          selectedHouseId
         })
       }
       setSuccessMessage(`${files.length} foto berhasil ditambahkan`)
