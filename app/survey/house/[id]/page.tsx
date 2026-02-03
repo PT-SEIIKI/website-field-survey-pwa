@@ -41,7 +41,13 @@ function HouseDetailContent() {
       const photosRes = await fetch(`/api/photos/list?houseId=${params.id}`)
       if (photosRes.ok) {
         const data = await photosRes.json()
-        setPhotos(data.photos || [])
+        console.log("[HouseDetail] Photos data:", data)
+        // Extract photos from metadata if present, otherwise use the list
+        const processedPhotos = (data.photos || []).map((p: any) => ({
+          ...p,
+          url: p.url || (p.photoData ? p.photoData : `/uploads/${p.fileName}`)
+        }))
+        setPhotos(processedPhotos)
       }
     } catch (e) {
       console.error(e)

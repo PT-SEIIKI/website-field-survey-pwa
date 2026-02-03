@@ -73,29 +73,29 @@
 [x] 73. Fixed missing "use client" directive in upload page - Jan 20, 2026
 [x] 74. Verified project is running successfully - Jan 20, 2026
 [x] 75. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
-[x] 77. Created TutorialDialog component and integrated it into the Login page.
-[x] 78. Added comprehensive PWA and Website usage instructions in the tutorial.
-[x] 79. Verified layout on mobile and desktop viewports.
-[x] 80. Fixed margin/padding across dashboard and login pages for better mobile UX.
-[x] 81. Resolved TypeScript error in dashboard icon sizing.
-[x] 82. Reinstalled npm packages and restarted workflow - environment migration completed Jan 20, 2026
-[x] 83. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
-[x] 84. Enhanced SyncManager to fetch and merge data from server on login/init.
-[x] 85. Triggered automatic sync on successful login to ensure multi-device data consistency.
-[x] 86. Verified offline safety: Added robust connectivity checks to the data merge logic to prevent failures in offline mode.
-[x] 87. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
-[x] 88. Reinstalled npm packages and restarted workflow - project running successfully on Feb 02, 2026
-[x] 89. Removed "Entri Survey" table, filter toolbar, and preview modal from admin page - Feb 02, 2026
-[x] 90. Removed Folder, Lokasi, Keterangan fields from upload page - Feb 02, 2026
-[x] 91. Created API routes for villages (/api/villages), sub-villages (/api/sub-villages), houses (/api/houses) - Feb 02, 2026
-[x] 92. Implemented hierarchical Desa→Dusun→Rumah dropdown system on upload page - Feb 02, 2026
+[x] 76. Created TutorialDialog component and integrated it into the Login page.
+[x] 77. Added comprehensive PWA and Website usage instructions in the tutorial.
+[x] 78. Verified layout on mobile and desktop viewports.
+[x] 79. Fixed margin/padding across dashboard and login pages for better mobile UX.
+[x] 80. Resolved TypeScript error in dashboard icon sizing.
+[x] 81. Reinstalled npm packages and restarted workflow - environment migration completed Jan 20, 2026
+[x] 82. Reinstalled npm packages and restarted workflow after environment migration - Jan 20, 2026
+[x] 83. Enhanced SyncManager to fetch and merge data from server on login/init.
+[x] 84. Triggered automatic sync on successful login to ensure multi-device data consistency.
+[x] 85. Verified offline safety: Added robust connectivity checks to the data merge logic to prevent failures in offline mode.
+[x] 86. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
+[x] 87. Reinstalled npm packages and restarted workflow - project running successfully on Feb 02, 2026
+[x] 88. Removed "Entri Survey" table, filter toolbar, and preview modal from admin page - Feb 02, 2026
+[x] 89. Removed Folder, Lokasi, Keterangan fields from upload page - Feb 02, 2026
+[x] 90. Created API routes for villages (/api/villages), sub-villages (/api/sub-villages), houses (/api/houses) - Feb 02, 2026
+[x] 91. Implemented hierarchical Desa→Dusun→Rumah dropdown system on upload page - Feb 02, 2026
+[x] 92. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
 [x] 93. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
-[x] 94. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
-[x] 95. Fixed login 500 error - pushed database schema and seeded admin user (admin/admin123) - Feb 02, 2026
-[x] 96. Removed "Wawasan Data" section from admin page - Feb 02, 2026
-[x] 97. Fixed build error by changing @/lib/db to @/server/db in API routes - Feb 02, 2026
-[x] 98. Added CRUD functionality for Desa/Dusun/Rumah on upload page - Feb 02, 2026
-[x] 99. Reinstalled npm packages and restarted workflow - environment migration completed Feb 02, 2026
-[x] 100. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
-[x] 101. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
-[x] 102. Reinstalled npm packages and restarted workflow - project verified working on Feb 03, 2026
+[x] 94. Fixed login 500 error - pushed database schema and seeded admin user (admin/admin123) - Feb 02, 2026
+[x] 95. Removed "Wawasan Data" section from admin page - Feb 02, 2026
+[x] 96. Fixed build error by changing @/lib/db to @/server/db in API routes - Feb 02, 2026
+[x] 97. Added CRUD functionality for Desa/Dusun/Rumah on upload page - Feb 02, 2026
+[x] 98. Reinstalled npm packages and restarted workflow - environment migration completed Feb 02, 2026
+[x] 99. Reinstalled npm packages and restarted workflow after environment migration - Feb 02, 2026
+[x] 100. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
+[x] 101. Fixed photo loading in House Detail page by enhancing API metadata extraction and handling flexible houseId keys (houseId/house_id). Feb 03, 2026

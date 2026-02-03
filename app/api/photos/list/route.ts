@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const endDate = request.nextUrl.searchParams.get("endDate")
 
     const files = await fs.readdir(uploadsDir)
+    console.log("[API] Files in uploadsDir:", files)
 
     // Read all metadata files
     const photos = await Promise.all(
@@ -29,7 +30,12 @@ export async function GET(request: NextRequest) {
         .map(async (f) => {
           try {
             const content = await readFile(join(uploadsDir, f), "utf-8")
-            return JSON.parse(content)
+            const data = JSON.parse(content)
+            // Ensure URL is absolute for the client if it's just a filename
+            if (data.url && !data.url.startsWith("http") && !data.url.startsWith("/")) {
+              data.url = `/uploads/${data.url}`
+            }
+            return data
           } catch {
             return null
           }
@@ -41,7 +47,10 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (houseId) {
-      filteredPhotos = filteredPhotos.filter((p) => String(p.houseId) === houseId)
+      filteredPhotos = filteredPhotos.filter((p) => {
+        const pId = String(p.houseId || p.house_id);
+        return pId === String(houseId);
+      })
     }
     if (villageId) {
       filteredPhotos = filteredPhotos.filter((p) => String(p.villageId) === villageId)
