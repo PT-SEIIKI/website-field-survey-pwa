@@ -19,8 +19,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { VillageHierarchy } from "@/components/village-hierarchy";
-import { FolderManager } from "@/components/folder-manager";
-import { getFolders } from "@/lib/indexeddb";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
@@ -30,30 +28,14 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [villages, setVillages] = useState<any[]>([]);
-  const [folderStats, setFolderStats] = useState({ total: 0, pending: 0 });
 
   useEffect(() => {
     fetch("/api/villages")
       .then((res) => res.json())
       .then((data) =>
-        setVillages(data.map((v) => ({ ...v, id: String(v.id) }))),
+        setVillages(data.map((v: any) => ({ ...v, id: String(v.id) }))),
       )
       .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    const loadFolderStats = async () => {
-      try {
-        const folders = await getFolders();
-        setFolderStats({
-          total: folders.length,
-          pending: folders.filter((f) => f.syncStatus === "pending").length,
-        });
-      } catch (err) {
-        console.error("Error loading folder stats:", err);
-      }
-    };
-    loadFolderStats();
   }, []);
 
   useEffect(() => {

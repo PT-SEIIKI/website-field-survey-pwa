@@ -148,7 +148,25 @@ export class DatabaseStorage implements IStorage {
 
   // Folder implementation
   async getFolders(): Promise<Folder[]> {
-    return await db.select().from(folders);
+    return await db.select({
+      id: folders.id,
+      name: folders.name,
+      houseName: folders.houseName,
+      nik: folders.nik,
+      villageId: folders.villageId,
+      subVillageId: folders.subVillageId,
+      houseId: folders.houseId,
+      offlineId: folders.offlineId,
+      createdAt: folders.createdAt,
+      isSynced: folders.isSynced,
+      villageName: villages.name,
+      subVillageName: subVillages.name,
+      houseName2: houses.name,
+    })
+    .from(folders)
+    .leftJoin(villages, eq(folders.villageId, villages.id))
+    .leftJoin(subVillages, eq(folders.subVillageId, subVillages.id))
+    .leftJoin(houses, eq(folders.houseId, houses.id));
   }
 
   async createFolder(insertFolder: InsertFolder): Promise<Folder> {

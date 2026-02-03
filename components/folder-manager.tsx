@@ -18,6 +18,9 @@ interface Folder {
   name: string
   houseName?: string
   nik?: string
+  villageId?: number
+  subVillageId?: number
+  houseId?: number
   createdAt: number
   syncStatus: "pending" | "synced"
 }

@@ -494,43 +494,7 @@ function UploadPageContent() {
             )}
 
             <div className="space-y-6">
-              <div className="space-y-4 p-6 border border-border rounded-xl bg-card/50">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Folder Survey (Dari Dashboard)
-                  </label>
-                  <select
-                    value={selectedFolderId}
-                    onChange={(e) => {
-                      const folderId = e.target.value;
-                      setSelectedFolderId(folderId);
-                      
-                      // Auto-select hierarchy based on folder
-                      if (folderId) {
-                        const folder = folders.find(f => f.id === folderId);
-                        if (folder) {
-                          if (folder.villageId) setSelectedVillageId(String(folder.villageId));
-                          if (folder.subVillageId) setSelectedSubVillageId(String(folder.subVillageId));
-                          if (folder.houseId) setSelectedHouseId(String(folder.houseId));
-                        }
-                      }
-                    }}
-                    className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
-                  >
-                    <option value="">Pilih Folder (Opsional)</option>
-                    {folders.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name} {f.houseName ? `- ${f.houseName}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-muted-foreground italic">
-                    * Pilih folder jika Anda ingin mengelompokkan foto ini ke dalam folder tertentu.
-                  </p>
-                </div>
-
-                <div className="h-px bg-border/50 my-4" />
-
+              <div className="space-y-6 p-6 border border-border rounded-xl bg-card/50">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

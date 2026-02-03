@@ -1,7 +1,7 @@
 // Service Worker untuk PWA - Offline support & Background Sync
-// Version: 1.0.7 - Improved offline routing & caching
-const CACHE_NAME = "survey-pwa-v1.0.7"
-const API_CACHE = "survey-api-v1.0.7"
+// Version: 1.0.8 - Complete offline coverage for all pages
+const CACHE_NAME = "survey-pwa-v1.0.8"
+const API_CACHE = "survey-api-v1.0.8"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",
@@ -9,6 +9,9 @@ const ASSETS_TO_CACHE = [
   "/survey/upload",
   "/survey/gallery",
   "/survey/folder",
+  "/admin",
+  "/admin/users",
+  "/admin/stats",
   "/offline.html",
   "/manifest.json",
   "/favicon.ico",
@@ -112,7 +115,17 @@ async function cacheFallback(request) {
   if (cleanMatch) return cleanMatch;
 
   // 3. Known routes fallback (SPA-like behavior)
-  const routes = ["/login", "/survey/dashboard", "/survey/upload", "/survey/gallery", "/survey/folder"];
+  const routes = [
+    "/", 
+    "/login", 
+    "/survey/dashboard", 
+    "/survey/upload", 
+    "/survey/gallery", 
+    "/survey/folder",
+    "/admin",
+    "/admin/users",
+    "/admin/stats"
+  ];
   for (const route of routes) {
     if (url.pathname.startsWith(route)) {
       const routeMatch = await cache.match(route);
