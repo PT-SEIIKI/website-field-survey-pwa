@@ -122,6 +122,12 @@ export class DatabaseStorage implements IStorage {
   async createEntry(insertEntry: InsertEntry): Promise<Entry> {
     try {
       console.log("[Storage] Inserting entry:", JSON.stringify(insertEntry));
+      
+      // Validate required fields
+      if (!insertEntry.surveyId) {
+        insertEntry.surveyId = 1; // Default survey ID
+      }
+      
       const [entry] = await db.insert(surveyEntries).values(insertEntry).returning();
       return entry;
     } catch (error) {
@@ -133,6 +139,12 @@ export class DatabaseStorage implements IStorage {
   async createPhoto(insertPhoto: InsertPhoto): Promise<Photo> {
     try {
       console.log("[Storage] Inserting photo:", JSON.stringify(insertPhoto));
+      
+      // Validate required fields
+      if (!insertPhoto.url) {
+        throw new Error("Photo URL is required");
+      }
+      
       const [photo] = await db.insert(photos).values(insertPhoto).returning();
       return photo;
     } catch (error) {
