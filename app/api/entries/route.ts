@@ -4,12 +4,8 @@ import { storage } from "@/server/storage";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const surveyId = searchParams.get("surveyId");
+    const surveyId = searchParams.get("surveyId") || "1";
     
-    if (!surveyId) {
-      return NextResponse.json({ success: false, message: "surveyId is required" }, { status: 400 });
-    }
-
     const entries = await storage.getEntries(parseInt(surveyId));
     // The entries from storage already have the joined fields
     return NextResponse.json(entries);

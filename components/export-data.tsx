@@ -11,7 +11,7 @@ export function ExportData() {
   const handleDownload = async (format: 'xlsx' | 'csv') => {
     setIsExporting(true)
     try {
-      const response = await fetch("/api/entries")
+      const response = await fetch("/api/entries?surveyId=1")
       const photos = await response.json()
 
       if (!Array.isArray(photos)) {
