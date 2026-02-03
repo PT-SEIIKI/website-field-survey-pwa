@@ -41,7 +41,11 @@ const nextConfig = {
           },
           {
             key: 'Content-Type',
-            value: 'application/javascript',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
           },
         ],
       },

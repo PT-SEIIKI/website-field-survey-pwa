@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, subVillageId, offlineId, ownerName, nik, address } = body
     
+    console.log("[API] Creating house with body:", JSON.stringify(body))
+    
     if (!name || !subVillageId) {
       return NextResponse.json({ error: "Name and subVillageId are required" }, { status: 400 })
     }
@@ -53,6 +55,15 @@ export async function POST(request: NextRequest) {
       actualSubVillageId = parseInt(subVillageId)
     }
     
+    // Check if house with this offlineId already exists
+    if (offlineId) {
+      const existing = await db.select().from(houses).where(eq(houses.offlineId, offlineId)).limit(1)
+      if (existing.length > 0) {
+        console.log("[API] House with offlineId already exists:", offlineId)
+        return NextResponse.json(existing[0], { status: 200 })
+      }
+    }
+    
     // Create house
     const [newHouse] = await db.insert(houses).values({ 
       name, 
@@ -62,6 +73,8 @@ export async function POST(request: NextRequest) {
       address,
       offlineId: offlineId || `h_${Date.now()}`
     }).returning()
+    
+    console.log("[API] House created:", newHouse)
     
     // Get village and sub-village names for folder
     const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.id, actualSubVillageId))
@@ -80,15 +93,15 @@ export async function POST(request: NextRequest) {
         isSynced: true
       }).returning()
       
-      console.log(`Auto-created folder ${newFolder.name} for house ${newHouse.name}`)
+      console.log(`[API] Auto-created folder ${newFolder.name} for house ${newHouse.name}`)
     } catch (folderError) {
-      console.error("Error auto-creating folder:", folderError)
+      console.error("[API] Error auto-creating folder:", folderError)
       // Continue even if folder creation fails
     }
     
     return NextResponse.json(newHouse, { status: 201 })
   } catch (error) {
-    console.error("Error creating house:", error)
-    return NextResponse.json({ error: "Failed to create house" }, { status: 500 })
+    console.error("[API] Error creating house:", error)
+    return NextResponse.json({ error: "Failed to create house", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
