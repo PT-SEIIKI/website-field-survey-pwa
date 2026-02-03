@@ -101,3 +101,4 @@
 [x] 101. Fixed photo loading in House Detail page by enhancing API metadata extraction and handling flexible houseId keys (houseId/house_id). Feb 03, 2026
 [x] 102. Fixed 'undefined' image URLs in House Detail page by providing more robust fallback logic for filename extraction from metadata (`photoId`, `filename`, `fileName`). Feb 03, 2026
 [x] 103. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
+[x] 104. Reinstalled npm packages and restarted workflow after environment migration - Feb 03, 2026
