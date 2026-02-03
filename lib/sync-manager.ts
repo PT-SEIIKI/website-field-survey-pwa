@@ -179,11 +179,15 @@ export async function startSync() {
     console.log(`[v0] Starting sync for ${pendingPhotos.length} photos`)
 
     for (const photo of pendingPhotos) {
-      if (!foldersCache) {
-        const foldersRes = await fetch("/api/folders")
-        if (foldersRes.ok) foldersCache = await foldersRes.json()
+      try {
+        if (!foldersCache) {
+          const foldersRes = await fetch("/api/folders")
+          if (foldersRes.ok) foldersCache = await foldersRes.json()
+        }
+        await syncPhoto(photo, foldersCache)
+      } catch (e) {
+        console.error(`[v0] Photo sync error for ${photo.id}:`, e)
       }
-      await syncPhoto(photo, foldersCache)
     }
 
     currentSyncStatus.lastSyncTime = Date.now()

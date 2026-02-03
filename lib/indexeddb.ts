@@ -25,7 +25,7 @@ export async function deleteDatabase(): Promise<void> {
       resolve()
     }
     
-    deleteReq.blocked = () => {
+    deleteReq.onblocked = () => {
       console.log(`[IndexedDB] Database ${DB_NAME} diblokir, menunggu penutupan koneksi...`)
     }
   })

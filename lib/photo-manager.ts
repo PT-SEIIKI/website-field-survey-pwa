@@ -114,26 +114,31 @@ export async function addPhotoWithMetadata(blob: Blob, metadata?: Partial<PhotoM
       console.log("[v0] Metadata saved for photo:", photoId)
     }
 
-    // Add to sync queue
-    await addToSyncQueue(photoId)
-    console.log("[v0] Added to sync queue:", photoId)
-
     // Jika offline dan ada folderId, buat folder di IndexedDB
     const { getOnlineStatus } = await import("./connectivity")
     const isOnline = getOnlineStatus()
     
+    // Add to sync queue first to ensure it's tracked
+    await addToSyncQueue(photoId)
+    console.log("[v0] Added to sync queue:", photoId)
+    
     if (!isOnline && metadata?.folderId) {
       try {
-        const { saveFolder } = await import("./indexeddb")
-        await saveFolder({
-          id: metadata.folderId,
-          name: `Folder ${metadata.folderId}`,
-          createdAt: Date.now(),
-          syncStatus: "pending"
-        })
-        console.log("[v0] Folder created for offline photo:", metadata.folderId)
+        const { saveFolder, getFolders } = await import("./indexeddb")
+        const localFolders = await getFolders()
+        const existingFolder = localFolders.find(f => f.id === metadata.folderId)
+        
+        if (!existingFolder) {
+          await saveFolder({
+            id: metadata.folderId,
+            name: metadata.folderId.startsWith('folder_') ? `Folder ${metadata.folderId.split('_').pop()}` : `Folder ${metadata.folderId}`,
+            createdAt: Date.now(),
+            syncStatus: "pending"
+          })
+          console.log("[v0] Folder created for offline photo:", metadata.folderId)
+        }
       } catch (folderError) {
-        console.warn("[v0] Failed to create offline folder:", folderError)
+        console.warn("[v0] Failed to create/check offline folder:", folderError)
       }
     }
 
