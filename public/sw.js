@@ -1,12 +1,13 @@
 // Service Worker untuk PWA - Offline support & Background Sync
-// Version: 1.0.6 - Enhanced offline routing & caching
-const CACHE_NAME = "survey-pwa-v1.0.6"
-const API_CACHE = "survey-api-v1.0.6"
+// Version: 1.0.7 - Improved offline routing & caching
+const CACHE_NAME = "survey-pwa-v1.0.7"
+const API_CACHE = "survey-api-v1.0.7"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",
   "/survey/dashboard",
   "/survey/upload",
+  "/survey/gallery",
   "/survey/folder",
   "/offline.html",
   "/manifest.json",
@@ -15,7 +16,7 @@ const ASSETS_TO_CACHE = [
   "/apple-icon.png",
   "/icon-192x192.png",
   "/icon-512x512.png",
-  "/app/globals.css",
+  "/logo.png",
 ]
 
 // Install event - cache essential assets
@@ -23,6 +24,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log("[SW] Pre-caching assets...");
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
         console.error("[SW] Pre-cache error:", err);
       });
@@ -37,6 +39,7 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== API_CACHE) {
+            console.log("[SW] Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -51,6 +54,15 @@ self.addEventListener("fetch", (event) => {
 
   if (!url.protocol.startsWith("http")) return;
 
+  // Ignore browser extensions and other external requests
+  if (url.origin !== self.location.origin) {
+    // Exception for fonts or common CDNs if needed
+    if (url.hostname.includes("fonts.googleapis.com") || url.hostname.includes("fonts.gstatic.com")) {
+      event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
+    }
+    return;
+  }
+
   // API calls: Network First
   if (url.pathname.startsWith("/api/")) {
     if (event.request.method === "GET") {
@@ -59,22 +71,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static Assets: Stale While Revalidate
-  if (
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/static/") ||
-    ASSETS_TO_CACHE.includes(url.pathname)
-  ) {
-    event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
-    return;
-  }
-
-  // Navigation (HTML): Network First with full fallback logic
-  if (event.request.mode === "navigate" || event.request.headers.get("Accept")?.includes("text/html")) {
+  // Navigation (HTML): Network First with robust fallback
+  if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          if (response.ok) {
+          if (response && response.status === 200) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
             return response;
@@ -86,7 +88,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Default: Stale While Revalidate
+  // Static Assets & Others: Stale While Revalidate
   event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
 });
 
@@ -94,17 +96,17 @@ async function cacheFallback(request) {
   const cache = await caches.open(CACHE_NAME);
   const url = new URL(request.url);
   
-  // 1. Exact match
-  let matched = await cache.match(request);
+  // 1. Try exact match from cache
+  const matched = await cache.match(request);
   if (matched) return matched;
 
-  // 2. Clean URL match
-  const cleanUrl = url.origin + url.pathname.replace(/\/$/, "");
-  matched = await cache.match(cleanUrl);
-  if (matched) return matched;
+  // 2. Try matching without trailing slash
+  const cleanUrl = url.pathname.endsWith("/") ? url.pathname.slice(0, -1) : url.pathname;
+  const cleanMatch = await cache.match(cleanUrl);
+  if (cleanMatch) return cleanMatch;
 
-  // 3. Known routes fallback
-  const routes = ["/login", "/survey/dashboard", "/survey/upload", "/survey/folder"];
+  // 3. Known routes fallback (SPA-like behavior)
+  const routes = ["/login", "/survey/dashboard", "/survey/upload", "/survey/gallery", "/survey/folder"];
   for (const route of routes) {
     if (url.pathname.startsWith(route)) {
       const routeMatch = await cache.match(route);
@@ -112,39 +114,57 @@ async function cacheFallback(request) {
     }
   }
 
-  // 4. Root fallback
+  // 4. Default fallbacks
   const rootMatch = await cache.match("/");
   if (rootMatch) return rootMatch;
 
-  // 5. Offline page
-  return cache.match("/offline.html");
+  const offlineMatch = await cache.match("/offline.html");
+  if (offlineMatch) return offlineMatch;
+
+  return new Response("Offline content not available", {
+    status: 503,
+    statusText: "Service Unavailable",
+    headers: new Headers({ "Content-Type": "text/plain" })
+  });
 }
 
 async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+    if (response && response.status === 200) {
+      cache.put(request, response.clone());
+    }
     return response;
   } catch (error) {
     const cached = await cache.match(request);
-    return cached || new Response(JSON.stringify({ error: "offline" }), { status: 503, headers: { "Content-Type": "application/json" } });
+    if (cached) return cached;
+    return new Response(JSON.stringify({ error: "offline", message: "Network request failed" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }
 
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cachedResponse = await cache.match(request);
-  const fetchPromise = fetch(request).then((networkResponse) => {
-    if (networkResponse.ok) cache.put(request, networkResponse.clone());
-    return networkResponse;
-  }).catch(() => cachedResponse);
+  
+  const fetchPromise = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200) {
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    })
+    .catch(() => cachedResponse);
+
   return cachedResponse || fetchPromise;
 }
 
-// Handle messages from client
+// Handle skip waiting
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting()
+    self.skipWaiting();
   }
-})
+});
