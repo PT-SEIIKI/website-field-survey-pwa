@@ -116,25 +116,43 @@ export async function startSync() {
     const allSubVillages = await getSubVillages()
     for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
       try {
+        console.log("[v0] Syncing sub-village:", sv.id, sv.name)
         const res = await fetch("/api/sub-villages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: sv.name, villageId: sv.villageId, offlineId: sv.id })
         })
-        if (res.ok) await saveSubVillage({ ...sv, syncStatus: "synced" })
-      } catch (e) {}
+        if (res.ok) {
+          console.log("[v0] Sub-village synced successfully:", sv.id)
+          await saveSubVillage({ ...sv, syncStatus: "synced" })
+        } else {
+          const errorText = await res.text()
+          console.error("[v0] Sub-village sync failed:", sv.id, errorText)
+        }
+      } catch (e) {
+        console.error("[v0] Sub-village sync error:", sv.id, e)
+      }
     }
 
     const allHouses = await getHouses()
     for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
       try {
+        console.log("[v0] Syncing house:", h.id, h.name)
         const res = await fetch("/api/houses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: h.name, subVillageId: h.subVillageId, offlineId: h.id })
         })
-        if (res.ok) await saveHouse({ ...h, syncStatus: "synced" })
-      } catch (e) {}
+        if (res.ok) {
+          console.log("[v0] House synced successfully:", h.id)
+          await saveHouse({ ...h, syncStatus: "synced" })
+        } else {
+          const errorText = await res.text()
+          console.error("[v0] House sync failed:", h.id, errorText)
+        }
+      } catch (e) {
+        console.error("[v0] House sync error:", h.id, e)
+      }
     }
 
     // 2. Sync Folders

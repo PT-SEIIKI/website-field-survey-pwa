@@ -40,12 +40,20 @@ export async function POST(request: NextRequest) {
       // This is an offline ID, find the actual village by offlineId
       const [village] = await db.select().from(villages).where(eq(villages.offlineId, villageId))
       if (!village) {
+        console.log("[API] Village not found with offline ID:", villageId)
         return NextResponse.json({ error: "Village not found with offline ID" }, { status: 404 })
       }
       actualVillageId = village.id
+    } else if (typeof villageId === 'string') {
+      // This might be a string representation of a numeric ID
+      actualVillageId = parseInt(villageId)
+      if (isNaN(actualVillageId)) {
+        console.log("[API] Invalid villageId format:", villageId)
+        return NextResponse.json({ error: "Invalid villageId format" }, { status: 400 })
+      }
     } else {
       // This is a numeric ID
-      actualVillageId = parseInt(villageId)
+      actualVillageId = villageId
     }
     
     // Check if sub-village with this offlineId already exists

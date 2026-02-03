@@ -47,12 +47,20 @@ export async function POST(request: NextRequest) {
       // This is an offline ID, find the actual sub-village by offlineId
       const [subVillage] = await db.select().from(subVillages).where(eq(subVillages.offlineId, subVillageId))
       if (!subVillage) {
+        console.log("[API] Sub-village not found with offline ID:", subVillageId)
         return NextResponse.json({ error: "Sub-village not found with offline ID" }, { status: 404 })
       }
       actualSubVillageId = subVillage.id
+    } else if (typeof subVillageId === 'string') {
+      // This might be a string representation of a numeric ID
+      actualSubVillageId = parseInt(subVillageId)
+      if (isNaN(actualSubVillageId)) {
+        console.log("[API] Invalid subVillageId format:", subVillageId)
+        return NextResponse.json({ error: "Invalid subVillageId format" }, { status: 400 })
+      }
     } else {
       // This is a numeric ID
-      actualSubVillageId = parseInt(subVillageId)
+      actualSubVillageId = subVillageId
     }
     
     // Check if house with this offlineId already exists

@@ -115,9 +115,19 @@ function UploadPageContent() {
         }
       } catch (error) {
         console.error("Failed to fetch folders from server:", error);
-        // Keep using local data if server fails
       }
     }
+    
+    // Filter out folders that don't have meaningful content
+    const filteredFolders = local.filter(folder => {
+      // Only show folders that have a proper name and are not empty placeholders
+      return folder.name && 
+             !folder.name.includes('Folder ') && 
+             folder.name.trim() !== '' &&
+             (folder.villageName || folder.houseName || folder.name !== 'Unknown');
+    });
+    
+    setFolders(filteredFolders);
   };
 
   const createVillage = async () => {
