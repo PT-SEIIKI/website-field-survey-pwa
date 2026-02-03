@@ -1,126 +1,220 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ChevronRight, ChevronDown, Folder, Home, Image as ImageIcon, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  Home,
+  Image as ImageIcon,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export function VillageHierarchy() {
-  const [villages, setVillages] = useState<any[]>([])
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+  const [villages, setVillages] = useState<any[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const router = useRouter();
 
   useEffect(() => {
-    fetchVillages()
-  }, [])
+    fetchVillages();
+  }, []);
 
   const fetchVillages = async () => {
     try {
-      const res = await fetch("/api/villages")
-      if (res.ok) setVillages(await res.json())
+      const res = await fetch("/api/villages");
+      if (res.ok) setVillages(await res.json());
     } catch (e) {
-      console.error(e)
+      console.error(e);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const toggle = (id: string) => {
-    setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
-  }
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
-  if (loading) return <Loader2 className="animate-spin mx-auto" />
+  const totalPages = Math.ceil(villages.length / itemsPerPage);
+  const paginatedVillages = villages.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  if (loading) return <Loader2 className="animate-spin mx-auto" />;
 
   return (
-    <div className="space-y-2">
-      {villages.map(v => (
-        <VillageItem key={v.id} village={v} expanded={expanded} toggle={toggle} />
-      ))}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        {paginatedVillages.map((v) => (
+          <VillageItem
+            key={v.id}
+            village={v}
+            expanded={expanded}
+            toggle={toggle}
+          />
+        ))}
+      </div>
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className={
+                  currentPage === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(page)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
-  )
+  );
 }
 
 function VillageItem({ village, expanded, toggle }: any) {
-  const [subVillages, setSubVillages] = useState<any[]>([])
-  const isExpanded = expanded[`v-${village.id}`]
+  const [subVillages, setSubVillages] = useState<any[]>([]);
+  const isExpanded = expanded[`v-${village.id}`];
 
   useEffect(() => {
     if (isExpanded && subVillages.length === 0) {
       fetch(`/api/sub-villages?villageId=${village.id}`)
-        .then(res => res.json())
-        .then(setSubVillages)
+        .then((res) => res.json())
+        .then(setSubVillages);
     }
-  }, [isExpanded])
+  }, [isExpanded]);
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card/30">
-      <button 
+      <button
         onClick={() => toggle(`v-${village.id}`)}
         className="w-full flex items-center gap-3 p-4 hover:bg-secondary/30 transition-colors"
       >
-        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        {isExpanded ? (
+          <ChevronDown className="w-4 h-4" />
+        ) : (
+          <ChevronRight className="w-4 h-4" />
+        )}
         <Folder className="w-4 h-4 text-primary" />
-        <span className="font-bold uppercase text-sm tracking-tight">{village.name}</span>
+        <span className="font-bold uppercase text-sm tracking-tight">
+          {village.name}
+        </span>
       </button>
       {isExpanded && (
         <div className="pl-8 pr-4 pb-4 space-y-2 border-t border-border/50 pt-2">
-          {subVillages.map(sv => (
-            <SubVillageItem key={sv.id} subVillage={sv} expanded={expanded} toggle={toggle} />
+          {subVillages.map((sv) => (
+            <SubVillageItem
+              key={sv.id}
+              subVillage={sv}
+              expanded={expanded}
+              toggle={toggle}
+            />
           ))}
-          {subVillages.length === 0 && <p className="text-[10px] text-muted-foreground uppercase py-2">Belum ada dusun</p>}
+          {subVillages.length === 0 && (
+            <p className="text-[10px] text-muted-foreground uppercase py-2">
+              Belum ada dusun
+            </p>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function SubVillageItem({ subVillage, expanded, toggle }: any) {
-  const [houses, setHouses] = useState<any[]>([])
-  const isExpanded = expanded[`sv-${subVillage.id}`]
+  const [houses, setHouses] = useState<any[]>([]);
+  const isExpanded = expanded[`sv-${subVillage.id}`];
 
   useEffect(() => {
     if (isExpanded && houses.length === 0) {
       fetch(`/api/houses?subVillageId=${subVillage.id}`)
-        .then(res => res.json())
-        .then(setHouses)
+        .then((res) => res.json())
+        .then(setHouses);
     }
-  }, [isExpanded])
+  }, [isExpanded]);
 
   return (
     <div className="border border-border/50 rounded-md bg-background/50">
-      <button 
+      <button
         onClick={() => toggle(`sv-${subVillage.id}`)}
         className="w-full flex items-center gap-3 p-3 hover:bg-secondary/20 transition-colors"
       >
-        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+        {isExpanded ? (
+          <ChevronDown className="w-3 h-3" />
+        ) : (
+          <ChevronRight className="w-3 h-3" />
+        )}
         <Folder className="w-3 h-3 text-primary/70" />
-        <span className="font-semibold text-xs tracking-tight">{subVillage.name}</span>
+        <span className="font-semibold text-xs tracking-tight">
+          {subVillage.name}
+        </span>
       </button>
       {isExpanded && (
         <div className="pl-8 pr-3 pb-3 space-y-1 pt-1">
-          {houses.map(h => (
+          {houses.map((h) => (
             <HouseItem key={h.id} house={h} />
           ))}
-          {houses.length === 0 && <p className="text-[9px] text-muted-foreground uppercase py-1">Belum ada rumah</p>}
+          {houses.length === 0 && (
+            <p className="text-[9px] text-muted-foreground uppercase py-1">
+              Belum ada rumah
+            </p>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function HouseItem({ house }: any) {
-  const [photoCount, setPhotoCount] = useState(0)
-  const router = useRouter()
+  const [photoCount, setPhotoCount] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     fetch(`/api/photos/list?houseId=${house.id}`)
-      .then(res => res.json())
-      .then(data => setPhotoCount(data.photos?.length || 0))
-  }, [house.id])
+      .then((res) => res.json())
+      .then((data) => setPhotoCount(data.photos?.length || 0));
+  }, [house.id]);
 
   return (
-    <div 
+    <div
       onClick={() => router.push(`/survey/house/${house.id}`)}
       className="flex items-center justify-between p-2 rounded hover:bg-secondary/40 transition-colors cursor-pointer"
     >
@@ -133,5 +227,5 @@ function HouseItem({ house }: any) {
         {photoCount}
       </div>
     </div>
-  )
+  );
 }
