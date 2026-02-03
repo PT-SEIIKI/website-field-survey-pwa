@@ -31,6 +31,12 @@ export async function GET(request: NextRequest) {
           try {
             const content = await readFile(join(uploadsDir, f), "utf-8")
             const data = JSON.parse(content)
+            
+            // Add unique ID for client-side tracking, use db ID if available
+            if (!data.id) {
+              data.id = data.photoId || f.replace(".json", "");
+            }
+
             // Ensure URL is absolute for the client if it's just a filename
             if (!data.url) {
               const fileName = data.fileName || data.filename || data.fileName || f.replace(".json", ".jpg");
