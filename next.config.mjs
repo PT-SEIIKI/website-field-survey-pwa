@@ -29,6 +29,11 @@ const nextConfig = {
   // Disable static generation to prevent window errors
   output: 'standalone',
   
+  // Add build timestamp for cache busting
+  generateBuildId: async () => {
+    return Date.now().toString();
+  },
+  
   // Add headers for service worker
   async headers() {
     return [
@@ -51,6 +56,15 @@ const nextConfig = {
       },
       {
         source: '/_next/static/chunks/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/(.*)',
         headers: [
           {
             key: 'Cache-Control',
