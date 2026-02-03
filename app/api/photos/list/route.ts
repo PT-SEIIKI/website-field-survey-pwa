@@ -32,8 +32,15 @@ export async function GET(request: NextRequest) {
             const content = await readFile(join(uploadsDir, f), "utf-8")
             const data = JSON.parse(content)
             // Ensure URL is absolute for the client if it's just a filename
-            if (data.url && !data.url.startsWith("http") && !data.url.startsWith("/")) {
-              data.url = `/uploads/${data.url}`
+            if (!data.url) {
+              const fileName = data.fileName || data.filename || data.fileName || f.replace(".json", ".jpg");
+              data.url = `/uploads/${fileName}`;
+            } else if (!data.url.startsWith("http") && !data.url.startsWith("/")) {
+              data.url = `/uploads/${data.url}`;
+            }
+            // Add filename for client fallback
+            if (!data.fileName && !data.filename) {
+               data.fileName = f.replace(".json", ".jpg");
             }
             return data
           } catch {

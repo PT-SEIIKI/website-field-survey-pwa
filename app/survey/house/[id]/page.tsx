@@ -43,10 +43,23 @@ function HouseDetailContent() {
         const data = await photosRes.json()
         console.log("[HouseDetail] Photos data:", data)
         // Extract photos from metadata if present, otherwise use the list
-        const processedPhotos = (data.photos || []).map((p: any) => ({
-          ...p,
-          url: p.url || (p.photoData ? p.photoData : `/uploads/${p.fileName}`)
-        }))
+        const processedPhotos = (data.photos || []).map((p: any) => {
+          let url = p.url;
+          if (!url || url.includes('undefined')) {
+            if (p.photoData) {
+              url = p.photoData;
+            } else if (p.fileName) {
+              url = `/uploads/${p.fileName}`;
+            } else if (p.filename) {
+              url = `/uploads/${p.filename}`;
+            } else if (p.photoId) {
+              url = `/uploads/${p.photoId}.jpg`;
+            } else if (p.id) {
+              url = `/uploads/${p.id}.jpg`;
+            }
+          }
+          return { ...p, url };
+        })
         setPhotos(processedPhotos)
       }
     } catch (e) {
