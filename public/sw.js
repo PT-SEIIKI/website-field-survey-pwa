@@ -88,6 +88,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Handle Dynamic Image Loading (Uploads)
+  if (url.pathname.startsWith("/uploads/")) {
+    event.respondWith(staleWhileRevalidate(event.request, API_CACHE));
+    return;
+  }
+
   // Static Assets & Others: Stale While Revalidate
   event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
 });

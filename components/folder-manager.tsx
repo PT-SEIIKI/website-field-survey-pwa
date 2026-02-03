@@ -88,22 +88,14 @@ export function FolderManager() {
     }
 
     try {
-      if (isOnline && editingFolder?.syncStatus === "synced") {
-        const res = await fetch("/api/folders")
-        if (res.ok) {
-          const serverFolders = await res.json()
-          const serverFolder = serverFolders.find((f: any) => f.offlineId === folderData.id)
-          if (serverFolder) {
-            await fetch(`/api/folders/${serverFolder.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, houseName, nik })
-            })
-          }
-        }
-      }
       await saveFolder(folderData)
       await loadFolders()
+      
+      if (isOnline) {
+        // Trigger sync manually if online
+        import("@/lib/sync-manager").then(({ startSync }) => startSync())
+      }
+      
       setIsDialogOpen(false)
       resetForm()
     } catch (error) {

@@ -35,36 +35,65 @@ function FolderDetailPageContent() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const { getFolders, getMetadata, getAllPhotos } = await import("@/lib/indexeddb")
-      const localFolders = await getFolders()
-      const localFolder = localFolders.find(f => String(f.id) === String(folderId))
-      
-      if (localFolder) {
-        setFolder({
-          id: localFolder.id,
-          name: localFolder.name,
-          houseName: localFolder.houseName,
-          nik: localFolder.nik
-        })
+      // local fallback for folder details
+      try {
+        const { getFolders, getMetadata, getAllPhotos, getPhoto } = await import("@/lib/indexeddb")
+        const localFolders = await getFolders()
+        const localFolder = localFolders.find(f => String(f.id) === String(folderId))
         
-        const allPhotos = await getAllPhotos()
-        const folderPhotos = []
-        
-        for (const p of allPhotos) {
-          const meta = await getMetadata(p.id)
-          if (meta?.folderId && String(meta.folderId) === String(folderId)) {
-            folderPhotos.push({
-              id: p.id,
-              url: URL.createObjectURL(p.blob),
-              location: meta.location || "Tanpa Lokasi",
-              description: meta.description || "",
-              timestamp: p.timestamp,
-              createdAt: new Date(p.timestamp).toISOString(),
-              isOffline: true
-            })
+        if (localFolder) {
+          setFolder(prev => ({
+            ...prev,
+            id: localFolder.id,
+            name: localFolder.name,
+            houseName: localFolder.houseName,
+            nik: localFolder.nik
+          }))
+          
+          const allPhotos = await getAllPhotos()
+          const folderPhotos = []
+          
+          for (const p of allPhotos) {
+            const meta = await getMetadata(p.id)
+            if (meta?.folderId && String(meta.folderId) === String(folderId)) {
+              // Ensure we have a valid URL even if blob is empty (for synced photos without local blob)
+              let photoUrl = "https://placehold.co/400x300?text=Loading..."
+              if (p.blob && p.blob.size > 0) {
+                photoUrl = URL.createObjectURL(p.blob)
+              } else {
+                // Try to use the server URL from metadata if it exists
+                photoUrl = meta.url || `/uploads/${p.id}.jpg`
+              }
+
+              folderPhotos.push({
+                id: p.id,
+                url: photoUrl,
+                location: meta.location || "Tanpa Lokasi",
+                description: meta.description || "",
+                timestamp: p.timestamp,
+                createdAt: new Date(p.timestamp).toISOString(),
+                isOffline: p.syncStatus !== "synced"
+              })
+            }
           }
+          setPhotos(prev => {
+            const merged = [...prev]
+            folderPhotos.forEach(lp => {
+              const existingIndex = merged.findIndex(mp => String(mp.id) === String(lp.id))
+              if (existingIndex >= 0) {
+                // Prefer local blob URL if available and we are offline
+                if (lp.url.startsWith("blob:") && !merged[existingIndex].url.startsWith("blob:")) {
+                  merged[existingIndex] = lp
+                }
+              } else {
+                merged.push(lp)
+              }
+            })
+            return merged.sort((a, b) => b.timestamp - a.timestamp)
+          })
         }
-        setPhotos(folderPhotos)
+      } catch (err) {
+        console.warn("Local DB fetch failed:", err)
       }
 
       const folderRes = await fetch(`/api/folders/${folderId}`)
