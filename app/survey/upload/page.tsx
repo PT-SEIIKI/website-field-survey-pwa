@@ -68,6 +68,9 @@ function UploadPageContent() {
   const [newVillageName, setNewVillageName] = useState("");
   const [newSubVillageName, setNewSubVillageName] = useState("");
   const [newHouseName, setNewHouseName] = useState("");
+  const [newOwnerName, setNewOwnerName] = useState("");
+  const [newNik, setNewNik] = useState("");
+  const [newAddress, setNewAddress] = useState("");
   const [showAddVillage, setShowAddVillage] = useState(false);
   const [showAddSubVillage, setShowAddSubVillage] = useState(false);
   const [showAddHouse, setShowAddHouse] = useState(false);
@@ -165,12 +168,18 @@ function UploadPageContent() {
         id: offlineId,
         name: newHouseName.trim(),
         subVillageId: selectedSubVillageId,
+        ownerName: newOwnerName.trim(),
+        nik: newNik.trim(),
+        address: newAddress.trim(),
         syncStatus: "pending",
       };
       await saveHouse(newH);
       setHouses((prev) => [...prev, newH]);
       setSelectedHouseId(offlineId);
       setNewHouseName("");
+      setNewOwnerName("");
+      setNewNik("");
+      setNewAddress("");
       setShowAddHouse(false);
       return;
     }
@@ -181,6 +190,9 @@ function UploadPageContent() {
       body: JSON.stringify({
         name: newHouseName.trim(),
         subVillageId: selectedSubVillageId,
+        ownerName: newOwnerName.trim(),
+        nik: newNik.trim(),
+        address: newAddress.trim(),
         offlineId,
       }),
     });
@@ -195,6 +207,9 @@ function UploadPageContent() {
       setHouses((prev) => [...prev, { ...created, id: String(created.id) }]);
       setSelectedHouseId(String(created.id));
       setNewHouseName("");
+      setNewOwnerName("");
+      setNewNik("");
+      setNewAddress("");
       setShowAddHouse(false);
     }
   };
@@ -593,16 +608,36 @@ function UploadPageContent() {
                     </Button>
                   </div>
                   {showAddHouse && selectedSubVillageId && (
-                    <div className="flex gap-2 mb-2">
+                    <div className="space-y-2 mb-4">
                       <input
                         type="text"
                         value={newHouseName}
                         onChange={(e) => setNewHouseName(e.target.value)}
-                        placeholder="Nama rumah baru..."
-                        className="flex-1 h-9 rounded-md border border-border bg-background px-3 text-sm"
+                        placeholder="Nama rumah (No. Rumah)..."
+                        className="w-full h-9 rounded-md border border-border bg-background px-3 text-sm"
                       />
-                      <Button size="sm" className="h-9" onClick={createHouse}>
-                        Tambah
+                      <input
+                        type="text"
+                        value={newOwnerName}
+                        onChange={(e) => setNewOwnerName(e.target.value)}
+                        placeholder="Nama Pemilik (Opsional)"
+                        className="w-full h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      />
+                      <input
+                        type="text"
+                        value={newNik}
+                        onChange={(e) => setNewNik(e.target.value)}
+                        placeholder="NIK (Opsional)"
+                        className="w-full h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      />
+                      <textarea
+                        value={newAddress}
+                        onChange={(e) => setNewAddress(e.target.value)}
+                        placeholder="Alamat (Opsional)"
+                        className="w-full h-20 rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
+                      />
+                      <Button size="sm" className="w-full h-9" onClick={createHouse}>
+                        Tambah Rumah
                       </Button>
                     </div>
                   )}

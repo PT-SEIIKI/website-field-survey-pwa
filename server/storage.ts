@@ -11,7 +11,7 @@ import {
   type House, type InsertHouse
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -94,8 +94,23 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(surveys);
   }
 
-  async getEntries(surveyId: number): Promise<Entry[]> {
-    return await db.select().from(surveyEntries).where(eq(surveyEntries.surveyId, surveyId));
+  async getEntries(surveyId: number): Promise<any[]> {
+    return await db.select({
+      id: photos.id,
+      url: photos.url,
+      createdAt: photos.createdAt,
+      houseName: houses.name,
+      ownerName: houses.ownerName,
+      nik: houses.nik,
+      address: houses.address,
+      villageName: villages.name,
+      subVillageName: subVillages.name,
+    })
+    .from(photos)
+    .innerJoin(houses, eq(photos.houseId, houses.id))
+    .innerJoin(subVillages, eq(houses.subVillageId, subVillages.id))
+    .innerJoin(villages, eq(subVillages.villageId, villages.id))
+    .orderBy(desc(photos.createdAt));
   }
 
   async deleteEntry(id: number): Promise<void> {

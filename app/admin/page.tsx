@@ -6,7 +6,8 @@ import { getCurrentUser, isAdmin } from "@/lib/auth"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Home, Camera, UserPlus } from "lucide-react"
+import { Home, Camera, UserPlus, Download } from "lucide-react"
+import { ExportData } from "@/components/export-data"
 
 interface Stats {
   totalPhotos: number
@@ -110,8 +111,21 @@ function AdminPageContent() {
               <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Dashboard Surveyor</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">Akses dashboard sederhana surveyor untuk manajemen folder dan pengecekan status cepat.</p>
             </button>
+            <button
+              onClick={() => router.push("/survey/gallery")}
+              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
+              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+                <Camera className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Galeri Foto</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">Lihat semua foto yang telah diupload berdasarkan lokasi dan waktu.</p>
+            </button>
           </div>
           
+          <div className="mt-12 p-8 rounded-xl border border-border bg-card/50">
+            <ExportData />
+          </div>
         </div>
       </main>
     </div>

@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
     }
 
     const entries = await storage.getEntries(parseInt(surveyId));
-    return NextResponse.json({ success: true, entries });
+    // The entries from storage already have the joined fields
+    return NextResponse.json(entries);
   } catch (error) {
     console.error("[API] Fetch entries error:", error);
     return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
