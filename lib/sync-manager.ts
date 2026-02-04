@@ -14,6 +14,56 @@ import {
   saveFolder,
 } from './indexeddb'
 
+// Helper functions untuk offline-to-server ID mapping
+async function getServerIdMapping() {
+  try {
+    console.log('🗺️ Fetching server data for ID mapping...')
+    
+    // Fetch existing data from server
+    const [villagesRes, subVillagesRes, housesRes] = await Promise.all([
+      fetch('/api/villages'),
+      fetch('/api/sub-villages'), 
+      fetch('/api/houses')
+    ])
+
+    const serverVillages = villagesRes.ok ? await villagesRes.json() : []
+    const serverSubVillages = subVillagesRes.ok ? await subVillagesRes.json() : []
+    const serverHouses = housesRes.ok ? await housesRes.json() : []
+
+    // Create mapping: offlineId -> serverId
+    const villageMapping = new Map()
+    const subVillageMapping = new Map()
+    const houseMapping = new Map()
+
+    serverVillages.forEach((v: any) => {
+      if (v.offlineId) villageMapping.set(v.offlineId, v.id)
+    })
+
+    serverSubVillages.forEach((sv: any) => {
+      if (sv.offlineId) subVillageMapping.set(sv.offlineId, sv.id)
+    })
+
+    serverHouses.forEach((h: any) => {
+      if (h.offlineId) houseMapping.set(h.offlineId, h.id)
+    })
+
+    console.log('📊 ID Mapping loaded:', {
+      villages: villageMapping.size,
+      subVillages: subVillageMapping.size,
+      houses: houseMapping.size
+    })
+
+    return { villageMapping, subVillageMapping, houseMapping }
+  } catch (error) {
+    console.error('❌ Failed to load server ID mapping:', error)
+    return { 
+      villageMapping: new Map(), 
+      subVillageMapping: new Map(), 
+      houseMapping: new Map() 
+    }
+  }
+}
+
 // Re-export getPendingPhotos for components
 export { getPendingPhotos } from './indexeddb'
 
@@ -299,7 +349,10 @@ export async function startSync(): Promise<void> {
   console.log('🔒 Sync lock acquired')
 
   try {
-    // 0. Sync Hierarchy first (Villages, SubVillages, Houses, Folders)
+    // 0. Get server ID mapping first
+    const { villageMapping, subVillageMapping, houseMapping } = await getServerIdMapping()
+    
+    // 1. Sync Hierarchy (Villages, SubVillages, Houses, Folders)
     console.log('🏗️ Syncing hierarchy data...')
     
     // Sync Villages
@@ -315,8 +368,11 @@ export async function startSync(): Promise<void> {
           body: JSON.stringify({ name: v.name, offlineId: v.id })
         })
         if (res.ok) {
+          const serverVillage = await res.json()
           await saveVillage({ ...v, syncStatus: "synced" })
-          console.log('✅ Village synced:', v.name)
+          // Update mapping with new server ID
+          villageMapping.set(v.id, serverVillage.id)
+          console.log('✅ Village synced:', v.name, '→ server ID:', serverVillage.id)
         } else {
           console.error('❌ Village sync failed:', v.name, res.status)
         }
@@ -332,15 +388,25 @@ export async function startSync(): Promise<void> {
     for (const sv of pendingSubVillages) {
       try {
         console.log(`🔄 Syncing sub-village: ${sv.name} (${sv.id})`)
+        
+        // Convert villageId using mapping
         let villageId = sv.villageId
         if (typeof villageId === 'string') {
           if (villageId.startsWith('v_')) {
-            console.warn('⚠️ Skipping sub-village with offline villageId:', sv.id, villageId)
-            await saveSubVillage({ ...sv, syncStatus: "synced" })
-            continue
+            // Try to get server ID from mapping
+            const serverVillageId = villageMapping.get(villageId)
+            if (serverVillageId) {
+              villageId = serverVillageId
+              console.log(`🔄 Mapped village ID: ${villageId} → ${serverVillageId}`)
+            } else {
+              console.warn('⚠️ Village not found in mapping, skipping sub-village:', sv.id, villageId)
+              await saveSubVillage({ ...sv, syncStatus: "synced" })
+              continue
+            }
+          } else {
+            const parsed = parseInt(villageId, 10)
+            if (!isNaN(parsed)) villageId = parsed
           }
-          const parsed = parseInt(villageId, 10)
-          if (!isNaN(parsed)) villageId = parsed
         }
         
         const res = await fetch("/api/sub-villages", {
@@ -353,8 +419,11 @@ export async function startSync(): Promise<void> {
           })
         })
         if (res.ok) {
+          const serverSubVillage = await res.json()
           await saveSubVillage({ ...sv, syncStatus: "synced" })
-          console.log('✅ Sub-village synced:', sv.name)
+          // Update mapping with new server ID
+          subVillageMapping.set(sv.id, serverSubVillage.id)
+          console.log('✅ Sub-village synced:', sv.name, '→ server ID:', serverSubVillage.id)
         } else {
           console.error('❌ Sub-village sync failed:', sv.name, res.status)
         }
@@ -370,15 +439,25 @@ export async function startSync(): Promise<void> {
     for (const h of pendingHouses) {
       try {
         console.log(`🔄 Syncing house: ${h.ownerName} (${h.id})`)
+        
+        // Convert subVillageId using mapping
         let subVillageId = h.subVillageId
         if (typeof subVillageId === 'string') {
           if (subVillageId.startsWith('sv_')) {
-            console.warn('⚠️ Skipping house with offline subVillageId:', h.id, subVillageId)
-            await saveHouse({ ...h, syncStatus: "synced" })
-            continue
+            // Try to get server ID from mapping
+            const serverSubVillageId = subVillageMapping.get(subVillageId)
+            if (serverSubVillageId) {
+              subVillageId = serverSubVillageId
+              console.log(`🔄 Mapped sub-village ID: ${subVillageId} → ${serverSubVillageId}`)
+            } else {
+              console.warn('⚠️ Sub-village not found in mapping, skipping house:', h.id, subVillageId)
+              await saveHouse({ ...h, syncStatus: "synced" })
+              continue
+            }
+          } else {
+            const parsed = parseInt(subVillageId, 10)
+            if (!isNaN(parsed)) subVillageId = parsed
           }
-          const parsed = parseInt(subVillageId, 10)
-          if (!isNaN(parsed)) subVillageId = parsed
         }
         
         const res = await fetch("/api/houses", {
@@ -393,8 +472,11 @@ export async function startSync(): Promise<void> {
           })
         })
         if (res.ok) {
+          const serverHouse = await res.json()
           await saveHouse({ ...h, syncStatus: "synced" })
-          console.log('✅ House synced:', h.ownerName)
+          // Update mapping with new server ID
+          houseMapping.set(h.id, serverHouse.id)
+          console.log('✅ House synced:', h.ownerName, '→ server ID:', serverHouse.id)
         } else {
           console.error('❌ House sync failed:', h.ownerName, res.status)
         }
@@ -410,22 +492,55 @@ export async function startSync(): Promise<void> {
     for (const folder of pendingFolders) {
       try {
         console.log(`🔄 Syncing folder: ${folder.name} (${folder.id})`)
+        
+        // Convert all IDs using mapping
         let villageId = folder.villageId
         let subVillageId = folder.subVillageId
         let houseId = folder.houseId
         
-        // Convert to numbers if needed
-        if (villageId && typeof villageId === 'string' && !villageId.startsWith('v_')) {
-          const parsed = parseInt(villageId, 10)
-          if (!isNaN(parsed)) villageId = parsed
+        if (villageId && typeof villageId === 'string') {
+          if (villageId.startsWith('v_')) {
+            const serverVillageId = villageMapping.get(villageId)
+            if (serverVillageId) {
+              villageId = serverVillageId
+              console.log(`🔄 Mapped village ID: ${folder.villageId} → ${serverVillageId}`)
+            } else {
+              villageId = null
+            }
+          } else {
+            const parsed = parseInt(villageId, 10)
+            villageId = !isNaN(parsed) ? parsed : null
+          }
         }
-        if (subVillageId && typeof subVillageId === 'string' && !subVillageId.startsWith('sv_')) {
-          const parsed = parseInt(subVillageId, 10)
-          if (!isNaN(parsed)) subVillageId = parsed
+        
+        if (subVillageId && typeof subVillageId === 'string') {
+          if (subVillageId.startsWith('sv_')) {
+            const serverSubVillageId = subVillageMapping.get(subVillageId)
+            if (serverSubVillageId) {
+              subVillageId = serverSubVillageId
+              console.log(`🔄 Mapped sub-village ID: ${folder.subVillageId} → ${serverSubVillageId}`)
+            } else {
+              subVillageId = null
+            }
+          } else {
+            const parsed = parseInt(subVillageId, 10)
+            subVillageId = !isNaN(parsed) ? parsed : null
+          }
         }
-        if (houseId && typeof houseId === 'string' && !houseId.startsWith('h_')) {
-          const parsed = parseInt(houseId, 10)
-          if (!isNaN(parsed)) houseId = parsed
+        
+        if (houseId && typeof houseId === 'string') {
+          if (houseId.startsWith('h_')) {
+            const serverHouseId = houseMapping.get(houseId)
+            if (serverHouseId) {
+              houseId = serverHouseId
+              console.log(`🔄 Mapped house ID: ${folder.houseId} → ${serverHouseId}`)
+            } else {
+              houseId = null
+            }
+          } else {
+            const parsed = parseInt(houseId, 10)
+            houseId = !isNaN(parsed) ? parsed : null
+          }
         }
         
         const res = await fetch("/api/folders", {
@@ -446,6 +561,8 @@ export async function startSync(): Promise<void> {
           console.log('✅ Folder synced:', folder.name)
         } else {
           console.error('❌ Folder sync failed:', folder.name, res.status)
+          const errorText = await res.text()
+          console.error('Error details:', errorText)
         }
       } catch (e) {
         console.error('❌ Folder sync failed:', folder.name, e)
