@@ -494,6 +494,7 @@ export async function startSync(): Promise<void> {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
+            name: h.ownerName || `House ${h.id}`, // Required field
             ownerName: h.ownerName,
             nik: h.nik,
             address: h.address,
