@@ -299,23 +299,16 @@ export async function startSync(): Promise<void> {
   console.log('🔒 Sync lock acquired')
 
   try {
-    console.log('🔍 Getting pending photos from IndexedDB...')
-    const pendingPhotos = await getPendingPhotos()
-    console.log('📊 Pending photos count:', pendingPhotos.length)
-
-    if (pendingPhotos.length === 0) {
-      console.log('✅ No pending photos to sync')
-      console.groupEnd()
-      return
-    }
-
     // 0. Sync Hierarchy first (Villages, SubVillages, Houses, Folders)
     console.log('🏗️ Syncing hierarchy data...')
     
     // Sync Villages
     const allVillages = await getVillages()
-    for (const v of allVillages.filter(i => i.syncStatus === "pending")) {
+    const pendingVillages = allVillages.filter(i => i.syncStatus === "pending")
+    console.log(`📊 Found ${pendingVillages.length} pending villages`)
+    for (const v of pendingVillages) {
       try {
+        console.log(`🔄 Syncing village: ${v.name} (${v.id})`)
         const res = await fetch("/api/villages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -324,6 +317,8 @@ export async function startSync(): Promise<void> {
         if (res.ok) {
           await saveVillage({ ...v, syncStatus: "synced" })
           console.log('✅ Village synced:', v.name)
+        } else {
+          console.error('❌ Village sync failed:', v.name, res.status)
         }
       } catch (e) {
         console.error('❌ Village sync failed:', v.name, e)
@@ -332,12 +327,15 @@ export async function startSync(): Promise<void> {
 
     // Sync SubVillages
     const allSubVillages = await getSubVillages()
-    for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
+    const pendingSubVillages = allSubVillages.filter(i => i.syncStatus === "pending")
+    console.log(`📊 Found ${pendingSubVillages.length} pending sub-villages`)
+    for (const sv of pendingSubVillages) {
       try {
+        console.log(`🔄 Syncing sub-village: ${sv.name} (${sv.id})`)
         let villageId = sv.villageId
         if (typeof villageId === 'string') {
           if (villageId.startsWith('v_')) {
-            console.warn('⚠️ Skipping sub-village with offline villageId:', sv.id)
+            console.warn('⚠️ Skipping sub-village with offline villageId:', sv.id, villageId)
             await saveSubVillage({ ...sv, syncStatus: "synced" })
             continue
           }
@@ -357,6 +355,8 @@ export async function startSync(): Promise<void> {
         if (res.ok) {
           await saveSubVillage({ ...sv, syncStatus: "synced" })
           console.log('✅ Sub-village synced:', sv.name)
+        } else {
+          console.error('❌ Sub-village sync failed:', sv.name, res.status)
         }
       } catch (e) {
         console.error('❌ Sub-village sync failed:', sv.name, e)
@@ -365,12 +365,15 @@ export async function startSync(): Promise<void> {
 
     // Sync Houses
     const allHouses = await getHouses()
-    for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
+    const pendingHouses = allHouses.filter(i => i.syncStatus === "pending")
+    console.log(`📊 Found ${pendingHouses.length} pending houses`)
+    for (const h of pendingHouses) {
       try {
+        console.log(`🔄 Syncing house: ${h.ownerName} (${h.id})`)
         let subVillageId = h.subVillageId
         if (typeof subVillageId === 'string') {
           if (subVillageId.startsWith('sv_')) {
-            console.warn('⚠️ Skipping house with offline subVillageId:', h.id)
+            console.warn('⚠️ Skipping house with offline subVillageId:', h.id, subVillageId)
             await saveHouse({ ...h, syncStatus: "synced" })
             continue
           }
@@ -392,6 +395,8 @@ export async function startSync(): Promise<void> {
         if (res.ok) {
           await saveHouse({ ...h, syncStatus: "synced" })
           console.log('✅ House synced:', h.ownerName)
+        } else {
+          console.error('❌ House sync failed:', h.ownerName, res.status)
         }
       } catch (e) {
         console.error('❌ House sync failed:', h.ownerName, e)
@@ -400,8 +405,11 @@ export async function startSync(): Promise<void> {
 
     // Sync Folders
     const allFolders = await getFolders()
-    for (const folder of allFolders.filter(f => f.syncStatus === "pending")) {
+    const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
+    console.log(`📊 Found ${pendingFolders.length} pending folders`)
+    for (const folder of pendingFolders) {
       try {
+        console.log(`🔄 Syncing folder: ${folder.name} (${folder.id})`)
         let villageId = folder.villageId
         let subVillageId = folder.subVillageId
         let houseId = folder.houseId
@@ -436,24 +444,23 @@ export async function startSync(): Promise<void> {
         if (res.ok) {
           await saveFolder({ ...folder, syncStatus: "synced" })
           console.log('✅ Folder synced:', folder.name)
+        } else {
+          console.error('❌ Folder sync failed:', folder.name, res.status)
         }
       } catch (e) {
         console.error('❌ Folder sync failed:', folder.name, e)
       }
     }
 
-    console.log('📋 Pending photos list:')
-    console.table(
-      pendingPhotos.map((p) => ({
-        id: p.id,
-        entryId: p.entryId,
-        folderId: p.folderId,
-        syncStatus: p.syncStatus,
-        attempts: p.syncAttempts,
-        hasBlob: !!p.blob,
-        blobSize: p.blob ? `${(p.blob.size / 1024).toFixed(2)}KB` : 'N/A',
-      }))
-    )
+    console.log('� Getting pending photos from IndexedDB...')
+    const pendingPhotos = await getPendingPhotos()
+    console.log('📊 Pending photos count:', pendingPhotos.length)
+
+    if (pendingPhotos.length === 0) {
+      console.log('✅ No pending photos to sync')
+      console.groupEnd()
+      return
+    }
 
     let successCount = 0
     let failedCount = 0
