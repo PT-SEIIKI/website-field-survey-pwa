@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
 import {
   Upload,
-  BarChart3,
   Wifi,
   WifiOff,
   Camera,
@@ -16,6 +15,7 @@ import {
   Folder as FolderIcon,
   Plus,
   UserPlus,
+  Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { VillageHierarchy } from "@/components/village-hierarchy";
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                   variant="outline"
                   className="flex-1 sm:flex-none rounded-full px-6 font-bold uppercase text-[11px] tracking-widest border-border"
                 >
-                  <BarChart3 className="w-4 h-4 mr-2" />
+                  <Shield className="w-4 h-4 mr-2" />
                   Portal Admin
                 </Button>
               )}
@@ -117,7 +117,7 @@ export default function DashboardPage() {
             label="Cloud"
             value={stats ? stats.totalPhotos : "0"}
             description="Foto Tersinkron"
-            icon={<BarChart3 size={14} />}
+            icon={<Shield size={14} />}
           />
           <StatCard
             label="Wilayah"
@@ -151,47 +151,6 @@ export default function DashboardPage() {
           </div>
           <VillageHierarchy />
         </div>
-
-        {/* Quick Actions (Admin) */}
-        {user.role === "admin" && (
-          <div className="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-border">
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-6">
-              Administratif
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <button
-                onClick={() => router.push("/admin")}
-                className="group flex flex-col items-start p-6 sm:p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-              >
-                <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                  <BarChart3 className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
-                </div>
-                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">
-                  Buka Portal Admin
-                </h4>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
-                  Analisis semua data yang dikumpulkan, ekspor laporan, dan
-                  kelola konfigurasi sistem tingkat tinggi.
-                </p>
-              </button>
-              <button
-                onClick={() => router.push("/admin/users")}
-                className="group flex flex-col items-start p-6 sm:p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-              >
-                <div className="p-2 sm:p-3 bg-secondary rounded-lg mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                  <UserPlus className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
-                </div>
-                <h4 className="font-bold text-base sm:text-lg tracking-tight mb-2 uppercase">
-                  Manajemen User
-                </h4>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
-                  Kelola akses sistem, buat akun surveyor baru, dan pantau peran
-                  pengguna.
-                </p>
-              </button>
-            </div>
-          </div>
-        )}
       </main>
 
       <footer className="max-w-6xl mx-auto px-6 py-6 sm:py-10 border-t border-border mt-12 sm:mt-20">
