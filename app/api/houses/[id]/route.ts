@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/server/db"
-import { houses, photos, folders } from "@/shared/schema"
+import { houses, photos, folders, villages, subVillages } from "@/shared/schema"
 import { eq } from "drizzle-orm"
 
 export async function GET(
@@ -14,11 +14,34 @@ export async function GET(
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
     }
 
-    const [house] = await db.select().from(houses).where(eq(houses.id, houseId))
+    // Get house with village and sub-village names
+    const [house] = await db
+      .select({
+        id: houses.id,
+        name: houses.name,
+        ownerName: houses.ownerName,
+        nik: houses.nik,
+        address: houses.address,
+        subVillageId: houses.subVillageId,
+        villageId: villages.id,
+        villageName: villages.name,
+        subVillageName: subVillages.name,
+      })
+      .from(houses)
+      .leftJoin(subVillages, eq(houses.subVillageId, subVillages.id))
+      .leftJoin(villages, eq(subVillages.villageId, villages.id))
+      .where(eq(houses.id, houseId))
     
     if (!house) {
       return NextResponse.json({ error: "House not found" }, { status: 404 })
     }
+
+    console.log(`🏠 [House API] Fetched house ${houseId}:`, {
+      name: house.name,
+      villageName: house.villageName,
+      subVillageName: house.subVillageName,
+      ownerName: house.ownerName
+    })
 
     return NextResponse.json(house)
   } catch (error) {

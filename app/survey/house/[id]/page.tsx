@@ -163,6 +163,41 @@ function HouseDetailContent() {
           </div>
         </div>
 
+        {/* House Details */}
+        <div className="bg-card border rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4">Informasi Rumah</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Nama Desa</p>
+                <p className="font-medium">{house.villageName || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Nama Dusun</p>
+                <p className="font-medium">{house.subVillageName || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Nama Rumah</p>
+                <p className="font-medium">{house.name || '-'}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Nama Pemilik</p>
+                <p className="font-medium">{house.ownerName || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">NIK</p>
+                <p className="font-medium">{house.nik || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Alamat</p>
+                <p className="font-medium">{house.address || '-'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((photo, i) => (
             <div key={photo.id || i} className="space-y-3">
