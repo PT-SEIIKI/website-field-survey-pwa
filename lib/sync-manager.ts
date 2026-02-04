@@ -359,6 +359,8 @@ export async function startSync(): Promise<void> {
     const allVillages = await getVillages()
     const pendingVillages = allVillages.filter(i => i.syncStatus === "pending")
     console.log(`📊 Found ${pendingVillages.length} pending villages`)
+    let newVillagesSynced = false
+    
     for (const v of pendingVillages) {
       try {
         console.log(`🔄 Syncing village: ${v.name} (${v.id})`)
@@ -373,6 +375,7 @@ export async function startSync(): Promise<void> {
           // Update mapping with new server ID
           villageMapping.set(v.id, serverVillage.id)
           console.log('✅ Village synced:', v.name, '→ server ID:', serverVillage.id)
+          newVillagesSynced = true
         } else {
           console.error('❌ Village sync failed:', v.name, res.status)
         }
@@ -381,10 +384,25 @@ export async function startSync(): Promise<void> {
       }
     }
 
+    // If new villages were synced, refresh mapping and retry sub-villages/houses
+    if (newVillagesSynced) {
+      console.log('🔄 New villages synced, refreshing ID mapping...')
+      const freshMapping = await getServerIdMapping()
+      villageMapping.clear()
+      freshMapping.villageMapping.forEach((val, key) => villageMapping.set(key, val))
+      subVillageMapping.clear()
+      freshMapping.subVillageMapping.forEach((val, key) => subVillageMapping.set(key, val))
+      houseMapping.clear()
+      freshMapping.houseMapping.forEach((val, key) => houseMapping.set(key, val))
+      console.log('✅ ID mapping refreshed')
+    }
+
     // Sync SubVillages
     const allSubVillages = await getSubVillages()
     const pendingSubVillages = allSubVillages.filter(i => i.syncStatus === "pending")
     console.log(`📊 Found ${pendingSubVillages.length} pending sub-villages`)
+    let newSubVillagesSynced = false
+    
     for (const sv of pendingSubVillages) {
       try {
         console.log(`🔄 Syncing sub-village: ${sv.name} (${sv.id})`)
@@ -399,8 +417,8 @@ export async function startSync(): Promise<void> {
               villageId = serverVillageId
               console.log(`🔄 Mapped village ID: ${villageId} → ${serverVillageId}`)
             } else {
-              console.warn('⚠️ Village not found in mapping, skipping sub-village:', sv.id, villageId)
-              await saveSubVillage({ ...sv, syncStatus: "synced" })
+              console.warn('⚠️ Village not found in mapping, skipping sub-village for now:', sv.id, villageId)
+              // Don't mark as synced - let it retry in next sync when village might be available
               continue
             }
           } else {
@@ -424,12 +442,24 @@ export async function startSync(): Promise<void> {
           // Update mapping with new server ID
           subVillageMapping.set(sv.id, serverSubVillage.id)
           console.log('✅ Sub-village synced:', sv.name, '→ server ID:', serverSubVillage.id)
+          newSubVillagesSynced = true
         } else {
           console.error('❌ Sub-village sync failed:', sv.name, res.status)
         }
       } catch (e) {
         console.error('❌ Sub-village sync failed:', sv.name, e)
       }
+    }
+
+    // If new sub-villages were synced, refresh mapping for houses
+    if (newSubVillagesSynced) {
+      console.log('🔄 New sub-villages synced, refreshing house mapping...')
+      const freshMapping = await getServerIdMapping()
+      subVillageMapping.clear()
+      freshMapping.subVillageMapping.forEach((val, key) => subVillageMapping.set(key, val))
+      houseMapping.clear()
+      freshMapping.houseMapping.forEach((val, key) => houseMapping.set(key, val))
+      console.log('✅ House mapping refreshed')
     }
 
     // Sync Houses
@@ -450,8 +480,8 @@ export async function startSync(): Promise<void> {
               subVillageId = serverSubVillageId
               console.log(`🔄 Mapped sub-village ID: ${subVillageId} → ${serverSubVillageId}`)
             } else {
-              console.warn('⚠️ Sub-village not found in mapping, skipping house:', h.id, subVillageId)
-              await saveHouse({ ...h, syncStatus: "synced" })
+              console.warn('⚠️ Sub-village not found in mapping, skipping house for now:', h.id, subVillageId)
+              // Don't mark as synced - let it retry in next sync when sub-village might be available
               continue
             }
           } else {
