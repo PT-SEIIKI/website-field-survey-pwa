@@ -6,7 +6,7 @@ import { getCurrentUser, isAdmin } from "@/lib/auth"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Home, Camera, UserPlus, Download, FolderOpen, Image as ImageIcon, Wifi } from "lucide-react"
+import { Home, Camera, UserPlus, Download, FolderOpen, Wifi } from "lucide-react"
 import { ExportData } from "@/components/export-data"
 import { Navbar } from "@/components/navbar"
 
@@ -80,22 +80,6 @@ function AdminPageContent() {
                 <p>2. Upload foto dengan lokasi yang tepat</p>
                 <p>3. Foto otomatis sync saat online</p>
                 <p>4. Status "Synced" menandakan berhasil</p>
-              </div>
-            </button>
-            
-            <button
-              onClick={() => router.push("/survey/gallery")}
-              className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-            >
-              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <ImageIcon className="w-5 h-5 text-primary" />
-              </div>
-              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Galeri Foto</h4>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <p>1. Akses menu Galeri di navbar</p>
-                <p>2. Lihat semua foto yang diupload</p>
-                <p>3. Filter berdasarkan status sync</p>
-                <p>4. Download atau hapus foto</p>
               </div>
             </button>
             

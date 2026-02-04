@@ -14,16 +14,13 @@ import {
   X,
   Home,
   Camera,
-  Users,
-  Settings,
-  LogOut,
+  Shield,
+  UserPlus,
   Wifi,
   WifiOff,
-  RefreshCw,
-  FolderOpen,
-  Image,
-  UserPlus,
-  Shield
+  LogOut,
+  Users,
+  Settings
 } from "lucide-react"
 
 interface NavItem {
@@ -59,11 +56,6 @@ export function Navbar() {
       label: "Survey Lapangan",
       href: "/survey/upload",
       icon: <Camera className="w-4 h-4" />
-    },
-    {
-      label: "Galeri",
-      href: "/survey/gallery",
-      icon: <Image className="w-4 h-4" />
     },
     {
       label: "Admin",
