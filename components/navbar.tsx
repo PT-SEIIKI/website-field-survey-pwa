@@ -14,7 +14,6 @@ import {
   X,
   Home,
   Camera,
-  BarChart3,
   Users,
   Settings,
   LogOut,
@@ -70,12 +69,6 @@ export function Navbar() {
       label: "Galeri",
       href: "/survey/gallery",
       icon: <Image className="w-4 h-4" />
-    },
-    {
-      label: "Statistik",
-      href: "/admin",
-      icon: <BarChart3 className="w-4 h-4" />,
-      adminOnly: true
     },
     {
       label: "Manajemen User",
