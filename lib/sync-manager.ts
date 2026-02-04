@@ -34,15 +34,73 @@ export function initSyncManager() {
   // Subscribe ke connectivity changes
   subscribeToConnectivity((isOnline) => {
     if (isOnline && !syncInProgress) {
-      console.log("[v0] Online - starting sync")
+      console.log("[v0] 🌐 Online - starting sync")
       startSync()
+      
+      // Register Background Sync jika browser support
+      registerBackgroundSync()
     }
   })
+
+  // Listen untuk sync events dari Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'BACKGROUND_SYNC_TRIGGERED') {
+        console.log('[v0] 📩 Received sync trigger from Service Worker')
+        if (!syncInProgress) {
+          startSync()
+        } else {
+          console.log('[v0] ⏭️ Sync already in progress, skipping')
+        }
+      }
+    })
+    console.log('[v0] 👂 Listening for Service Worker sync events')
+  }
 
   // Cek sync queue setiap 5 detik
   setInterval(() => {
     updateSyncStatus()
   }, 5000)
+  
+  // Auto-sync saat app load jika ada pending items
+  setTimeout(async () => {
+    const isOnline = await checkConnectivity()
+    if (isOnline) {
+      await updateSyncStatus()
+      if (currentSyncStatus.totalPending > 0) {
+        console.log(`[v0] 📦 Found ${currentSyncStatus.totalPending} pending items on load, starting sync`)
+        startSync()
+      }
+    }
+  }, 2000)
+}
+
+// Helper function untuk register Background Sync
+async function registerBackgroundSync() {
+  if ('serviceWorker' in navigator && 'sync' in (self as any).registration) {
+    try {
+      const registration = await navigator.serviceWorker.ready
+      await (registration as any).sync.register('sync-photos')
+      
+      // Notify SW that sync was registered
+      if (registration.active) {
+        registration.active.postMessage({
+          type: 'SYNC_REGISTERED',
+          tag: 'sync-photos'
+        })
+      }
+      
+      console.log('[v0] ✅ Background Sync registered successfully')
+      return true
+    } catch (err) {
+      console.log('[v0] ⚠️ Background Sync registration failed:', err)
+      // Fallback sudah handle di subscribeToConnectivity
+      return false
+    }
+  } else {
+    console.log('[v0] ⚠️ Background Sync not supported, using fallback')
+    return false
+  }
 }
 
 export function subscribeSyncStatus(listener: (status: SyncStatus) => void) {

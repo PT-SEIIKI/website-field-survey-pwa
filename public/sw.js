@@ -1,7 +1,7 @@
 // Service Worker untuk PWA - Offline support & Background Sync
-// Version: 1.0.8 - Complete offline coverage for all pages
-const CACHE_NAME = "survey-pwa-v1.0.8"
-const API_CACHE = "survey-api-v1.0.8"
+// Version: 1.0.9 - Added Background Sync for photo upload
+const CACHE_NAME = "survey-pwa-v1.0.9"
+const API_CACHE = "survey-api-v1.0.9"
 const ASSETS_TO_CACHE = [
   "/",
   "/login",
@@ -223,3 +223,62 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
+
+// ===================================================================
+// BACKGROUND SYNC HANDLER untuk Auto-Upload saat Online Kembali
+// ===================================================================
+
+// Background Sync Handler untuk Auto-Upload saat Online Kembali
+self.addEventListener('sync', (event) => {
+  console.log('[SW] 🔄 Background Sync event triggered:', event.tag)
+  
+  if (event.tag === 'sync-photos') {
+    event.waitUntil(handlePhotoSync())
+  }
+})
+
+async function handlePhotoSync() {
+  try {
+    console.log('[SW] 📤 Starting photo sync process...')
+    
+    // Get all active clients (browser tabs with the app open)
+    const clients = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    })
+    
+    if (clients.length > 0) {
+      console.log(`[SW] 📢 Notifying ${clients.length} client(s) to start sync`)
+      
+      // Notify each client to trigger their sync manager
+      for (const client of clients) {
+        client.postMessage({
+          type: 'BACKGROUND_SYNC_TRIGGERED',
+          tag: 'sync-photos',
+          timestamp: Date.now()
+        })
+      }
+      
+      console.log('[SW] ✅ Sync notifications sent successfully')
+      return true
+    } else {
+      // No clients open - sync will happen when app opens next time
+      console.log('[SW] ⏳ No active clients - sync will run when app opens')
+      return false
+    }
+    
+  } catch (error) {
+    console.error('[SW] ❌ Background sync error:', error)
+    // Re-throw to tell browser to retry later
+    throw error
+  }
+}
+
+// Helper: Log sync registrations
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SYNC_REGISTERED') {
+    console.log('[SW] 📝 Sync registered from client:', event.data.tag)
+  }
+})
+
+console.log('[SW] 🎯 Background Sync handler loaded and ready')
