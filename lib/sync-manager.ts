@@ -8,6 +8,10 @@ import {
   getVillages,
   getSubVillages,
   getHouses,
+  saveVillage,
+  saveSubVillage,
+  saveHouse,
+  saveFolder,
 } from './indexeddb'
 
 // Re-export getPendingPhotos for components
@@ -151,7 +155,21 @@ export async function syncPhoto(photo: PendingPhoto): Promise<boolean> {
     console.log('📤 Step 1/3: Creating FormData...')
     const formData = new FormData()
     formData.append('file', photo.blob, photo.fileName || `photo-${photo.id}.jpg`)
-    formData.append('folderId', photo.folderId)
+    formData.append('photoId', photo.id)
+    formData.append('folderId', photo.folderId || '')
+    
+    // Get metadata for additional fields
+    const { getMetadata } = await import('./indexeddb')
+    const metadata = await getMetadata(photo.id)
+    
+    if (metadata) {
+      formData.append('location', metadata.location || '')
+      formData.append('description', metadata.description || '')
+      formData.append('timestamp', metadata.timestamp?.toString() || Date.now().toString())
+      formData.append('villageId', metadata.villageId?.toString() || '')
+      formData.append('subVillageId', metadata.subVillageId?.toString() || '')
+      formData.append('houseId', metadata.houseId?.toString() || '')
+    }
 
     console.log('📤 Step 2/3: Uploading file to /api/upload...')
     const uploadRes = await fetch('/api/upload', {
@@ -291,10 +309,143 @@ export async function startSync(): Promise<void> {
       return
     }
 
+    // 0. Sync Hierarchy first (Villages, SubVillages, Houses, Folders)
+    console.log('🏗️ Syncing hierarchy data...')
+    
+    // Sync Villages
+    const allVillages = await getVillages()
+    for (const v of allVillages.filter(i => i.syncStatus === "pending")) {
+      try {
+        const res = await fetch("/api/villages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: v.name, offlineId: v.id })
+        })
+        if (res.ok) {
+          await saveVillage({ ...v, syncStatus: "synced" })
+          console.log('✅ Village synced:', v.name)
+        }
+      } catch (e) {
+        console.error('❌ Village sync failed:', v.name, e)
+      }
+    }
+
+    // Sync SubVillages
+    const allSubVillages = await getSubVillages()
+    for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
+      try {
+        let villageId = sv.villageId
+        if (typeof villageId === 'string') {
+          if (villageId.startsWith('v_')) {
+            console.warn('⚠️ Skipping sub-village with offline villageId:', sv.id)
+            await saveSubVillage({ ...sv, syncStatus: "synced" })
+            continue
+          }
+          const parsed = parseInt(villageId, 10)
+          if (!isNaN(parsed)) villageId = parsed
+        }
+        
+        const res = await fetch("/api/sub-villages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name: sv.name, 
+            villageId, 
+            offlineId: sv.id 
+          })
+        })
+        if (res.ok) {
+          await saveSubVillage({ ...sv, syncStatus: "synced" })
+          console.log('✅ Sub-village synced:', sv.name)
+        }
+      } catch (e) {
+        console.error('❌ Sub-village sync failed:', sv.name, e)
+      }
+    }
+
+    // Sync Houses
+    const allHouses = await getHouses()
+    for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
+      try {
+        let subVillageId = h.subVillageId
+        if (typeof subVillageId === 'string') {
+          if (subVillageId.startsWith('sv_')) {
+            console.warn('⚠️ Skipping house with offline subVillageId:', h.id)
+            await saveHouse({ ...h, syncStatus: "synced" })
+            continue
+          }
+          const parsed = parseInt(subVillageId, 10)
+          if (!isNaN(parsed)) subVillageId = parsed
+        }
+        
+        const res = await fetch("/api/houses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            ownerName: h.ownerName,
+            nik: h.nik,
+            address: h.address,
+            subVillageId,
+            offlineId: h.id
+          })
+        })
+        if (res.ok) {
+          await saveHouse({ ...h, syncStatus: "synced" })
+          console.log('✅ House synced:', h.ownerName)
+        }
+      } catch (e) {
+        console.error('❌ House sync failed:', h.ownerName, e)
+      }
+    }
+
+    // Sync Folders
+    const allFolders = await getFolders()
+    for (const folder of allFolders.filter(f => f.syncStatus === "pending")) {
+      try {
+        let villageId = folder.villageId
+        let subVillageId = folder.subVillageId
+        let houseId = folder.houseId
+        
+        // Convert to numbers if needed
+        if (villageId && typeof villageId === 'string' && !villageId.startsWith('v_')) {
+          const parsed = parseInt(villageId, 10)
+          if (!isNaN(parsed)) villageId = parsed
+        }
+        if (subVillageId && typeof subVillageId === 'string' && !subVillageId.startsWith('sv_')) {
+          const parsed = parseInt(subVillageId, 10)
+          if (!isNaN(parsed)) subVillageId = parsed
+        }
+        if (houseId && typeof houseId === 'string' && !houseId.startsWith('h_')) {
+          const parsed = parseInt(houseId, 10)
+          if (!isNaN(parsed)) houseId = parsed
+        }
+        
+        const res = await fetch("/api/folders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: folder.name,
+            houseName: folder.houseName,
+            nik: folder.nik,
+            villageId: villageId || null,
+            subVillageId: subVillageId || null,
+            houseId: houseId || null,
+            offlineId: folder.id
+          })
+        })
+        if (res.ok) {
+          await saveFolder({ ...folder, syncStatus: "synced" })
+          console.log('✅ Folder synced:', folder.name)
+        }
+      } catch (e) {
+        console.error('❌ Folder sync failed:', folder.name, e)
+      }
+    }
+
     console.log('📋 Pending photos list:')
     console.table(
       pendingPhotos.map((p) => ({
-        id: p.id.slice(0, 20) + '...',
+        id: p.id,
         entryId: p.entryId,
         folderId: p.folderId,
         syncStatus: p.syncStatus,
