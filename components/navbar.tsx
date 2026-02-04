@@ -61,14 +61,15 @@ export function Navbar() {
       icon: <Camera className="w-4 h-4" />
     },
     {
-      label: "Folder",
-      href: "/survey/folder",
-      icon: <FolderOpen className="w-4 h-4" />
-    },
-    {
       label: "Galeri",
       href: "/survey/gallery",
       icon: <Image className="w-4 h-4" />
+    },
+    {
+      label: "Admin",
+      href: "/admin",
+      icon: <Shield className="w-4 h-4" />,
+      adminOnly: true
     },
     {
       label: "Manajemen User",

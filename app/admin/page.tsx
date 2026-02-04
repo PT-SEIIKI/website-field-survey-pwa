@@ -67,7 +67,10 @@ function AdminPageContent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+            <button
+              onClick={() => router.push("/survey/upload")}
+              className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
               <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <Camera className="w-5 h-5 text-primary" />
               </div>
@@ -78,22 +81,12 @@ function AdminPageContent() {
                 <p>3. Foto otomatis sync saat online</p>
                 <p>4. Status "Synced" menandakan berhasil</p>
               </div>
-            </div>
+            </button>
             
-            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
-              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <FolderOpen className="w-5 h-5 text-primary" />
-              </div>
-              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Management Folder</h4>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <p>1. Akses menu Folder di navbar</p>
-                <p>2. Lihat hierarchy lengkap: Desa/Dusun/Rumah</p>
-                <p>3. Klik rumah untuk lihat detail foto</p>
-                <p>4. Edit atau hapus folder jika needed</p>
-              </div>
-            </div>
-            
-            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+            <button
+              onClick={() => router.push("/survey/gallery")}
+              className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
               <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <ImageIcon className="w-5 h-5 text-primary" />
               </div>
@@ -104,7 +97,7 @@ function AdminPageContent() {
                 <p>3. Filter berdasarkan status sync</p>
                 <p>4. Download atau hapus foto</p>
               </div>
-            </div>
+            </button>
             
             <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
               <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
@@ -119,7 +112,10 @@ function AdminPageContent() {
               </div>
             </div>
             
-            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+            <button
+              onClick={() => router.push("/admin/users")}
+              className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+            >
               <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <UserPlus className="w-5 h-5 text-primary" />
               </div>
@@ -130,7 +126,7 @@ function AdminPageContent() {
                 <p>3. User: hanya bisa survey lapangan</p>
                 <p>4. Edit atau hapus user existing</p>
               </div>
-            </div>
+            </button>
             
             <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
               <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
