@@ -6,7 +6,33 @@ import { z } from "zod";
 export async function GET() {
   try {
     const folders = await storage.getFolders();
-    return NextResponse.json(folders);
+    const villages = await storage.getVillages();
+    const subVillages = await storage.getSubVillages();
+    const houses = await storage.getHouses();
+    
+    // Filter folders that have complete hierarchy (village → sub-village → house)
+    const validFolders = folders.filter(folder => {
+      // Check if folder has valid houseId
+      if (!folder.houseId) return false;
+      
+      // Check if house exists
+      const house = houses.find(h => h.id === folder.houseId);
+      if (!house) return false;
+      
+      // Check if sub-village exists
+      const subVillage = subVillages.find(sv => sv.id === house.subVillageId);
+      if (!subVillage) return false;
+      
+      // Check if village exists
+      const village = villages.find(v => v.id === subVillage.villageId);
+      if (!village) return false;
+      
+      return true;
+    });
+    
+    console.log(`📁 [Folders API] Total folders: ${folders.length}, Valid folders: ${validFolders.length}`);
+    
+    return NextResponse.json(validFolders);
   } catch (error) {
     return NextResponse.json({ message: "Failed to fetch folders" }, { status: 500 });
   }
