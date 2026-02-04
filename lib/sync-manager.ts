@@ -193,6 +193,8 @@ export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, 
     syncAttempts: photo.syncAttempts,
   })
 
+  let houseId = '' // Declare at function scope
+
   try {
     // Validate blob
     if (!photo.blob) {
@@ -220,7 +222,7 @@ export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, 
       formData.append('subVillageId', metadata.subVillageId?.toString() || '')
       
       // Map offline houseId to server ID
-      let houseId = metadata.houseId?.toString() || ''
+      houseId = metadata.houseId?.toString() || ''
       if (houseId && houseId.startsWith('h_') && houseMapping) {
         const serverHouseId = houseMapping.get(houseId)
         if (serverHouseId) {
@@ -248,7 +250,10 @@ export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, 
           }
         }
       }
-      formData.append('houseId', houseId)
+      
+      if (houseId) {
+        formData.append('houseId', houseId)
+      }
     }
 
     console.log('📤 Step 2/3: Uploading file to /api/upload...')
@@ -274,6 +279,27 @@ export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, 
       url: uploadData.url,
       publicId: uploadData.publicId,
     })
+
+    // Save photo to database
+    console.log('💾 Saving photo to database...')
+    const photoRes = await fetch('/api/photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: uploadData.url,
+        houseId: houseId,
+        offlineId: photo.id
+      })
+    })
+
+    if (!photoRes.ok) {
+      const errorText = await photoRes.text()
+      console.error('❌ Failed to save photo to database:', errorText)
+      throw new Error(`Failed to save photo: ${photoRes.status} - ${errorText}`)
+    }
+
+    const photoData = await photoRes.json()
+    console.log('✅ Photo saved to database:', photoData)
 
     console.log('📝 Step 3/3: Creating entry...')
     const entryRes = await fetch('/api/entries', {

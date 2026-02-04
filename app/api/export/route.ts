@@ -25,10 +25,15 @@ export async function GET() {
       // Get all photos for this house
       const housePhotos = await storage.getPhotosByHouseId(house.id)
       
+      console.log(`📊 [Export API] House ${house.name} (${house.id}): ${housePhotos.length} photos`)
+      
       // Create photo links
-      const photoLinks = housePhotos.map((photo: any) => 
-        `https://survei.seyiki.com${photo.url}`
-      ).join(', ')
+      const photoLinks = housePhotos.map((photo: any) => {
+        console.log(`📸 [Export API] Photo: ${photo.url}`)
+        return `https://survei.seyiki.com${photo.url}`
+      }).join(', ')
+      
+      console.log(`🔗 [Export API] Photo links for ${house.name}: ${photoLinks}`)
       
       // Add to export data
       exportData.push({
