@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, UserPlus, Loader2, Home, ArrowLeft } from "lucide-react";
+import { Trash2, UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { LogoutButton } from "@/components/logout-button";
+import { Navbar } from "@/components/navbar";
 
 export default function UserManagement() {
   const router = useRouter();
@@ -84,139 +84,194 @@ export default function UserManagement() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.push("/admin")} className="rounded-full h-9 w-9">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="SEIIKI" className="h-6 w-auto" />
-              <div className="h-4 w-px bg-border" />
-              <h1 className="text-sm font-bold uppercase tracking-widest">Manajemen User</h1>
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Manajemen User</h1>
+              <p className="text-muted-foreground mt-1 text-sm">Kelola akun surveyor dan administrator sistem</p>
+            </div>
+            
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2 font-semibold tracking-wide h-11 px-6 w-full sm:w-auto">
+                  <UserPlus className="h-4 w-4" />
+                  Tambah User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold">Tambah User Baru</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Username</label>
+                    <Input 
+                      value={newUser.username} 
+                      onChange={e => setNewUser({...newUser, username: e.target.value})}
+                      placeholder="Masukkan username"
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Password</label>
+                    <Input 
+                      type="password"
+                      value={newUser.password} 
+                      onChange={e => setNewUser({...newUser, password: e.target.value})}
+                      placeholder="Masukkan password"
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Role</label>
+                    <Select 
+                      value={newUser.role} 
+                      onValueChange={val => setNewUser({...newUser, role: val})}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Pilih role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">Surveyor</SelectItem>
+                        <SelectItem value="admin">Administrator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter className="gap-3">
+                  <Button variant="outline" onClick={() => setIsAddOpen(false)} className="h-11">Batal</Button>
+                  <Button onClick={handleAddUser} disabled={isSubmitting} className="h-11 px-8">
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Simpan
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold">{users.length}</p>
+              </div>
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <UserPlus className="h-6 w-6 text-primary" />
+              </div>
             </div>
           </div>
-          <LogoutButton />
-        </div>
-      </nav>
-
-      <main className="p-8 max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Akun Sistem</h2>
-            <p className="text-muted-foreground mt-1 text-sm">Kelola akun surveyor dan administrator sistem.</p>
-          </div>
-          
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 font-bold uppercase tracking-widest text-[11px] h-10 px-6">
-                <UserPlus className="h-4 w-4" />
-                Tambah User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold tracking-tight">Tambah Akun Baru</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Username</label>
-                  <Input 
-                    value={newUser.username} 
-                    onChange={e => setNewUser({...newUser, username: e.target.value})}
-                    placeholder="surveyor2"
-                    className="h-10 bg-background/50 border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Password</label>
-                  <Input 
-                    type="password"
-                    value={newUser.password} 
-                    onChange={e => setNewUser({...newUser, password: e.target.value})}
-                    placeholder="••••••••"
-                    className="h-10 bg-background/50 border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Role</label>
-                  <Select 
-                    value={newUser.role} 
-                    onValueChange={val => setNewUser({...newUser, role: val})}
-                  >
-                    <SelectTrigger className="h-10 bg-background/50 border-border">
-                      <SelectValue placeholder="Pilih Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">Surveyor (User)</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Administrators</p>
+                <p className="text-2xl font-bold">{users.filter(u => u.role === 'admin').length}</p>
               </div>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setIsAddOpen(false)} className="h-10 font-bold uppercase tracking-widest text-[10px]">Batal</Button>
-                <Button onClick={handleAddUser} disabled={isSubmitting} className="h-10 px-8 font-bold uppercase tracking-widest text-[10px]">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Simpan
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              <div className="h-12 w-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <UserPlus className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Surveyors</p>
+                <p className="text-2xl font-bold">{users.filter(u => u.role === 'user').length}</p>
+              </div>
+              <div className="h-12 w-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <UserPlus className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="border border-border rounded-xl bg-card/50 overflow-hidden shadow-xl shadow-black/5">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary/20 border-none hover:bg-secondary/20">
-                <TableHead className="font-bold uppercase tracking-widest text-[10px] py-4">Username</TableHead>
-                <TableHead className="font-bold uppercase tracking-widest text-[10px] py-4">Role</TableHead>
-                <TableHead className="font-bold uppercase tracking-widest text-[10px] py-4">Dibuat Pada</TableHead>
-                <TableHead className="font-bold uppercase tracking-widest text-[10px] py-4 text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-40 text-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto" />
-                  </TableCell>
+        {/* Users Table */}
+        <div className="bg-card border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead className="font-semibold">Username</TableHead>
+                  <TableHead className="font-semibold">Role</TableHead>
+                  <TableHead className="font-semibold hidden sm:table-cell">Dibuat Pada</TableHead>
+                  <TableHead className="font-semibold text-right">Aksi</TableHead>
                 </TableRow>
-              ) : users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-40 text-center text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Belum ada user.</TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user.id} className="group hover:bg-secondary/30 transition-colors border-border/50">
-                    <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tight ${
-                        user.role === "admin" ? "bg-primary/10 text-primary border border-primary/20" : "bg-secondary text-secondary-foreground border border-border"
-                      }`}>
-                        {user.role}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-[11px] text-muted-foreground font-mono uppercase">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString("id-ID") : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleDelete(user.id)}
-                        className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10 transition-colors"
-                        disabled={user.username === "admin"}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-32 text-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto" />
+                      <p className="text-sm text-muted-foreground mt-2">Memuat data...</p>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-32 text-center">
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <UserPlus className="h-12 w-12 mb-4 opacity-20" />
+                        <p className="text-sm font-medium">Belum ada user</p>
+                        <p className="text-xs mt-1">Tambah user pertama untuk memulai</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id} className="border-b hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-medium py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="text-primary font-semibold text-sm">
+                              {user.username.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{user.username}</p>
+                            <p className="text-xs text-muted-foreground hidden sm:block">ID: {user.id}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                          user.role === "admin" 
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300" 
+                            : "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                        }`}>
+                          {user.role === "admin" ? "Administrator" : "Surveyor"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground py-4">
+                        <div className="text-sm">
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString("id-ID", {
+                            day: 'numeric',
+                            month: 'short', 
+                            year: 'numeric'
+                          }) : "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right py-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDelete(user.id)}
+                          className="h-9 px-3 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                          disabled={user.username === "admin"}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </main>
     </div>

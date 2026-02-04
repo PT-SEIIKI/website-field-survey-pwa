@@ -2,9 +2,10 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Home, Image as ImageIcon, Loader2, Wifi, WifiOff } from "lucide-react"
+import { ArrowLeft, Home, Image as ImageIcon, Loader2, Wifi, WifiOff, Download, Trash2, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useOnlineStatus } from "@/hooks/use-online-status"
+import { toast } from "@/hooks/use-toast"
 
 export default function HouseDetailPage() {
   return (
@@ -69,6 +70,67 @@ function HouseDetailContent() {
     }
   }
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename || 'survey-photo.jpg'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(downloadUrl)
+    } catch (error) {
+      console.error('Download failed:', error)
+      toast({
+        title: "Error",
+        description: "Gagal mendownload foto",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDelete = async (photo: any) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus foto ini?')) return
+
+    try {
+      // Use photo.id for database deletion if available, otherwise fallback to fileName/photoId
+      const identifier = photo.id || photo.photoId || photo.fileName || photo.filename;
+      
+      if (!identifier) {
+        toast({
+          title: "Error",
+          description: "ID Foto tidak ditemukan",
+          variant: "destructive"
+        })
+        return;
+      }
+
+      const res = await fetch(`/api/photos/${identifier}`, {
+        method: 'DELETE'
+      })
+
+      if (res.ok) {
+        setPhotos(photos.filter(p => (p.id !== photo.id && p.photoId !== photo.photoId)))
+        toast({
+          title: "Berhasil",
+          description: "Foto berhasil dihapus"
+        })
+      } else {
+        throw new Error('Failed to delete')
+      }
+    } catch (error) {
+      console.error('Delete failed:', error)
+      toast({
+        title: "Error",
+        description: "Gagal menghapus foto",
+        variant: "destructive"
+      })
+    }
+  }
+
   if (loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>
   if (!house) return <div className="p-8 text-center uppercase font-bold tracking-widest">Rumah tidak ditemukan</div>
 
@@ -101,14 +163,43 @@ function HouseDetailContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((photo, i) => (
-            <div key={photo.id || i} className="relative aspect-square rounded-xl overflow-hidden border border-border bg-secondary/20">
-              <img 
-                src={photo.url} 
-                alt={`Survey ${i}`} 
-                className="w-full h-full object-cover"
-              />
+            <div key={photo.id || i} className="space-y-3">
+              <div className="relative aspect-square rounded-xl overflow-hidden border border-border bg-secondary/20">
+                <img 
+                  src={photo.url} 
+                  alt={`Survey ${i}`} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => window.open(photo.url, '_blank')}
+                  className="flex-1 h-9 text-xs font-medium"
+                >
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  View
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleDownload(photo.url, `photo-${photo.id}.jpg`)}
+                  className="h-9 px-3"
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => handleDelete(photo)}
+                  className="h-9 px-3"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
           ))}
           {photos.length === 0 && (
