@@ -228,7 +228,24 @@ export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, 
           console.log(`🔄 Mapped house ID for photo: ${metadata.houseId} → ${houseId}`)
         } else {
           console.warn(`⚠️ House ID not found in mapping: ${metadata.houseId}`)
-          houseId = ''
+          // Try to refresh mapping from server
+          console.log('🔄 Refreshing house mapping for photo sync...')
+          try {
+            const freshMapping = await getServerIdMapping()
+            houseMapping?.clear()
+            freshMapping.houseMapping.forEach((val, key) => houseMapping?.set(key, val))
+            const refreshedHouseId = houseMapping?.get(houseId)
+            if (refreshedHouseId) {
+              houseId = refreshedHouseId.toString()
+              console.log(`✅ Found house ID after refresh: ${metadata.houseId} → ${houseId}`)
+            } else {
+              console.warn(`⚠️ House ID still not found after refresh: ${metadata.houseId}`)
+              houseId = ''
+            }
+          } catch (e) {
+            console.error('❌ Failed to refresh house mapping:', e)
+            houseId = ''
+          }
         }
       }
       formData.append('houseId', houseId)
