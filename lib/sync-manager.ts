@@ -640,6 +640,35 @@ export async function startSync(): Promise<void> {
       return
     }
 
+    // Check if all photos have valid house mapping
+    console.log('🔍 Checking house mapping for all photos...')
+    const photosWithoutHouseMapping = []
+    for (const photo of pendingPhotos) {
+      const metadata = photo.metadata || {}
+      const houseId = metadata.houseId?.toString() || ''
+      if (houseId && houseId.startsWith('h_')) {
+        const serverHouseId = houseMapping.get(houseId)
+        if (!serverHouseId) {
+          photosWithoutHouseMapping.push({
+            photoId: photo.id,
+            houseId: houseId
+          })
+        }
+      }
+    }
+
+    if (photosWithoutHouseMapping.length > 0) {
+      console.warn(`⚠️ ${photosWithoutHouseMapping.length} photos have unmapped house IDs:`)
+      photosWithoutHouseMapping.forEach(p => {
+        console.warn(`  - Photo ${p.photoId}: House ${p.houseId} not found`)
+      })
+      console.warn('🔄 Skipping photo sync until hierarchy sync is complete')
+      console.groupEnd()
+      return
+    }
+
+    console.log('✅ All photos have valid house mapping, proceeding with sync')
+
     let successCount = 0
     let failedCount = 0
 
