@@ -94,16 +94,6 @@ export default function GalleryPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row gap-6 mb-10">
-          <Card className="flex-1 border-border bg-card/50">
-            <CardHeader className="p-6">
-              <CardTitle className="flex items-center justify-between text-lg font-bold tracking-tight uppercase">
-                <span>Stored Locally</span>
-                <Badge variant="outline" className="font-mono text-xs">{filteredPhotos.length}</Badge>
-              </CardTitle>
-              <CardDescription className="text-xs uppercase tracking-wider font-medium text-muted-foreground">Photos awaiting synchronization</CardDescription>
-            </CardHeader>
-          </Card>
-
           <Card className="w-full md:w-72 border-border bg-card/50">
             <CardHeader className="px-6 py-4 pb-2">
               <CardTitle className="text-[10px] font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-[0.2em]">
