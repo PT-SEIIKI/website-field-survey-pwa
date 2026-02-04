@@ -46,9 +46,23 @@ export function checkConnectivity(): Promise<boolean> {
       return
     }
 
-    // Coba fetch ke endpoint kecil
-    fetch("/api/health", { method: "HEAD", cache: "no-store" })
-      .then(() => resolve(true))
-      .catch(() => resolve(false))
+    // Coba fetch ke endpoint kecil dengan timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+    fetch("/api/health", { 
+      method: "HEAD", 
+      cache: "no-store",
+      signal: controller.signal 
+    })
+      .then((response) => {
+        clearTimeout(timeoutId)
+        resolve(response.ok)
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId)
+        console.log('[Connectivity] Health check failed:', error)
+        resolve(false)
+      })
   })
 }

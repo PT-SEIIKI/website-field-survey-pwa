@@ -81,27 +81,44 @@ class OfflineSyncQueue {
   async processQueue(): Promise<void> {
     if (this.isProcessing || !navigator.onLine) return
     
+    // Cek koneksi sebenarnya ke server
+    const hasRealConnection = await this.checkRealConnection()
+    if (!hasRealConnection) {
+      console.log('[SyncQueue] No real connection to server, skipping sync')
+      return
+    }
+    
     this.isProcessing = true
     const pendingOps = this.queue.filter(op => op.status === 'pending')
     
     for (const operation of pendingOps) {
       try {
+        operation.status = 'syncing'
+        await this.saveToIndexedDB(operation)
+        
         await this.executeOperation(operation)
         operation.status = 'completed'
         await this.saveToIndexedDB(operation)
+        
+        console.log('[SyncQueue] Operation completed:', operation.id)
       } catch (error) {
         console.error('[SyncQueue] Operation failed:', error)
         operation.status = 'failed'
         operation.retryCount = (operation.retryCount || 0) + 1
         await this.saveToIndexedDB(operation)
         
-        // Retry logic
-        if (operation.retryCount < 3) {
+        // Retry logic dengan exponential backoff
+        if (operation.retryCount < 5) {
+          const delay = Math.min(30000, 5000 * Math.pow(2, operation.retryCount - 1))
+          console.log(`[SyncQueue] Retrying operation ${operation.id} in ${delay}ms (attempt ${operation.retryCount}/5)`)
+          
           setTimeout(() => {
             operation.status = 'pending'
             this.saveToIndexedDB(operation)
             this.processQueue()
-          }, 5000 * operation.retryCount)
+          }, delay)
+        } else {
+          console.error(`[SyncQueue] Operation ${operation.id} failed after 5 retries, giving up`)
         }
       }
     }
@@ -131,23 +148,32 @@ class OfflineSyncQueue {
   private async executeVillageOperation(type: string, data: any, entityId?: string): Promise<void> {
     switch (type) {
       case 'create':
-        await fetch('/api/villages', {
+        const response = await fetch('/api/villages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!response.ok) {
+          throw new Error(`Village creation failed: ${response.status} ${response.statusText}`)
+        }
         break
       case 'update':
-        await fetch(`/api/villages/${entityId}`, {
+        const updateResponse = await fetch(`/api/villages/${entityId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!updateResponse.ok) {
+          throw new Error(`Village update failed: ${updateResponse.status} ${updateResponse.statusText}`)
+        }
         break
       case 'delete':
-        await fetch(`/api/villages/${entityId}`, {
+        const deleteResponse = await fetch(`/api/villages/${entityId}`, {
           method: 'DELETE'
         })
+        if (!deleteResponse.ok) {
+          throw new Error(`Village deletion failed: ${deleteResponse.status} ${deleteResponse.statusText}`)
+        }
         break
     }
   }
@@ -155,23 +181,32 @@ class OfflineSyncQueue {
   private async executeSubVillageOperation(type: string, data: any, entityId?: string): Promise<void> {
     switch (type) {
       case 'create':
-        await fetch('/api/sub-villages', {
+        const response = await fetch('/api/sub-villages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!response.ok) {
+          throw new Error(`SubVillage creation failed: ${response.status} ${response.statusText}`)
+        }
         break
       case 'update':
-        await fetch(`/api/sub-villages/${entityId}`, {
+        const updateResponse = await fetch(`/api/sub-villages/${entityId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!updateResponse.ok) {
+          throw new Error(`SubVillage update failed: ${updateResponse.status} ${updateResponse.statusText}`)
+        }
         break
       case 'delete':
-        await fetch(`/api/sub-villages/${entityId}`, {
+        const deleteResponse = await fetch(`/api/sub-villages/${entityId}`, {
           method: 'DELETE'
         })
+        if (!deleteResponse.ok) {
+          throw new Error(`SubVillage deletion failed: ${deleteResponse.status} ${deleteResponse.statusText}`)
+        }
         break
     }
   }
@@ -179,23 +214,32 @@ class OfflineSyncQueue {
   private async executeHouseOperation(type: string, data: any, entityId?: string): Promise<void> {
     switch (type) {
       case 'create':
-        await fetch('/api/houses', {
+        const response = await fetch('/api/houses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!response.ok) {
+          throw new Error(`House creation failed: ${response.status} ${response.statusText}`)
+        }
         break
       case 'update':
-        await fetch(`/api/houses/${entityId}`, {
+        const updateResponse = await fetch(`/api/houses/${entityId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!updateResponse.ok) {
+          throw new Error(`House update failed: ${updateResponse.status} ${updateResponse.statusText}`)
+        }
         break
       case 'delete':
-        await fetch(`/api/houses/${entityId}`, {
+        const deleteResponse = await fetch(`/api/houses/${entityId}`, {
           method: 'DELETE'
         })
+        if (!deleteResponse.ok) {
+          throw new Error(`House deletion failed: ${deleteResponse.status} ${deleteResponse.statusText}`)
+        }
         break
     }
   }
@@ -203,23 +247,32 @@ class OfflineSyncQueue {
   private async executeFolderOperation(type: string, data: any, entityId?: string): Promise<void> {
     switch (type) {
       case 'create':
-        await fetch('/api/folders', {
+        const response = await fetch('/api/folders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!response.ok) {
+          throw new Error(`Folder creation failed: ${response.status} ${response.statusText}`)
+        }
         break
       case 'update':
-        await fetch(`/api/folders/${entityId}`, {
+        const updateResponse = await fetch(`/api/folders/${entityId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
+        if (!updateResponse.ok) {
+          throw new Error(`Folder update failed: ${updateResponse.status} ${updateResponse.statusText}`)
+        }
         break
       case 'delete':
-        await fetch(`/api/folders/${entityId}`, {
+        const deleteResponse = await fetch(`/api/folders/${entityId}`, {
           method: 'DELETE'
         })
+        if (!deleteResponse.ok) {
+          throw new Error(`Folder deletion failed: ${deleteResponse.status} ${deleteResponse.statusText}`)
+        }
         break
     }
   }
@@ -254,6 +307,34 @@ class OfflineSyncQueue {
       }
       request.onerror = () => reject(request.error)
     })
+  }
+
+  private async checkRealConnection(): Promise<boolean> {
+    try {
+      const response = await fetch('/api/health', { 
+        method: 'HEAD', 
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      })
+      return response.ok
+    } catch (error) {
+      console.log('[SyncQueue] Health check failed:', error)
+      return false
+    }
+  }
+
+  async forceRetryFailed(): Promise<void> {
+    const failedOps = this.queue.filter(op => op.status === 'failed')
+    for (const operation of failedOps) {
+      operation.status = 'pending'
+      operation.retryCount = 0
+      await this.saveToIndexedDB(operation)
+    }
+    
+    if (failedOps.length > 0) {
+      console.log(`[SyncQueue] Reset ${failedOps.length} failed operations to pending`)
+      this.processQueue()
+    }
   }
 }
 

@@ -554,6 +554,16 @@ function UploadPageContent() {
     await startSync();
   };
 
+  const handleForceRetry = async () => {
+    try {
+      await offlineSyncQueue.forceRetryFailed();
+      setSuccessMessage("Force retry sync dimulai");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      console.error("Force retry failed:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
@@ -608,18 +618,30 @@ function UploadPageContent() {
                     </p>
                   </div>
                 </div>
-                <Button
-                  onClick={handleSync}
-                  disabled={syncStatus.isSyncing || !isOnline}
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs bg-background"
-                >
-                  <RefreshCw
-                    className={`w-3.5 h-3.5 mr-2 ${syncStatus.isSyncing ? "animate-spin" : ""}`}
-                  />
-                  Sync
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleForceRetry}
+                    disabled={!isOnline}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs bg-background"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                    Retry
+                  </Button>
+                  <Button
+                    onClick={handleSync}
+                    disabled={syncStatus.isSyncing || !isOnline}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs bg-background"
+                  >
+                    <RefreshCw
+                      className={`w-3.5 h-3.5 mr-2 ${syncStatus.isSyncing ? "animate-spin" : ""}`}
+                    />
+                    Sync
+                  </Button>
+                </div>
               </div>
             )}
 
