@@ -835,38 +835,6 @@ function UploadPageContent() {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Folder Survey
-                    </label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs"
-                      onClick={() => fetchFolders()}
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedFolderId}
-                      onChange={(e) => setSelectedFolderId(e.target.value)}
-                      className="flex-1 h-10 rounded-md border border-border bg-background px-3 text-sm focus:ring-1 focus:ring-foreground transition-all"
-                    >
-                      <option value="">Pilih Folder (Opsional)</option>
-                      {folders.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name} {f.villageName && `(${f.villageName})`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-border">
                 <UploadArea
                   onFilesSelected={handleFilesSelected}
                   isLoading={isUploading}
