@@ -640,34 +640,29 @@ export async function startSync(): Promise<void> {
       return
     }
 
-    // Check if all photos have valid house mapping
-    console.log('🔍 Checking house mapping for all photos...')
-    const photosWithoutHouseMapping = []
-    for (const photo of pendingPhotos) {
-      const metadata = photo.metadata || {}
-      const houseId = metadata.houseId?.toString() || ''
-      if (houseId && houseId.startsWith('h_')) {
-        const serverHouseId = houseMapping.get(houseId)
-        if (!serverHouseId) {
-          photosWithoutHouseMapping.push({
-            photoId: photo.id,
-            houseId: houseId
-          })
-        }
-      }
-    }
-
-    if (photosWithoutHouseMapping.length > 0) {
-      console.warn(`⚠️ ${photosWithoutHouseMapping.length} photos have unmapped house IDs:`)
-      photosWithoutHouseMapping.forEach(p => {
-        console.warn(`  - Photo ${p.photoId}: House ${p.houseId} not found`)
+    // Check if there are pending houses that need to be synced first
+    console.log('🔍 Checking for pending houses before photo sync...')
+    const allHousesForCheck = await getHouses()
+    const pendingHousesForCheck = allHousesForCheck.filter(h => h.syncStatus === "pending")
+    
+    if (pendingHousesForCheck.length > 0) {
+      console.warn(`⚠️ ${pendingHousesForCheck.length} houses still pending sync:`)
+      pendingHousesForCheck.forEach(h => {
+        console.warn(`  - House: ${h.name || h.ownerName || 'Unknown'} (${h.id})`)
       })
-      console.warn('🔄 Skipping photo sync until hierarchy sync is complete')
+      console.warn('🔄 Skipping photo sync until all houses are synced')
       console.groupEnd()
       return
     }
 
-    console.log('✅ All photos have valid house mapping, proceeding with sync')
+    // Final house mapping refresh before photo sync
+    console.log('🔄 Final house mapping refresh before photo sync...')
+    const finalHouseMapping = await getServerIdMapping()
+    houseMapping.clear()
+    finalHouseMapping.houseMapping.forEach((val, key) => houseMapping.set(key, val))
+    console.log('✅ Final house mapping loaded:', houseMapping.size, 'houses')
+
+    console.log('✅ All houses synced, proceeding with photo sync')
 
     let successCount = 0
     let failedCount = 0
