@@ -12,15 +12,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
       registerServiceWorker()
     }
 
-    // Initialize offline sync queue
-    if (typeof window !== 'undefined') {
-      import("@/lib/offline-sync-queue").then(({ offlineSyncQueue }) => {
-        // Load existing sync operations
-        offlineSyncQueue.loadFromIndexedDB().then(() => {
-          console.log("[Providers] Offline sync queue initialized")
-        })
-      })
-    }
+    // Initialize offline sync queue - DISABLED: SyncManager handles this
+    // if (typeof window !== 'undefined') {
+    //   import("@/lib/offline-sync-queue").then(({ offlineSyncQueue }) => {
+    //     // Load existing sync operations
+    //     offlineSyncQueue.loadFromIndexedDB().then(() => {
+    //       console.log("[Providers] Offline sync queue initialized")
+    //     })
+    //   })
+    // }
   }, [])
 
   return <>{children}</>

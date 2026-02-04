@@ -20,7 +20,7 @@ import {
   getFolders,
   saveFolder,
 } from "@/lib/indexeddb";
-import { offlineSyncQueue } from "@/lib/offline-sync-queue";
+// import { offlineSyncQueue } from "@/lib/offline-sync-queue"; // DISABLED - Using SyncManager instead
 import { UploadArea } from "@/components/upload-area";
 import { SyncStatus } from "@/components/sync-status";
 import { Button } from "@/components/ui/button";
@@ -175,13 +175,13 @@ function UploadPageContent() {
       };
       await saveFolder(newFolder);
       
-      // Add to sync queue
-      await offlineSyncQueue.addToQueue({
-        type: 'create',
-        entity: 'village',
-        data: { name: newVillageName.trim(), offlineId },
-        entityId: offlineId
-      });
+      // Add to sync queue - DISABLED: SyncManager handles this
+      // await offlineSyncQueue.addToQueue({
+      //   type: 'create',
+      //   entity: 'village',
+      //   data: { name: newVillageName.trim(), offlineId },
+      //   entityId: offlineId
+      // });
       
       setNewVillageName("");
       setShowAddVillage(false);
@@ -243,13 +243,13 @@ function UploadPageContent() {
       };
       await saveFolder(newFolder);
       
-      // Add to sync queue
-      await offlineSyncQueue.addToQueue({
-        type: 'create',
-        entity: 'subVillage',
-        data: { name: newSubVillageName.trim(), villageId: selectedVillageId, offlineId },
-        entityId: offlineId
-      });
+      // Add to sync queue - DISABLED: SyncManager handles this
+      // await offlineSyncQueue.addToQueue({
+      //   type: 'create',
+      //   entity: 'subVillage',
+      //   data: { name: newSubVillageName.trim(), villageId: selectedVillageId, offlineId },
+      //   entityId: offlineId
+      // });
       
       setNewSubVillageName("");
       setShowAddSubVillage(false);
@@ -322,20 +322,20 @@ function UploadPageContent() {
       };
       await saveFolder(newFolder);
       
-      // Add to sync queue
-      await offlineSyncQueue.addToQueue({
-        type: 'create',
-        entity: 'house',
-        data: { 
-          name: newHouseName.trim(), 
-          subVillageId: selectedSubVillageId, 
-          ownerName: newOwnerName.trim(),
-          nik: newNik.trim(),
-          address: newAddress.trim(),
-          offlineId 
-        },
-        entityId: offlineId
-      });
+      // Add to sync queue - DISABLED: SyncManager handles this
+      // await offlineSyncQueue.addToQueue({
+      //   type: 'create',
+      //   entity: 'house',
+      //   data: { 
+      //     name: newHouseName.trim(), 
+      //     subVillageId: selectedSubVillageId, 
+      //     ownerName: newOwnerName.trim(),
+      //     nik: newNik.trim(),
+      //     address: newAddress.trim(),
+      //     offlineId 
+      //   },
+      //   entityId: offlineId
+      // });
       
       setNewHouseName("");
       setNewOwnerName("");
@@ -576,8 +576,8 @@ function UploadPageContent() {
 
   const handleForceRetry = async () => {
     try {
-      await offlineSyncQueue.forceRetryFailed();
-      setSuccessMessage("Force retry sync dimulai");
+      // await offlineSyncQueue.forceRetryFailed(); // DISABLED: SyncManager handles this
+      setSuccessMessage("SyncManager handles retry automatically");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("Force retry failed:", error);
