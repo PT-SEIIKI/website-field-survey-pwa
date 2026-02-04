@@ -180,7 +180,7 @@ let isSyncing = false
 /**
  * Sync single photo to server
  */
-export async function syncPhoto(photo: PendingPhoto): Promise<boolean> {
+export async function syncPhoto(photo: PendingPhoto, houseMapping?: Map<string, number>): Promise<boolean> {
   console.group('🔄 SYNC PHOTO:', photo.id)
   console.log('Photo details:', {
     id: photo.id,
@@ -218,7 +218,20 @@ export async function syncPhoto(photo: PendingPhoto): Promise<boolean> {
       formData.append('timestamp', metadata.timestamp?.toString() || Date.now().toString())
       formData.append('villageId', metadata.villageId?.toString() || '')
       formData.append('subVillageId', metadata.subVillageId?.toString() || '')
-      formData.append('houseId', metadata.houseId?.toString() || '')
+      
+      // Map offline houseId to server ID
+      let houseId = metadata.houseId?.toString() || ''
+      if (houseId && houseId.startsWith('h_') && houseMapping) {
+        const serverHouseId = houseMapping.get(houseId)
+        if (serverHouseId) {
+          houseId = serverHouseId.toString()
+          console.log(`🔄 Mapped house ID for photo: ${metadata.houseId} → ${houseId}`)
+        } else {
+          console.warn(`⚠️ House ID not found in mapping: ${metadata.houseId}`)
+          houseId = ''
+        }
+      }
+      formData.append('houseId', houseId)
     }
 
     console.log('📤 Step 2/3: Uploading file to /api/upload...')
@@ -468,7 +481,7 @@ export async function startSync(): Promise<void> {
     console.log(`📊 Found ${pendingHouses.length} pending houses`)
     for (const h of pendingHouses) {
       try {
-        console.log(`🔄 Syncing house: ${h.ownerName} (${h.id})`)
+        console.log(`🔄 Syncing house: ${h.name || h.ownerName || 'Unknown'} (${h.id})`)
         
         // Convert subVillageId using mapping
         let subVillageId = h.subVillageId
@@ -494,7 +507,7 @@ export async function startSync(): Promise<void> {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
-            name: h.ownerName || `House ${h.id}`, // Required field
+            name: h.name || h.ownerName || `House ${h.id}`, // Required field
             ownerName: h.ownerName,
             nik: h.nik,
             address: h.address,
@@ -507,7 +520,7 @@ export async function startSync(): Promise<void> {
           await saveHouse({ ...h, syncStatus: "synced" })
           // Update mapping with new server ID
           houseMapping.set(h.id, serverHouse.id)
-          console.log('✅ House synced:', h.ownerName, '→ server ID:', serverHouse.id)
+          console.log('✅ House synced:', h.name || h.ownerName || 'Unknown', '→ server ID:', serverHouse.id)
         } else {
           console.error('❌ House sync failed:', h.ownerName, res.status)
         }
@@ -621,7 +634,7 @@ export async function startSync(): Promise<void> {
       console.log(`Attempt: ${photo.syncAttempts + 1}/3`)
       console.log(`${'='.repeat(60)}\n`)
 
-      const success = await syncPhoto(photo)
+      const success = await syncPhoto(photo, houseMapping)
 
       if (success) {
         successCount++
