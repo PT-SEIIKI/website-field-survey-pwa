@@ -1,717 +1,460 @@
 // Sync manager untuk handle upload queue dan auto-sync
-import { 
-  getPendingPhotos, 
-  updatePhotoStatus, 
-  getMetadata, 
-  getPhoto, 
-  getFolders, 
-  saveFolder, 
-  saveMetadata,
-  getVillages,
-  saveVillage,
-  getSubVillages,
-  saveSubVillage,
-  getHouses,
-  saveHouse
-} from "./indexeddb"
-import { checkConnectivity, subscribeToConnectivity } from "./connectivity"
+// Enhanced version with extensive logging and event dispatch
+import {
+  getPendingPhotos,
+  updatePhotoStatus,
+  getAllPhotos,
+} from './indexeddb'
 
-export interface SyncStatus {
-  totalPending: number
-  isSyncing: boolean
-  lastSyncTime?: number
-  lastError?: string
+// Re-export getPendingPhotos for components
+export { getPendingPhotos } from './indexeddb'
+
+// Define PendingPhoto interface since it's not exported
+export interface PendingPhoto {
+  id: string
+  entryId: string
+  folderId: string
+  fileName?: string
+  blob: Blob
+  mimeType?: string
+  syncStatus: "pending" | "syncing" | "synced" | "failed"
+  syncAttempts: number
+  createdAt?: number
 }
 
-let syncInProgress = false
-let syncListeners: ((status: SyncStatus) => void)[] = []
-const currentSyncStatus: SyncStatus = {
-  totalPending: 0,
-  isSyncing: false,
-}
+// Helper function untuk update photo sync attempts
+async function updatePhotoSyncAttempts(id: string, attempts: number): Promise<void> {
+  try {
+    const database = await import('./indexeddb').then(m => m.initDB())
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction(['photos'], 'readwrite')
+      const store = tx.objectStore('photos')
 
-export function initSyncManager() {
-  // Subscribe ke connectivity changes
-  subscribeToConnectivity((isOnline) => {
-    if (isOnline && !syncInProgress) {
-      console.log("[v0] 🌐 Online - starting sync")
-      startSync()
-      
-      // Register Background Sync jika browser support
-      registerBackgroundSync()
-    }
-  })
+      // Get photo first
+      const getRequest = store.get(id)
 
-  // Listen untuk sync events dari Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'BACKGROUND_SYNC_TRIGGERED') {
-        console.log('[v0] 📩 Received sync trigger from Service Worker')
-        if (!syncInProgress) {
-          startSync()
+      getRequest.onsuccess = () => {
+        const photo = getRequest.result
+        if (photo) {
+          photo.syncAttempts = attempts
+          const updateRequest = store.put(photo)
+
+          updateRequest.onerror = () => {
+            console.error(`[IndexedDB] Error updating photo attempts:`, updateRequest.error)
+            reject(updateRequest.error)
+          }
+          updateRequest.onsuccess = () => {
+            console.log(`[IndexedDB] Photo attempts updated: ${id} -> ${attempts}`)
+            resolve()
+          }
         } else {
-          console.log('[v0] ⏭️ Sync already in progress, skipping')
+          reject(new Error('Photo not found'))
         }
       }
-    })
-    console.log('[v0] 👂 Listening for Service Worker sync events')
-  }
 
-  // Cek sync queue setiap 5 detik
-  setInterval(() => {
-    updateSyncStatus()
-  }, 5000)
-  
-  // Auto-sync saat app load jika ada pending items
-  setTimeout(async () => {
-    const isOnline = await checkConnectivity()
-    if (isOnline) {
-      await updateSyncStatus()
-      if (currentSyncStatus.totalPending > 0) {
-        console.log(`[v0] 📦 Found ${currentSyncStatus.totalPending} pending items on load, starting sync`)
-        startSync()
+      getRequest.onerror = () => {
+        console.error(`[IndexedDB] Error getting photo for attempts update:`, getRequest.error)
+        reject(getRequest.error)
       }
-    }
-  }, 2000)
+    })
+  } catch (error) {
+    console.error(`[IndexedDB] Failed to update photo attempts:`, error)
+    throw error
+  }
 }
 
-// Helper function untuk register Background Sync
-async function registerBackgroundSync() {
-  if ('serviceWorker' in navigator && 'sync' in (self as any).registration) {
-    try {
-      const registration = await navigator.serviceWorker.ready
-      await (registration as any).sync.register('sync-photos')
-      
-      // Notify SW that sync was registered
-      if (registration.active) {
-        registration.active.postMessage({
-          type: 'SYNC_REGISTERED',
-          tag: 'sync-photos'
-        })
-      }
-      
-      console.log('[v0] ✅ Background Sync registered successfully')
-      return true
-    } catch (err) {
-      console.log('[v0] ⚠️ Background Sync registration failed:', err)
-      // Fallback sudah handle di subscribeToConnectivity
+let isSyncing = false
+
+/**
+ * Sync single photo to server
+ */
+export async function syncPhoto(photo: PendingPhoto): Promise<boolean> {
+  console.group('🔄 SYNC PHOTO:', photo.id)
+  console.log('Photo details:', {
+    id: photo.id,
+    entryId: photo.entryId,
+    folderId: photo.folderId,
+    fileName: photo.fileName,
+    blobSize: photo.blob?.size,
+    mimeType: photo.mimeType,
+    syncStatus: photo.syncStatus,
+    syncAttempts: photo.syncAttempts,
+  })
+
+  try {
+    // Validate blob
+    if (!photo.blob) {
+      console.error('❌ No blob found for photo:', photo.id)
+      await updatePhotoStatus(photo.id, 'failed')
+      console.groupEnd()
       return false
     }
-  } else {
-    console.log('[v0] ⚠️ Background Sync not supported, using fallback')
+
+    console.log('📤 Step 1/3: Creating FormData...')
+    const formData = new FormData()
+    formData.append('file', photo.blob, photo.fileName || `photo-${photo.id}.jpg`)
+    formData.append('folderId', photo.folderId)
+
+    console.log('📤 Step 2/3: Uploading file to /api/upload...')
+    const uploadRes = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+
+    console.log('Upload response status:', uploadRes.status, uploadRes.statusText)
+
+    if (!uploadRes.ok) {
+      const errorText = await uploadRes.text()
+      console.error('❌ Upload failed:', {
+        status: uploadRes.status,
+        statusText: uploadRes.statusText,
+        error: errorText,
+      })
+      throw new Error(`Upload failed: ${uploadRes.status} - ${errorText}`)
+    }
+
+    const uploadData = await uploadRes.json()
+    console.log('✅ File uploaded successfully:', {
+      url: uploadData.url,
+      publicId: uploadData.publicId,
+    })
+
+    console.log('📝 Step 3/3: Creating entry...')
+    const entryRes = await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: photo.entryId,
+        folderId: photo.folderId,
+      }),
+    })
+
+    console.log('Entry response status:', entryRes.status, entryRes.statusText)
+
+    if (!entryRes.ok) {
+      const errorText = await entryRes.text()
+      console.error('❌ Entry creation failed:', {
+        status: entryRes.status,
+        statusText: entryRes.statusText,
+        error: errorText,
+      })
+      throw new Error(`Entry creation failed: ${entryRes.status} - ${errorText}`)
+    }
+
+    const entryData = await entryRes.json()
+    console.log('✅ Entry created:', entryData)
+
+    console.log('🔗 Step 4/3: Linking photo to entry...')
+    const linkRes = await fetch('/api/photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: uploadData.url,
+        publicId: uploadData.publicId,
+        entryId: photo.entryId,
+      }),
+    })
+
+    console.log('Link response status:', linkRes.status, linkRes.statusText)
+
+    if (!linkRes.ok) {
+      const errorText = await linkRes.text()
+      console.error('❌ Photo linking failed:', {
+        status: linkRes.status,
+        statusText: linkRes.statusText,
+        error: errorText,
+      })
+      throw new Error(`Photo linking failed: ${linkRes.status} - ${errorText}`)
+    }
+
+    const linkData = await linkRes.json()
+    console.log('✅ Photo linked successfully:', linkData)
+
+    // ⭐ CRITICAL: Update sync status to 'synced'
+    console.log('📝 Updating sync status to "synced"...')
+    await updatePhotoStatus(photo.id, 'synced')
+    console.log('✅ Sync status updated to "synced"')
+
+    // ⭐ TRIGGER UI REFRESH
+    if (typeof window !== 'undefined') {
+      console.log('📢 Dispatching "photo-synced" event for UI refresh...')
+      window.dispatchEvent(
+        new CustomEvent('photo-synced', {
+          detail: { photoId: photo.id, entryId: photo.entryId },
+        })
+      )
+    }
+
+    console.log('✅✅✅ PHOTO SYNC COMPLETE ✅✅✅')
+    console.groupEnd()
+    return true
+  } catch (error) {
+    console.error('❌ Sync error:', error)
+    console.error('Error details:', {
+      name: (error as Error).name,
+      message: (error as Error).message,
+      stack: (error as Error).stack,
+    })
+
+    await updatePhotoStatus(photo.id, 'failed')
+    console.log('📝 Sync status updated to "failed"')
+    console.groupEnd()
     return false
   }
 }
 
-export function subscribeSyncStatus(listener: (status: SyncStatus) => void) {
-  syncListeners.push(listener)
+/**
+ * Start syncing all pending photos
+ */
+export async function startSync(): Promise<void> {
+  console.group('🚀 START SYNC MANAGER')
+  console.log('Timestamp:', new Date().toISOString())
+  console.log('Online status:', navigator.onLine)
 
-  // Immediately call with current status
-  listener(currentSyncStatus)
-
-  return () => {
-    syncListeners = syncListeners.filter((l) => l !== listener)
-  }
-}
-
-function notifySyncListeners() {
-  syncListeners.forEach((listener) => listener(currentSyncStatus))
-}
-
-async function updateSyncStatus() {
-  const pendingPhotos = await getPendingPhotos()
-  const folders = await getFolders()
-  const pendingFolders = folders.filter(f => f.syncStatus === "pending")
-  
-  const v = await getVillages()
-  const sv = await getSubVillages()
-  const h = await getHouses()
-  
-  const pendingHierarchy = [
-    ...v.filter(i => i.syncStatus === "pending"),
-    ...sv.filter(i => i.syncStatus === "pending"),
-    ...h.filter(i => i.syncStatus === "pending")
-  ]
-  
-  currentSyncStatus.totalPending = pendingPhotos.length + pendingFolders.length + pendingHierarchy.length
-  notifySyncListeners()
-}
-
-export async function startSync() {
-  if (syncInProgress) {
-    console.log("[v0] Sync already in progress")
+  if (isSyncing) {
+    console.log('⏸️ Already syncing, skipping...')
+    console.groupEnd()
     return
   }
 
-  const isOnline = await checkConnectivity()
-  if (!isOnline) {
-    console.log("[v0] Offline - cannot sync")
-    return
-  }
-
-  syncInProgress = true
-  currentSyncStatus.isSyncing = true
-  notifySyncListeners()
+  isSyncing = true
+  console.log('🔒 Sync lock acquired')
 
   try {
-    // 0. Fetch from server first to merge with local
-    console.log("[v0] Fetching data from server to merge")
-    await fetchAndMergeFromServer()
-
-    // 1. Sync Hierarchy (Villages, SubVillages, Houses)
-    const allVillages = await getVillages()
-    for (const v of allVillages.filter(i => i.syncStatus === "pending")) {
-      try {
-        const res = await fetch("/api/villages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: v.name, offlineId: v.id })
-        })
-        if (res.ok) await saveVillage({ ...v, syncStatus: "synced" })
-      } catch (e) {}
-    }
-
-    const allSubVillages = await getSubVillages()
-    for (const sv of allSubVillages.filter(i => i.syncStatus === "pending")) {
-      try {
-        console.log("[v0] Syncing sub-village:", sv.id, sv.name)
-        
-        // Convert villageId from string to number if needed
-        let villageId = sv.villageId
-        if (typeof villageId === 'string') {
-          // Skip if villageId looks like an offline ID (starts with v_)
-          if (villageId.startsWith('v_')) {
-            console.error("[v0] Skipping sub-village with offline villageId:", sv.id, villageId)
-            // Mark as synced to prevent retry, but don't upload
-            await saveSubVillage({ ...sv, syncStatus: "synced" })
-            continue
-          }
-          const parsed = parseInt(villageId, 10)
-          if (isNaN(parsed)) {
-            console.error("[v0] Invalid villageId for sub-village:", sv.id, villageId)
-            // Mark as synced to prevent retry
-            await saveSubVillage({ ...sv, syncStatus: "synced" })
-            continue
-          }
-          villageId = parsed
-        }
-        
-        const res = await fetch("/api/sub-villages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            name: sv.name, 
-            villageId: villageId, 
-            offlineId: sv.id 
-          })
-        })
-        if (res.ok) {
-          console.log("[v0] Sub-village synced successfully:", sv.id)
-          await saveSubVillage({ ...sv, syncStatus: "synced" })
-        } else {
-          const errorText = await res.text()
-          console.error("[v0] Sub-village sync failed:", sv.id, errorText)
-        }
-      } catch (e) {
-        console.error("[v0] Sub-village sync error:", sv.id, e)
-      }
-    }
-
-    const allHouses = await getHouses()
-    for (const h of allHouses.filter(i => i.syncStatus === "pending")) {
-      try {
-        console.log("[v0] Syncing house:", h.id, h.name)
-        
-        // Convert subVillageId from string to number if needed
-        let subVillageId = h.subVillageId
-        if (typeof subVillageId === 'string') {
-          // Skip if subVillageId looks like an offline ID (starts with sv_)
-          if (subVillageId.startsWith('sv_')) {
-            console.error("[v0] Skipping house with offline subVillageId:", h.id, subVillageId)
-            // Mark as synced to prevent retry, but don't upload
-            await saveHouse({ ...h, syncStatus: "synced" })
-            continue
-          }
-          const parsed = parseInt(subVillageId, 10)
-          if (isNaN(parsed)) {
-            console.error("[v0] Invalid subVillageId for house:", h.id, subVillageId)
-            // Mark as synced to prevent retry
-            await saveHouse({ ...h, syncStatus: "synced" })
-            continue
-          }
-          subVillageId = parsed
-        }
-        
-        const res = await fetch("/api/houses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            name: h.name, 
-            subVillageId: subVillageId, 
-            offlineId: h.id,
-            ownerName: h.ownerName,
-            nik: h.nik,
-            address: h.address
-          })
-        })
-        if (res.ok) {
-          console.log("[v0] House synced successfully:", h.id)
-          await saveHouse({ ...h, syncStatus: "synced" })
-        } else {
-          const errorText = await res.text()
-          console.error("[v0] House sync failed:", h.id, errorText)
-        }
-      } catch (e) {
-        console.error("[v0] House sync error:", h.id, e)
-      }
-    }
-
-    // 2. Sync Folders
-    const allFolders = await getFolders()
-    const pendingFolders = allFolders.filter(f => f.syncStatus === "pending")
-    
-    if (pendingFolders.length > 0) {
-      console.log(`[v0] Syncing ${pendingFolders.length} folders`)
-      for (const folder of pendingFolders) {
-        try {
-          await syncFolder(folder)
-        } catch (e) {
-          console.error(`[v0] Folder sync error for ${folder.id}:`, e)
-          // Continue with other folders even if one fails
-        }
-      }
-    }
-
-    // Cache folders to avoid redundant API calls within the same sync batch
-    let foldersCache: any[] | null = null;
-
-    // 2. Sync Photos
+    console.log('🔍 Getting pending photos from IndexedDB...')
     const pendingPhotos = await getPendingPhotos()
-    console.log(`[v0] Starting sync for ${pendingPhotos.length} photos`)
+    console.log('📊 Pending photos count:', pendingPhotos.length)
 
-    for (const photo of pendingPhotos) {
-      try {
-        if (!foldersCache) {
-          const foldersRes = await fetch("/api/folders")
-          if (foldersRes.ok) foldersCache = await foldersRes.json()
-        }
-        await syncPhoto(photo, foldersCache)
-      } catch (e) {
-        console.error(`[v0] Photo sync error for ${photo.id}:`, e)
-      }
-    }
-
-    currentSyncStatus.lastSyncTime = Date.now()
-    currentSyncStatus.lastError = undefined
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : "Unknown error"
-    console.error("[v0] Sync error:", errorMsg)
-    currentSyncStatus.lastError = errorMsg
-  } finally {
-    syncInProgress = false
-    currentSyncStatus.isSyncing = false
-    await updateSyncStatus()
-    notifySyncListeners()
-  }
-}
-
-async function syncFolder(folder: any) {
-  let retryCount = 0
-  const maxRetries = 3
-
-  while (retryCount < maxRetries) {
-    try {
-      // Check if folder already exists on server by offlineId
-      const foldersRes = await fetch("/api/folders")
-      if (foldersRes.ok) {
-        const serverFolders = await foldersRes.json()
-        const existingServerFolder = serverFolders.find((f: any) => f.offlineId === folder.id)
-        
-        if (existingServerFolder) {
-          // If exists, update it to ensure names match
-          const updateRes = await fetch(`/api/folders/${existingServerFolder.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: folder.name,
-              houseName: folder.houseName,
-              nik: folder.nik
-            })
-          })
-          if (!updateRes.ok) throw new Error("Update failed")
-        } else {
-          // If not exists, create new
-          const folderData: any = {
-            name: folder.name,
-            houseName: folder.houseName,
-            nik: folder.nik,
-            offlineId: folder.id,
-            isSynced: true,
-            // Always include hierarchy IDs as null if not valid
-            villageId: null,
-            subVillageId: null,
-            houseId: null
-          }
-          
-          // Only add hierarchy IDs if they exist and are valid numbers (not offline IDs)
-          if (folder.villageId && typeof folder.villageId === 'number') {
-            folderData.villageId = folder.villageId
-          } else if (folder.villageId && typeof folder.villageId === 'string') {
-            // Skip offline IDs like v_123
-            if (!folder.villageId.startsWith('v_')) {
-              const parsed = parseInt(folder.villageId, 10)
-              if (!isNaN(parsed)) {
-                folderData.villageId = parsed
-              }
-            }
-          }
-          
-          if (folder.subVillageId && typeof folder.subVillageId === 'number') {
-            folderData.subVillageId = folder.subVillageId
-          } else if (folder.subVillageId && typeof folder.subVillageId === 'string') {
-            // Skip offline IDs like sv_123
-            if (!folder.subVillageId.startsWith('sv_')) {
-              const parsed = parseInt(folder.subVillageId, 10)
-              if (!isNaN(parsed)) {
-                folderData.subVillageId = parsed
-              }
-            }
-          }
-          
-          if (folder.houseId && typeof folder.houseId === 'number') {
-            folderData.houseId = folder.houseId
-          } else if (folder.houseId && typeof folder.houseId === 'string') {
-            // Skip offline IDs like h_123
-            if (!folder.houseId.startsWith('h_')) {
-              const parsed = parseInt(folder.houseId, 10)
-              if (!isNaN(parsed)) {
-                folderData.houseId = parsed
-              }
-            }
-          }
-          
-          console.log("[v0] Creating folder with data:", JSON.stringify(folderData))
-          
-          const response = await fetch("/api/folders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(folderData)
-          })
-          if (!response.ok) {
-            const errorText = await response.text()
-            console.error("[v0] Folder creation failed:", response.status, errorText)
-            throw new Error(`Folder creation failed: ${response.status} ${errorText}`)
-          }
-        }
-      } else {
-        throw new Error("Failed to fetch folders")
-      }
-
-      // Update local status
-      await saveFolder({
-        ...folder,
-        syncStatus: "synced"
-      })
-      console.log("[v0] Folder synced:", folder.id)
-      return // Success
-    } catch (error) {
-      retryCount++
-      console.error(`[v0] Failed to sync folder (attempt ${retryCount}):`, folder.id, error)
-      if (retryCount >= maxRetries) {
-        // Mark as failed to prevent infinite retries
-        await saveFolder({
-          ...folder,
-          syncStatus: "failed"
-        })
-        throw error
-      }
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000 * retryCount))
-    }
-  }
-}
-
-async function syncPhoto(photo: any, foldersCache: any[] | null = null) {
-  const photoId = photo.id;
-  let retryCount = 0;
-  const maxRetries = 3;
-
-  while (retryCount < maxRetries) {
-    try {
-      await updatePhotoStatus(photoId, "syncing")
-      notifySyncListeners()
-
-      const metadata = await getMetadata(photoId)
-      const photoData = await getPhoto(photoId);
-      if (!photoData) {
-        throw new Error("Photo not found in IndexedDB");
-      }
-
-      // First upload the photo file to /api/upload
-      const photoFormData = new FormData();
-      photoFormData.append("file", photoData.blob, `${photoId}.jpg`);
-      photoFormData.append("photoId", photoId);
-      photoFormData.append("location", metadata?.location || "");
-      photoFormData.append("description", metadata?.description || "");
-      photoFormData.append("timestamp", photoData.timestamp.toString());
-      
-      // Add hierarchy info to upload
-      if (metadata?.villageId || metadata?.selectedVillageId) {
-        photoFormData.append("villageId", String(metadata.villageId || metadata.selectedVillageId));
-      }
-      if (metadata?.subVillageId || metadata?.selectedSubVillageId) {
-        photoFormData.append("subVillageId", String(metadata.subVillageId || metadata.selectedSubVillageId));
-      }
-      if (metadata?.houseId || metadata?.selectedHouseId) {
-        photoFormData.append("houseId", String(metadata.houseId || metadata.selectedHouseId));
-      }
-      
-      // Add folder info to upload metadata if exists
-      if (metadata?.folderId) {
-        photoFormData.append("folderId", metadata.folderId);
-      }
-
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: photoFormData,
-      });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        throw new Error(`File upload failed: ${errorText}`);
-      }
-
-      // Find server-side folder ID if it exists
-      let serverFolderId = null
-      if (metadata?.folderId) {
-        const folders = foldersCache || await (async () => {
-          const res = await fetch("/api/folders")
-          return res.ok ? await res.json() : []
-        })()
-        
-        const folder = folders.find((f: any) => f.offlineId === metadata.folderId)
-        if (folder) serverFolderId = folder.id
-      }
-
-      // New hierarchy support:
-      let serverHouseId = metadata?.houseId || metadata?.selectedHouseId;
-      if (serverHouseId && typeof serverHouseId === 'string') {
-        const parsed = parseInt(serverHouseId, 10);
-        serverHouseId = isNaN(parsed) ? null : parsed;
-      }
-      
-      const requestBody: any = {
-        surveyId: metadata?.surveyId || 1,
-        data: JSON.stringify({
-          description: metadata?.description,
-          location: metadata?.location,
-          timestamp: photoData.timestamp,
-          folderId: metadata?.folderId,
-          villageId: metadata?.villageId || metadata?.selectedVillageId,
-          subVillageId: metadata?.subVillageId || metadata?.selectedSubVillageId,
-          houseId: metadata?.houseId || metadata?.selectedHouseId
-        }),
-        offlineId: photoId,
-        isSynced: true
-      };
-      
-      // Only add folderId if it exists and is valid
-      if (serverFolderId) {
-        requestBody.folderId = serverFolderId;
-      }
-      
-      const response = await fetch("/api/entries", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.statusText} - ${errorText}`)
-      }
-
-      const entryData = await response.json();
-
-      // Now upload photo linked to this entry AND the house directly
-      const photoResponse = await fetch("/api/photos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          entryId: entryData.id,
-          houseId: serverHouseId,
-          url: `/uploads/${photoId}.jpg`,
-          offlineId: photoId
-        }),
-      });
-
-      if (!photoResponse.ok) {
-        const errorText = await photoResponse.text();
-        throw new Error(`Photo upload failed: ${photoResponse.statusText} - ${errorText}`)
-      }
-
-      await updatePhotoStatus(photoId, "synced")
-      console.log("[v0] Photo synced:", photoId)
-      return // Success
-    } catch (error) {
-      retryCount++
-      console.error(`[v0] Failed to sync photo (attempt ${retryCount}):`, photoId, error)
-      if (retryCount >= maxRetries) {
-        await updatePhotoStatus(photoId, "failed")
-        throw error
-      }
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000 * retryCount))
-    }
-  }
-}
-
-async function fetchAndMergeFromServer() {
-  const isOnline = await checkConnectivity()
-  if (!isOnline) {
-    console.log("[v0] Offline - skipping merge from server")
-    return
-  }
-
-  try {
-    // Get current survey ID (usually 1 for this app)
-    const surveyId = 1;
-
-    // Fetch Folders
-    const foldersRes = await fetch("/api/folders")
-    if (foldersRes.ok) {
-      const serverFolders = await foldersRes.json()
-      const localFolders = await getFolders()
-      
-      for (const sFolder of serverFolders) {
-        // Match by offlineId (if it was created locally first) or by server id
-        const local = localFolders.find(f => f.id === sFolder.offlineId || f.id === sFolder.id.toString())
-        if (!local) {
-          await saveFolder({
-            id: sFolder.offlineId || sFolder.id.toString(),
-            name: sFolder.name,
-            houseName: sFolder.houseName,
-            nik: sFolder.nik,
-            createdAt: new Date(sFolder.createdAt).getTime(),
-            syncStatus: "synced"
-          })
-        }
-      }
-    }
-
-    // Fetch Hierarchy
-    const vRes = await fetch("/api/villages")
-    if (vRes.ok) {
-      const serverV = await vRes.json()
-      if (Array.isArray(serverV)) {
-        for (const v of serverV) await saveVillage({ ...v, id: String(v.id), syncStatus: "synced" })
-      }
-    }
-    const svRes = await fetch("/api/sub-villages")
-    if (svRes.ok) {
-      const serverSV = await svRes.json()
-      if (Array.isArray(serverSV)) {
-        for (const sv of serverSV) await saveSubVillage({ ...sv, id: String(sv.id), syncStatus: "synced" })
-      }
-    }
-    const hRes = await fetch("/api/houses")
-    if (hRes.ok) {
-      const serverH = await hRes.json()
-      if (Array.isArray(serverH)) {
-        for (const h of serverH) await saveHouse({ ...h, id: String(h.id), syncStatus: "synced" })
-      }
-    }
-
-    // Fetch Entries to get photo metadata
-    const entriesRes = await fetch(`/api/entries?surveyId=${surveyId}`)
-    if (entriesRes.ok) {
-      const data = await entriesRes.json()
-      const serverEntries = data.entries || []
-      
-      if (Array.isArray(serverEntries)) {
-        for (const entry of serverEntries) {
-          // Check if we have photos for this entry
-          const photosRes = await fetch(`/api/photos/list?entryId=${entry.id}`)
-          if (photosRes.ok) {
-            const photos = await photosRes.json()
-            if (Array.isArray(photos)) {
-              for (const photo of photos) {
-                // Check if photo exists in local metadata
-                const localMeta = await getMetadata(photo.offlineId || photo.id.toString())
-                if (!localMeta) {
-                  // Parse entry data for location/description
-                  let entryData: any = {}
-                  try {
-                    entryData = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data
-                  } catch (e) {}
-
-                  const photoId = photo.offlineId || photo.id.toString()
-                  
-                  // Save metadata so it appears in UI
-                  await saveMetadata(photoId, {
-                    location: entryData?.location || "",
-                    description: entryData?.description || "",
-                    timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
-                  })
-
-                  // Mark photo as synced in local DB if not present
-                  const localPhoto = await getPhoto(photoId)
-                  if (!localPhoto) {
-                    // We don't have the blob, but we mark it synced so we don't try to upload it
-                    // The UI will use the server URL if the blob is missing
-                    await (await import("./indexeddb")).savePhoto({
-                      id: photoId,
-                      blob: new Blob(), // Empty blob as placeholder
-                      timestamp: entryData?.timestamp || new Date(entry.createdAt).getTime(),
-                      syncStatus: "synced"
-                    })
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.error("[v0] Merge error:", e)
-  }
-}
-
-export async function getSyncStatus(): Promise<SyncStatus> {
-  await updateSyncStatus()
-  return currentSyncStatus
-}
-
-export async function retryFailedSync() {
-  try {
-    const database = await (await import("./indexeddb")).initDB()
-    
-    // Check if the photos store exists before trying to access it
-    if (!database.objectStoreNames.contains("photos")) {
-      console.warn("[IndexedDB] Store 'photos' not found, cannot retry failed sync")
+    if (pendingPhotos.length === 0) {
+      console.log('✅ No pending photos to sync')
+      console.groupEnd()
       return
     }
-    
-    const failedPhotos: any[] = await new Promise((resolve, reject) => {
-      const tx = database.transaction(["photos"], "readonly")
-      const store = tx.objectStore("photos")
-      const index = store.index("syncStatus")
-      const request = index.getAll("failed")
 
-      request.onerror = () => reject(request.error)
-      request.onsuccess = () => resolve(request.result || [])
-    })
+    console.log('📋 Pending photos list:')
+    console.table(
+      pendingPhotos.map((p) => ({
+        id: p.id.slice(0, 20) + '...',
+        entryId: p.entryId,
+        folderId: p.folderId,
+        syncStatus: p.syncStatus,
+        attempts: p.syncAttempts,
+        hasBlob: !!p.blob,
+        blobSize: p.blob ? `${(p.blob.size / 1024).toFixed(2)}KB` : 'N/A',
+      }))
+    )
 
-    if (failedPhotos.length > 0) {
-      console.log(`[v0] Retrying ${failedPhotos.length} failed photos`)
-      await startSync()
+    let successCount = 0
+    let failedCount = 0
+
+    for (let i = 0; i < pendingPhotos.length; i++) {
+      const photo = pendingPhotos[i]
+      console.log(`\n${'='.repeat(60)}`)
+      console.log(`📷 Processing photo ${i + 1}/${pendingPhotos.length}`)
+      console.log(`ID: ${photo.id}`)
+      console.log(`Attempt: ${photo.syncAttempts + 1}/3`)
+      console.log(`${'='.repeat(60)}\n`)
+
+      const success = await syncPhoto(photo)
+
+      if (success) {
+        successCount++
+        console.log(`✅ Photo ${i + 1}/${pendingPhotos.length} synced successfully`)
+      } else {
+        failedCount++
+
+        // Update attempt count
+        if (photo.syncAttempts < 2) {
+          const newAttempts = photo.syncAttempts + 1
+          console.log(`⏱️ Will retry later (attempt ${newAttempts}/3)`)
+          await updatePhotoSyncAttempts(photo.id, newAttempts)
+        } else {
+          console.error(`❌ Max retries (3) reached for photo ${photo.id}`)
+          console.error('Photo will remain in "failed" status')
+        }
+      }
+
+      // Add delay between syncs to avoid rate limiting
+      if (i < pendingPhotos.length - 1) {
+        console.log('⏳ Waiting 500ms before next photo...')
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
+    }
+
+    console.log('\n' + '='.repeat(60))
+    console.log('📊 SYNC SUMMARY')
+    console.log('='.repeat(60))
+    console.log('Total photos:', pendingPhotos.length)
+    console.log('✅ Success:', successCount)
+    console.log('❌ Failed:', failedCount)
+    console.log('='.repeat(60))
+
+    // Dispatch event to refresh UI
+    if (typeof window !== 'undefined') {
+      console.log('📢 Dispatching "sync-completed" event...')
+      window.dispatchEvent(
+        new CustomEvent('sync-completed', {
+          detail: { successCount, failedCount, totalCount: pendingPhotos.length },
+        })
+      )
     }
   } catch (error) {
-    console.error("[v0] Error in retryFailedSync:", error)
+    console.error('❌ Fatal sync error:', error)
+    console.error('Error details:', {
+      name: (error as Error).name,
+      message: (error as Error).message,
+      stack: (error as Error).stack,
+    })
+  } finally {
+    isSyncing = false
+    console.log('🔓 Sync lock released')
+    console.log('✅ SYNC MANAGER COMPLETED')
+    console.groupEnd()
   }
+}
+
+/**
+ * Initialize sync manager with auto-sync capabilities
+ */
+export function initSyncManager() {
+  console.log('🔧 ===== INIT SYNC MANAGER =====')
+  console.log('Timestamp:', new Date().toISOString())
+  console.log('User Agent:', navigator.userAgent)
+  console.log('Online:', navigator.onLine)
+
+  if (typeof window === 'undefined') {
+    console.log('⏸️ Running on server-side, skipping initialization')
+    return
+  }
+
+  // ===== ONLINE EVENT LISTENER =====
+  const handleOnline = async () => {
+    console.log('\n' + '='.repeat(60))
+    console.log('🌐 ONLINE EVENT DETECTED')
+    console.log('='.repeat(60))
+    console.log('Connection restored at:', new Date().toISOString())
+    console.log('Waiting 2 seconds before starting sync...')
+
+    setTimeout(async () => {
+      console.log('⏰ 2 seconds elapsed, starting sync now...')
+      await startSync()
+    }, 2000)
+  }
+
+  window.addEventListener('online', handleOnline)
+  console.log('✅ Online event listener registered')
+
+  // ===== OFFLINE EVENT LISTENER =====
+  const handleOffline = () => {
+    console.log('\n' + '='.repeat(60))
+    console.log('📴 OFFLINE EVENT DETECTED')
+    console.log('='.repeat(60))
+    console.log('Connection lost at:', new Date().toISOString())
+    console.log('Sync will resume automatically when connection returns')
+  }
+
+  window.addEventListener('offline', handleOffline)
+  console.log('✅ Offline event listener registered')
+
+  // ===== SERVICE WORKER MESSAGE LISTENER =====
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    console.log('✅ Service Worker is active, registering message listener...')
+
+    navigator.serviceWorker.addEventListener('message', async (event) => {
+      console.log('📨 SERVICE WORKER MESSAGE RECEIVED:', event.data)
+
+      if (event.data && event.data.type === 'BACKGROUND_SYNC_TRIGGERED') {
+        console.log('🔄 Background sync triggered by Service Worker')
+        console.log('Tag:', event.data.tag)
+        console.log('Timestamp:', new Date(event.data.timestamp).toISOString())
+        await startSync()
+      }
+    })
+
+    console.log('✅ Service Worker message listener registered')
+  } else {
+    console.warn('⚠️ Service Worker not available or not controlling')
+  }
+
+  // ===== BACKGROUND SYNC API =====
+  if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
+    console.log('✅ Background Sync API is supported')
+
+    // Register sync on online event
+    const registerBackgroundSync = async () => {
+      try {
+        const registration = await navigator.serviceWorker.ready
+        await (registration as any).sync.register('sync-photos')
+        console.log('✅ Background sync "sync-photos" registered')
+      } catch (error) {
+        console.error('❌ Failed to register background sync:', error)
+      }
+    }
+
+    window.addEventListener('online', registerBackgroundSync)
+    console.log('✅ Background sync registration on online event set up')
+  } else {
+    console.warn('⚠️ Background Sync API not supported')
+    console.warn('Falling back to online event listener only')
+  }
+
+  // ===== AUTO-SYNC ON PAGE LOAD =====
+  console.log('⏰ Setting up auto-sync check in 3 seconds...')
+
+  setTimeout(async () => {
+    console.log('\n' + '='.repeat(60))
+    console.log('🔍 AUTO-SYNC CHECK ON PAGE LOAD')
+    console.log('='.repeat(60))
+    console.log('Checking for pending photos...')
+
+    try {
+      const pendingPhotos = await getPendingPhotos()
+      console.log('Found pending photos:', pendingPhotos.length)
+
+      if (pendingPhotos.length > 0) {
+        console.log('Online status:', navigator.onLine)
+
+        if (navigator.onLine) {
+          console.log('📡 Device is online, starting automatic sync...')
+          await startSync()
+        } else {
+          console.log('📴 Device is offline, sync will wait for connection')
+        }
+      } else {
+        console.log('✅ No pending photos, nothing to sync')
+      }
+    } catch (error) {
+      console.error('❌ Error during auto-sync check:', error)
+    }
+
+    console.log('='.repeat(60))
+  }, 3000)
+
+  console.log('✅ Auto-sync check scheduled for 3 seconds from now')
+  console.log('===== SYNC MANAGER INITIALIZATION COMPLETE =====\n')
+}
+
+// ===== EXPORT FOR MANUAL DEBUGGING =====
+export function debugSyncManager() {
+  return {
+    isSyncing,
+    navigator: {
+      onLine: navigator.onLine,
+      userAgent: navigator.userAgent,
+    },
+    serviceWorker: {
+      available: 'serviceWorker' in navigator,
+      controller: !!navigator.serviceWorker?.controller,
+    },
+    backgroundSync: {
+      supported: 'sync' in ServiceWorkerRegistration.prototype,
+    },
+  }
+}
+
+// Expose to window for debugging
+if (typeof window !== 'undefined') {
+  ;(window as any).__debugSyncManager = debugSyncManager
+  ;(window as any).__startSync = startSync
+  ;(window as any).__getPendingPhotos = getPendingPhotos
 }

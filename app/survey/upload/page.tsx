@@ -22,6 +22,7 @@ import {
 } from "@/lib/indexeddb";
 import { offlineSyncQueue } from "@/lib/offline-sync-queue";
 import { UploadArea } from "@/components/upload-area";
+import { SyncStatus } from "@/components/sync-status";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -87,48 +88,67 @@ function UploadPageContent() {
   });
 
   const fetchFolders = async () => {
-    // First try to get from local IndexedDB
-    const local = await getFolders();
-    setFolders(local);
+    console.log('📁 [Upload] Loading folders...')
+    
+    try {
+      // Try network first
+      const res = await fetch('/api/folders', {
+        cache: 'no-cache', // Force fresh data
+      })
 
-    // If online, also fetch from server and merge
-    if (getOnlineStatus()) {
-      try {
-        const res = await fetch("/api/folders");
-        if (res.ok) {
-          const remote = await res.json();
-          const mappedFolders = remote.map((f: any) => ({ ...f, id: String(f.id) }));
-          
-          // Update local storage with server data
-          for (const folder of mappedFolders) {
-            await saveFolder(folder);
-          }
-          
-          // Update state with server data
-          setFolders(mappedFolders);
-          
-          // Wait a bit and refresh again to ensure we have the latest data
-          setTimeout(async () => {
-            const refreshed = await getFolders();
-            setFolders(refreshed);
-          }, 500);
+      if (res.ok) {
+        const data = await res.json()
+        console.log('[Upload] Folders loaded from network:', data.length)
+        
+        const mappedFolders = data.map((f: any) => ({ ...f, id: String(f.id) }))
+        setFolders(mappedFolders)
+
+        // Cache for offline use
+        if ('caches' in window) {
+          const cache = await caches.open('api-cache-v1')
+          await cache.put(
+            '/api/folders',
+            new Response(JSON.stringify(mappedFolders), {
+              headers: { 'Content-Type': 'application/json' },
+            })
+          )
+          console.log('[Upload] Folders cached for offline use')
         }
-      } catch (error) {
-        console.error("Failed to fetch folders from server:", error);
+        
+        // Update local IndexedDB
+        for (const folder of mappedFolders) {
+          await saveFolder(folder)
+        }
+      } else {
+        throw new Error(`HTTP ${res.status}`)
       }
+    } catch (error) {
+      console.warn('[Upload] Network failed, trying cache...', error)
+      
+      // Fallback ke cache
+      if ('caches' in window) {
+        try {
+          const cache = await caches.open('api-cache-v1')
+          const cachedResponse = await cache.match('/api/folders')
+
+          if (cachedResponse) {
+            const data = await cachedResponse.json()
+            console.log('[Upload] Folders loaded from cache:', data.length)
+            setFolders(data)
+          } else {
+            console.error('[Upload] No cached data available')
+          }
+        } catch (cacheError) {
+          console.error('[Upload] Cache error:', cacheError)
+        }
+      }
+      
+      // Final fallback ke IndexedDB
+      console.log('[Upload] Falling back to IndexedDB...')
+      const local = await getFolders()
+      setFolders(local)
     }
-    
-    // Filter out folders that don't have meaningful content
-    const filteredFolders = local.filter(folder => {
-      // Only show folders that have a proper name and are not empty placeholders
-      return folder.name && 
-             !folder.name.includes('Folder ') && 
-             folder.name.trim() !== '' &&
-             (folder.villageName || folder.houseName || folder.name !== 'Unknown');
-    });
-    
-    setFolders(filteredFolders);
-  };
+  }
 
   const createVillage = async () => {
     if (!newVillageName.trim()) return;
@@ -866,71 +886,7 @@ function UploadPageContent() {
           </div>
 
           <aside className="lg:col-span-5">
-            <div className="sticky top-24 border border-border rounded-lg overflow-hidden bg-background">
-              <div className="p-4 border-b border-border flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Status Sinkronisasi</h3>
-                <Badge variant="outline" className="font-mono text-[10px]">
-                  {photos.length}
-                </Badge>
-              </div>
-              <div className="p-4">
-                <Tabs defaultValue="pending">
-                  <TabsList className="grid grid-cols-4 w-full h-8 p-0 bg-secondary rounded-md overflow-hidden mb-4">
-                    <TabsTrigger
-                      value="pending"
-                      className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background"
-                    >
-                      Tertunda
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="syncing"
-                      className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background"
-                    >
-                      Proses
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="synced"
-                      className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background"
-                    >
-                      Selesai
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="failed"
-                      className="text-[10px] uppercase font-bold tracking-tight py-1 rounded-none data-[state=active]:bg-background"
-                    >
-                      Gagal
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <div className="min-h-[200px] max-h-[400px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                    <TabsContent value="pending" className="m-0 space-y-1">
-                      <PhotoList status="pending" photos={photos} />
-                    </TabsContent>
-                    <TabsContent value="syncing" className="m-0 space-y-1">
-                      <PhotoList status="syncing" photos={photos} />
-                    </TabsContent>
-                    <TabsContent value="synced" className="m-0 space-y-1">
-                      <PhotoList status="synced" photos={photos} />
-                    </TabsContent>
-                    <TabsContent value="failed" className="m-0 space-y-1">
-                      <PhotoList status="failed" photos={photos} />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-
-                <Button
-                  onClick={refreshPhotos}
-                  variant="ghost"
-                  className="w-full mt-4 h-9 text-xs text-muted-foreground hover:text-foreground"
-                  disabled={isLoading}
-                >
-                  <RefreshCw
-                    className={`w-3 h-3 mr-2 ${isLoading ? "animate-spin" : ""}`}
-                  />
-                  Segarkan List
-                </Button>
-              </div>
-            </div>
+            <SyncStatus />
           </aside>
         </div>
       </main>
