@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Home, Trash2, ImageIcon, RefreshCw, Folder as FolderIcon, Filter } from "lucide-react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { getFolders, getMetadata } from "@/lib/indexeddb"
+import { getMetadata } from "@/lib/indexeddb"
 
 export default function GalleryPage() {
   const router = useRouter()
@@ -23,8 +23,12 @@ export default function GalleryPage() {
   useEffect(() => {
     const loadFolders = async () => {
       try {
-        const data = await getFolders()
-        setFolders(data)
+        // Get folders from server instead of IndexedDB to show only active folders
+        const response = await fetch('/api/folders')
+        if (response.ok) {
+          const data = await response.json()
+          setFolders(data)
+        }
       } catch (err) {
         console.error("Error loading folders:", err)
       }
