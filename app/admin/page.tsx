@@ -52,23 +52,6 @@ function AdminPageContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.push("/survey/dashboard")} className="rounded-full h-9 w-9">
-              <Home className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="SEIIKI" className="h-6 w-auto" />
-              <div className="h-4 w-px bg-border" />
-              <h1 className="text-sm font-bold uppercase tracking-widest">Portal Admin</h1>
-            </div>
-          </div>
-          <LogoutButton />
-        </div>
-      </nav>
-
       <main className="max-w-7xl mx-auto px-6 py-10">
         {/* Welcome Section */}
         <div className="mb-12 border-b border-border pb-10">

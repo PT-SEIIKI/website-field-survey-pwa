@@ -62,36 +62,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img src="/logo.png" alt="SEIIKI" className="h-8 w-auto" />
-            <h1 className="text-sm font-bold uppercase tracking-widest hidden sm:block">
-              Dashboard
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-tight ${
-                isOnline
-                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                  : "bg-muted text-muted-foreground border-border"
-              }`}
-            >
-              {isOnline ? (
-                <Wifi className="w-3 h-3" />
-              ) : (
-                <WifiOff className="w-3 h-3" />
-              )}
-              {isOnline ? "Online" : "Offline"}
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-6xl mx-auto px-6 py-6 sm:py-10">
         {/* Hero / Welcome */}
         <div className="mb-8 sm:mb-12 border-b border-border pb-8 sm:pb-10">
