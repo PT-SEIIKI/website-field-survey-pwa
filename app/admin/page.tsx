@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Home, Camera, UserPlus, Download } from "lucide-react"
 import { ExportData } from "@/components/export-data"
+import { Navbar } from "@/components/navbar"
 
 interface Stats {
   totalPhotos: number
@@ -51,8 +52,10 @@ function AdminPageContent() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-7xl mx-auto px-6 py-10">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background text-foreground">
+        <main className="max-w-7xl mx-auto px-6 py-10">
         {/* Welcome Section */}
         <div className="mb-12 border-b border-border pb-10">
           <div className="flex flex-col gap-2 mb-8">
@@ -63,45 +66,45 @@ function AdminPageContent() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             <button
               onClick={() => router.push("/survey/upload")}
-              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
             >
-              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <Camera className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Survey Lapangan</h4>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Survey Lapangan</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">Mulai survey lapangan baru, ambil foto, dan kumpulkan data lokasi secara langsung.</p>
             </button>
             <button
               onClick={() => router.push("/admin/users")}
-              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
             >
-              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <UserPlus className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Manajemen User</h4>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Manajemen User</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">Buat, perbarui, dan kelola pengguna sistem serta tingkat akses mereka.</p>
             </button>
             <button
               onClick={() => router.push("/survey/dashboard")}
-              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
             >
-              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <Home className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Dashboard Surveyor</h4>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Dashboard Surveyor</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">Akses dashboard sederhana surveyor untuk manajemen folder dan pengecekan status cepat.</p>
             </button>
             <button
               onClick={() => router.push("/survey/gallery")}
-              className="group flex flex-col items-start p-8 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
+              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
             >
-              <div className="p-3 bg-secondary rounded-lg mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
                 <Camera className="w-5 h-5" />
               </div>
-              <h4 className="font-bold text-lg tracking-tight mb-2 uppercase">Galeri Foto</h4>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Galeri Foto</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">Lihat semua foto yang telah diupload berdasarkan lokasi dan waktu.</p>
             </button>
           </div>
@@ -112,6 +115,7 @@ function AdminPageContent() {
         </div>
       </main>
     </div>
+    </>
   )
 }
 
