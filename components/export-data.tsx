@@ -11,21 +11,21 @@ export function ExportData() {
   const handleDownload = async (format: 'xlsx' | 'csv') => {
     setIsExporting(true)
     try {
-      const response = await fetch("/api/entries?surveyId=1")
-      const photos = await response.json()
+      const response = await fetch("/api/export")
+      const result = await response.json()
 
-      if (!Array.isArray(photos)) {
-        throw new Error("Invalid data format")
+      if (!result.success) {
+        throw new Error(result.message || "Failed to fetch data")
       }
 
-      const exportData = photos.map(p => ({
-        "Desa": p.villageName || "-",
-        "Dusun": p.subVillageName || "-",
-        "Rumah": p.houseName || "-",
-        "Nama Pemilik": p.ownerName || "-",
-        "NIK": p.nik || "-",
-        "Alamat": p.address || "-",
-        "Foto": `https://survei.seyiki.com${p.url}`
+      const exportData = result.data.map((item: any) => ({
+        "nama desa": item["nama desa"],
+        "nama dusun": item["nama dusun"],
+        "nama rumah": item["nama rumah"],
+        "nama pemilik": item["nama pemilik"],
+        "nik": item["nik"],
+        "alamat": item["alamat"],
+        "poto": item["poto"]
       }))
 
       const worksheet = XLSX.utils.json_to_sheet(exportData)
@@ -39,7 +39,7 @@ export function ExportData() {
       }
     } catch (error) {
       console.error("Export error:", error)
-      alert("Gagal mengekspor data")
+      alert("Gagal mengekspor data: " + (error instanceof Error ? error.message : String(error)))
     } finally {
       setIsExporting(false)
     }
