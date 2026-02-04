@@ -6,7 +6,7 @@ import { getCurrentUser, isAdmin } from "@/lib/auth"
 import { LogoutButton } from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Home, Camera, UserPlus, Download } from "lucide-react"
+import { Home, Camera, UserPlus, Download, FolderOpen, Image as ImageIcon, Wifi } from "lucide-react"
 import { ExportData } from "@/components/export-data"
 import { Navbar } from "@/components/navbar"
 
@@ -66,47 +66,84 @@ function AdminPageContent() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            <button
-              onClick={() => router.push("/survey/upload")}
-              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-            >
-              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <Camera className="w-5 h-5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <Camera className="w-5 h-5 text-primary" />
               </div>
               <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Survey Lapangan</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Mulai survey lapangan baru, ambil foto, dan kumpulkan data lokasi secara langsung.</p>
-            </button>
-            <button
-              onClick={() => router.push("/admin/users")}
-              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-            >
-              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <UserPlus className="w-5 h-5" />
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Buat folder hierarchy: Desa → Dusun → Rumah</p>
+                <p>2. Upload foto dengan lokasi yang tepat</p>
+                <p>3. Foto otomatis sync saat online</p>
+                <p>4. Status "Synced" menandakan berhasil</p>
               </div>
-              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Manajemen User</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Buat, perbarui, dan kelola pengguna sistem serta tingkat akses mereka.</p>
-            </button>
-            <button
-              onClick={() => router.push("/survey/dashboard")}
-              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-            >
-              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <Home className="w-5 h-5" />
+            </div>
+            
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <FolderOpen className="w-5 h-5 text-primary" />
               </div>
-              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Dashboard Surveyor</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Akses dashboard sederhana surveyor untuk manajemen folder dan pengecekan status cepat.</p>
-            </button>
-            <button
-              onClick={() => router.push("/survey/gallery")}
-              className="group flex flex-col items-start p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all text-left"
-            >
-              <div className="p-3 bg-secondary rounded-lg mb-4 group-hover:scale-110 transition-transform">
-                <Camera className="w-5 h-5" />
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Management Folder</h4>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Akses menu Folder di navbar</p>
+                <p>2. Lihat hierarchy lengkap: Desa/Dusun/Rumah</p>
+                <p>3. Klik rumah untuk lihat detail foto</p>
+                <p>4. Edit atau hapus folder jika needed</p>
+              </div>
+            </div>
+            
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <ImageIcon className="w-5 h-5 text-primary" />
               </div>
               <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Galeri Foto</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">Lihat semua foto yang telah diupload berdasarkan lokasi dan waktu.</p>
-            </button>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Akses menu Galeri di navbar</p>
+                <p>2. Lihat semua foto yang diupload</p>
+                <p>3. Filter berdasarkan status sync</p>
+                <p>4. Download atau hapus foto</p>
+              </div>
+            </div>
+            
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <Wifi className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Offline Mode</h4>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Survey tetap bisa dilakukan offline</p>
+                <p>2. Data tersimpan di device lokal</p>
+                <p>3. Auto-sync saat koneksi online</p>
+                <p>4. Status pending ditampilkan di navbar</p>
+              </div>
+            </div>
+            
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <UserPlus className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Manajemen User</h4>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Buat user baru dengan role admin/user</p>
+                <p>2. Admin: akses penuh ke semua fitur</p>
+                <p>3. User: hanya bisa survey lapangan</p>
+                <p>4. Edit atau hapus user existing</p>
+              </div>
+            </div>
+            
+            <div className="group p-6 rounded-xl border border-border bg-card/50 hover:bg-secondary/30 transition-all">
+              <div className="p-3 bg-primary/10 rounded-lg mb-4 group-hover:scale-110 transition-transform">
+                <Download className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-bold text-base tracking-tight mb-2 uppercase">Export Data</h4>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>1. Download semua data survey</p>
+                <p>2. Export dalam format CSV/JSON</p>
+                <p>3. Include metadata foto</p>
+                <p>4. Backup data untuk keamanan</p>
+              </div>
+            </div>
           </div>
           
           <div className="mt-12 p-8 rounded-xl border border-border bg-card/50">
