@@ -4,10 +4,68 @@ import {
   getPendingPhotos,
   updatePhotoStatus,
   getAllPhotos,
+  getFolders,
+  getVillages,
+  getSubVillages,
+  getHouses,
 } from './indexeddb'
 
 // Re-export getPendingPhotos for components
 export { getPendingPhotos } from './indexeddb'
+
+// Sync status interface
+export interface SyncStatus {
+  totalPending: number
+  isSyncing: boolean
+  lastSyncTime?: Date
+}
+
+// Sync state management
+let syncListeners: ((status: SyncStatus) => void)[] = []
+let currentSyncStatus: SyncStatus = {
+  totalPending: 0,
+  isSyncing: false,
+}
+
+export function subscribeSyncStatus(listener: (status: SyncStatus) => void) {
+  syncListeners.push(listener)
+  listener(currentSyncStatus)
+  return () => {
+    syncListeners = syncListeners.filter((l) => l !== listener)
+  }
+}
+
+function notifySyncListeners() {
+  syncListeners.forEach((listener) => listener(currentSyncStatus))
+}
+
+async function updateSyncStatus() {
+  try {
+    const pendingPhotos = await getPendingPhotos()
+    const folders = await getFolders()
+    const pendingFolders = folders.filter(f => f.syncStatus === "pending")
+    
+    const v = await getVillages()
+    const sv = await getSubVillages()
+    const h = await getHouses()
+    
+    const pendingHierarchy = [
+      ...v.filter(i => i.syncStatus === "pending"),
+      ...sv.filter(i => i.syncStatus === "pending"),
+      ...h.filter(i => i.syncStatus === "pending")
+    ]
+    
+    currentSyncStatus.totalPending = pendingPhotos.length + pendingFolders.length + pendingHierarchy.length
+    notifySyncListeners()
+  } catch (error) {
+    console.error('[SyncManager] Error updating sync status:', error)
+  }
+}
+
+export async function getSyncStatus(): Promise<SyncStatus> {
+  await updateSyncStatus()
+  return currentSyncStatus
+}
 
 // Define PendingPhoto interface since it's not exported
 export interface PendingPhoto {
@@ -218,6 +276,8 @@ export async function startSync(): Promise<void> {
   }
 
   isSyncing = true
+  currentSyncStatus.isSyncing = true
+  notifySyncListeners()
   console.log('🔒 Sync lock acquired')
 
   try {
@@ -307,6 +367,9 @@ export async function startSync(): Promise<void> {
     })
   } finally {
     isSyncing = false
+    currentSyncStatus.isSyncing = false
+    currentSyncStatus.lastSyncTime = new Date()
+    notifySyncListeners()
     console.log('🔓 Sync lock released')
     console.log('✅ SYNC MANAGER COMPLETED')
     console.groupEnd()
@@ -401,6 +464,11 @@ export function initSyncManager() {
   // ===== AUTO-SYNC ON PAGE LOAD =====
   console.log('⏰ Setting up auto-sync check in 3 seconds...')
 
+  // Update sync status setiap 5 detik
+  setInterval(() => {
+    updateSyncStatus()
+  }, 5000)
+
   setTimeout(async () => {
     console.log('\n' + '='.repeat(60))
     console.log('🔍 AUTO-SYNC CHECK ON PAGE LOAD')
@@ -408,10 +476,10 @@ export function initSyncManager() {
     console.log('Checking for pending photos...')
 
     try {
-      const pendingPhotos = await getPendingPhotos()
-      console.log('Found pending photos:', pendingPhotos.length)
+      await updateSyncStatus()
+      console.log('Found pending photos:', currentSyncStatus.totalPending)
 
-      if (pendingPhotos.length > 0) {
+      if (currentSyncStatus.totalPending > 0) {
         console.log('Online status:', navigator.onLine)
 
         if (navigator.onLine) {
