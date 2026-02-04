@@ -23,9 +23,9 @@ export async function GET(
         nik: houses.nik,
         address: houses.address,
         subVillageId: houses.subVillageId,
-        villageId: villages.id,
         villageName: villages.name,
         subVillageName: subVillages.name,
+        createdAt: houses.createdAt
       })
       .from(houses)
       .leftJoin(subVillages, eq(houses.subVillageId, subVillages.id))
@@ -38,9 +38,8 @@ export async function GET(
 
     console.log(`🏠 [House API] Fetched house ${houseId}:`, {
       name: house.name,
-      villageName: house.villageName,
-      subVillageName: house.subVillageName,
-      ownerName: house.ownerName
+      village: house.villageName,
+      subVillage: house.subVillageName
     })
 
     return NextResponse.json(house)
