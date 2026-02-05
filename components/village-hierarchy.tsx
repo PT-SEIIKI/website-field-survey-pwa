@@ -99,14 +99,18 @@ export function VillageHierarchy() {
 
       // Add timeout and better error handling
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
-      const response = await fetch(`/api/download/village/${id}`, {
+      // Handle service worker by using cache-busting and proper headers
+      const response = await fetch(`/api/download/village/${id}?t=${Date.now()}`, {
         signal: controller.signal,
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
       });
       
       clearTimeout(timeoutId);
@@ -119,41 +123,84 @@ export function VillageHierarchy() {
 
       // Check if response has content
       const contentLength = response.headers.get('content-length');
+      const contentType = response.headers.get('content-type');
+      
+      console.log(`📦 [Download] Response headers:`, {
+        contentLength,
+        contentType,
+        contentDisposition: response.headers.get('content-disposition')
+      });
+
       if (contentLength === '0') {
         throw new Error('Download returned empty file');
       }
 
       console.log(`📦 [Download] Response size: ${contentLength} bytes`);
 
-      // Get blob with error handling
+      // Get blob with error handling - try different approaches
       let blob;
       try {
+        // First try: standard blob creation
         blob = await response.blob();
       } catch (blobError) {
-        console.error('❌ [Download] Blob creation failed:', blobError);
-        throw new Error('Failed to process download file');
+        console.error('❌ [Download] Standard blob failed, trying array buffer:', blobError);
+        
+        try {
+          // Second try: array buffer then blob
+          const arrayBuffer = await response.arrayBuffer();
+          blob = new Blob([arrayBuffer], { type: contentType || 'application/zip' });
+        } catch (arrayError) {
+          console.error('❌ [Download] Array buffer failed, trying text:', arrayError);
+          
+          try {
+            // Third try: text (for debugging)
+            const text = await response.text();
+            console.error('❌ [Download] Response text (first 200 chars):', text.substring(0, 200));
+            throw new Error('Invalid response format - not a binary file');
+          } catch (textError) {
+            console.error('❌ [Download] All methods failed:', textError);
+            throw new Error('Failed to process download file - response format error');
+          }
+        }
       }
 
       if (blob.size === 0) {
         throw new Error('Downloaded file is empty');
       }
 
-      console.log(`✅ [Download] Blob created: ${blob.size} bytes`);
+      console.log(`✅ [Download] Blob created: ${blob.size} bytes, type: ${blob.type}`);
       
-      // Create download link
+      // Create download link with better compatibility
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `${name.replace(/[^a-zA-Z0-9]/g, '_')}.rar`;
       a.style.display = 'none';
+      
+      // Add to DOM and trigger download
       document.body.appendChild(a);
-      a.click();
+      
+      // Try multiple click methods
+      try {
+        a.click();
+      } catch (clickError) {
+        console.error('❌ [Download] Click failed, trying dispatchEvent:', clickError);
+        a.dispatchEvent(new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        }));
+      }
       
       // Cleanup
       setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }, 100);
+        try {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (cleanupError) {
+          console.error('❌ [Download] Cleanup error:', cleanupError);
+        }
+      }, 1000);
 
       console.log(`✅ [Download] Completed for village: ${name}`);
     } catch (error: any) {
@@ -161,7 +208,7 @@ export function VillageHierarchy() {
       
       let errorMessage = 'Download gagal. Silakan coba lagi.';
       if (error.name === 'AbortError') {
-        errorMessage = 'Download timeout. Silakan coba lagi.';
+        errorMessage = 'Download timeout. File mungkin terlalu besar, silakan coba lagi.';
       } else if (error.message) {
         errorMessage = error.message;
       }
