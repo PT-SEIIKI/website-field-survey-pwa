@@ -18,9 +18,12 @@ export async function GET(
       return NextResponse.json({ error: "Invalid village ID" }, { status: 400 })
     }
 
+    console.log(`📁 [Download API] Starting download for village ID: ${villageId}`)
+
     // Get village with all related data
     const [village] = await db.select().from(villages).where(eq(villages.id, villageId))
     if (!village) {
+      console.error(`❌ [Download API] Village not found: ${villageId}`)
       return NextResponse.json({ error: "Village not found" }, { status: 404 })
     }
 
@@ -140,6 +143,8 @@ export async function GET(
       JSON.stringify(villageInfo, null, 2)
     )
 
+    console.log(`📦 [Download API] Creating archive with ${totalPhotos} photos`)
+
     // Create RAR file using archiver
     const rarPath = path.join(process.cwd(), 'temp', `${village.name.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.rar`)
     const output = createWriteStream(rarPath)
@@ -149,21 +154,35 @@ export async function GET(
       output.on('close', () => {
         console.log(`✅ [Download API] RAR created: ${archive.pointer()} bytes`)
         
-        // Read the file and send as response
-        const fileBuffer = fs.readFileSync(rarPath)
-        
-        // Clean up temporary files
-        fs.rmSync(tempDir, { recursive: true, force: true })
-        fs.rmSync(rarPath, { force: true })
+        try {
+          // Read the file and send as response
+          const fileBuffer = fs.readFileSync(rarPath)
+          
+          // Clean up temporary files
+          fs.rmSync(tempDir, { recursive: true, force: true })
+          fs.rmSync(rarPath, { force: true })
 
-        const response = new NextResponse(fileBuffer, {
-          headers: {
-            'Content-Type': 'application/zip',
-            'Content-Disposition': `attachment; filename="${village.name.replace(/[^a-zA-Z0-9]/g, '_')}.rar"`
+          if (fileBuffer.length === 0) {
+            console.error('❌ [Download API] Empty file created')
+            resolve(NextResponse.json({ error: 'Failed to create archive - empty file' }, { status: 500 }))
+            return
           }
-        })
 
-        resolve(response)
+          const response = new NextResponse(fileBuffer, {
+            headers: {
+              'Content-Type': 'application/zip',
+              'Content-Disposition': `attachment; filename="${village.name.replace(/[^a-zA-Z0-9]/g, '_')}.rar"`,
+              'Content-Length': fileBuffer.length.toString()
+            }
+          })
+
+          resolve(response)
+        } catch (fileError) {
+          console.error('❌ [Download API] File read error:', fileError)
+          fs.rmSync(tempDir, { recursive: true, force: true })
+          fs.rmSync(rarPath, { force: true })
+          resolve(NextResponse.json({ error: 'Failed to read archive file' }, { status: 500 }))
+        }
       })
 
       archive.on('error', (err: Error) => {

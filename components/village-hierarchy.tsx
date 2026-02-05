@@ -97,29 +97,76 @@ export function VillageHierarchy() {
         button.innerHTML = '<div class="w-3 h-3 animate-spin">⏳</div>';
       }
 
-      const response = await fetch(`/api/download/village/${id}`);
+      // Add timeout and better error handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const response = await fetch(`/api/download/village/${id}`, {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error('Download failed');
+        const errorText = await response.text();
+        console.error(`❌ [Download] Server error: ${response.status} - ${errorText}`);
+        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
       }
 
-      // Get the blob
-      const blob = await response.blob();
+      // Check if response has content
+      const contentLength = response.headers.get('content-length');
+      if (contentLength === '0') {
+        throw new Error('Download returned empty file');
+      }
+
+      console.log(`📦 [Download] Response size: ${contentLength} bytes`);
+
+      // Get blob with error handling
+      let blob;
+      try {
+        blob = await response.blob();
+      } catch (blobError) {
+        console.error('❌ [Download] Blob creation failed:', blobError);
+        throw new Error('Failed to process download file');
+      }
+
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty');
+      }
+
+      console.log(`✅ [Download] Blob created: ${blob.size} bytes`);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `${name.replace(/[^a-zA-Z0-9]/g, '_')}.rar`;
+      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      
+      // Cleanup
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
 
       console.log(`✅ [Download] Completed for village: ${name}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [Download] Error:', error);
-      alert('Download gagal. Silakan coba lagi.');
+      
+      let errorMessage = 'Download gagal. Silakan coba lagi.';
+      if (error.name === 'AbortError') {
+        errorMessage = 'Download timeout. Silakan coba lagi.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       // Reset button state
       const button = document.querySelector(`[data-download-village="${id}"]`) as HTMLButtonElement;
