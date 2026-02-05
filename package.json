@@ -70,7 +70,9 @@
     "uuid": "13.0.0",
     "vaul": "^1.1.2",
     "xlsx": "^0.18.5",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "archiver": "^7.0.1",
+    "@types/archiver": "^6.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",

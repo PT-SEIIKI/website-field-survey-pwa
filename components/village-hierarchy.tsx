@@ -12,6 +12,7 @@ import {
   Trash2,
   X,
   Check,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,6 +86,50 @@ export function VillageHierarchy() {
     }
   };
 
+  const downloadVillage = async (id: string, name: string) => {
+    try {
+      console.log(`📁 [Download] Starting download for village: ${name}`);
+      
+      // Show loading state
+      const button = document.querySelector(`[data-download-village="${id}"]`) as HTMLButtonElement;
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = '<div class="w-3 h-3 animate-spin">⏳</div>';
+      }
+
+      const response = await fetch(`/api/download/village/${id}`);
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      // Get the blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name.replace(/[^a-zA-Z0-9]/g, '_')}.rar`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      console.log(`✅ [Download] Completed for village: ${name}`);
+    } catch (error) {
+      console.error('❌ [Download] Error:', error);
+      alert('Download gagal. Silakan coba lagi.');
+    } finally {
+      // Reset button state
+      const button = document.querySelector(`[data-download-village="${id}"]`) as HTMLButtonElement;
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+      }
+    }
+  };
+
   const totalPages = Math.ceil(villages.length / itemsPerPage);
   const paginatedVillages = villages.slice(
     (currentPage - 1) * itemsPerPage,
@@ -104,6 +149,7 @@ export function VillageHierarchy() {
             toggle={toggle}
             deleteVillage={deleteVillage}
             updateVillage={updateVillage}
+            downloadVillage={downloadVillage}
           />
         ))}
       </div>
@@ -150,7 +196,7 @@ export function VillageHierarchy() {
   );
 }
 
-function VillageItem({ village, expanded, toggle, deleteVillage, updateVillage }: any) {
+function VillageItem({ village, expanded, toggle, deleteVillage, updateVillage, downloadVillage }: any) {
   const [subVillages, setSubVillages] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(village.name);
@@ -229,6 +275,16 @@ function VillageItem({ village, expanded, toggle, deleteVillage, updateVillage }
             </>
           ) : (
             <>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+                onClick={() => downloadVillage(village.id, village.name)}
+                data-download-village={village.id}
+                title="Download folder desa"
+              >
+                <Download className="w-3 h-3" />
+              </Button>
               <Button
                 size="sm"
                 variant="ghost"
