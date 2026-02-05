@@ -137,6 +137,9 @@ export function VillageHierarchy() {
 
       console.log(`📦 [Download] Response size: ${contentLength} bytes`);
 
+      // Clone response to avoid "body stream already read" error
+      const responseClone = response.clone();
+
       // Get blob with error handling - try different approaches
       let blob;
       try {
@@ -146,14 +149,14 @@ export function VillageHierarchy() {
         console.error('❌ [Download] Standard blob failed, trying array buffer:', blobError);
         
         try {
-          // Second try: array buffer then blob
-          const arrayBuffer = await response.arrayBuffer();
+          // Second try: array buffer then blob (use cloned response)
+          const arrayBuffer = await responseClone.arrayBuffer();
           blob = new Blob([arrayBuffer], { type: contentType || 'application/zip' });
         } catch (arrayError) {
           console.error('❌ [Download] Array buffer failed, trying text:', arrayError);
           
           try {
-            // Third try: text (for debugging)
+            // Third try: text (for debugging) - use another clone if needed
             const text = await response.text();
             console.error('❌ [Download] Response text (first 200 chars):', text.substring(0, 200));
             throw new Error('Invalid response format - not a binary file');
