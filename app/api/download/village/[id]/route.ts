@@ -63,22 +63,49 @@ export async function GET(
           .where(eq(photos.houseId, house.id))
 
         console.log(`    🏠 ${house.name}: ${photosList.length} photos`)
+        
+        // Debug: Log photo URLs
+        if (photosList.length > 0) {
+          console.log(`    📸 Photo URLs:`, photosList.map(p => p.url))
+        }
 
         // Copy photos to house directory
         for (const photo of photosList) {
           if (photo.url) {
             try {
-              // Extract filename from URL
-              const filename = photo.url.split('/').pop() || `photo_${photo.id}.jpg`
-              const sourcePath = path.join(process.cwd(), 'public', 'uploads', filename)
+              // Extract filename from URL - handle different URL formats
+              let filename = photo.url.split('/').pop() || `photo_${photo.id}.jpg`
+              
+              // Remove query parameters if any
+              filename = filename.split('?')[0]
+              
+              // Try different possible paths
+              const possiblePaths = [
+                path.join(process.cwd(), 'public', 'uploads', filename),
+                path.join(process.cwd(), 'uploads', filename),
+                path.join(process.cwd(), 'public', filename)
+              ]
+              
+              let sourcePath = ''
+              let fileExists = false
+              
+              for (const possiblePath of possiblePaths) {
+                if (fs.existsSync(possiblePath)) {
+                  sourcePath = possiblePath
+                  fileExists = true
+                  break
+                }
+              }
+              
               const destPath = path.join(houseDir, filename)
 
-              // Copy file if exists
-              if (fs.existsSync(sourcePath)) {
+              if (fileExists) {
                 fs.copyFileSync(sourcePath, destPath)
                 totalPhotos++
+                console.log(`      ✅ Copied: ${filename}`)
               } else {
-                console.warn(`      ⚠️  Photo file not found: ${sourcePath}`)
+                console.warn(`      ⚠️  Photo file not found for URL: ${photo.url}`)
+                console.warn(`      🔍 Tried paths:`, possiblePaths)
               }
             } catch (error) {
               console.error(`      ❌ Error copying photo ${photo.id}:`, error)
